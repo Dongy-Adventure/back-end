@@ -11,6 +11,7 @@ import (
 )
 
 func InitMongoDatabase(conf *config.DbConfig) (db *mongo.Database, err error) {
+	test := "a"
 	client, err := mongo.Connect(context.Background(), options.Client().ApplyURI(conf.MongoURL))
 	if err != nil {
 		return nil, err
