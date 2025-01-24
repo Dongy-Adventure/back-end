@@ -34,7 +34,7 @@ func LoadConfig() (*Config, error) {
 	}
 	fmt.Println("Current Working Directory:", dir)
 	if os.Getenv("APP_ENV") == "" {
-		err := godotenv.Load("E:/CU/SE_II_Backend/.env")
+		err := godotenv.Load(".env")
 		if err != nil {
 			return nil, err
 		}
