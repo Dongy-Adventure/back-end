@@ -17,6 +17,8 @@ type DbConfig struct {
 }
 
 type AuthConfig struct {
+	AccessTokenSecret           string
+	RefreshTokenSecret          string
 	AccessTokenLifespanMinutes  string
 	RefreshTokenLifespanMinutes string
 }
@@ -46,6 +48,8 @@ func LoadConfig() (*Config, error) {
 	}
 
 	authConfig := AuthConfig{
+		AccessTokenSecret:           os.Getenv("ACCESS_TOKEN_SECRET"),
+		RefreshTokenSecret:          os.Getenv("REFRESH_TOKEN_SECRET"),
 		AccessTokenLifespanMinutes:  os.Getenv("ACCESS_TOKEN_MINUTE_LIFESPAN"),
 		RefreshTokenLifespanMinutes: os.Getenv("REFRESH_TOKEN_MINUTE_LIFESPAN"),
 	}
