@@ -12,8 +12,8 @@ import (
 )
 
 type IBuyerRepository interface {
-	GetBuyerByID() ([]dto.Buyer, error)
-	GetBuyer(string) (*dto.Buyer, error)
+	GetBuyer() ([]dto.Seller, error)
+	GetBuyerByID(string) (*dto.Seller, error)
 	CreateBuyerData(*model.Buyer) (*dto.Buyer, error)
 	UpdateBuyerData(string, *model.Buyer) (*dto.Buyer, error)
 }
@@ -99,7 +99,7 @@ func (r BuyerRepository) UpdateBuyerData(buyerID string, updatedBuyer *model.Buy
 	 }
 
 	filter := bson.M{"buyer_id": buyerID}
-	_,error := r.buyerCollection.UpdateOne(ctx,filter,update)
+	_,err := r.buyerCollection.UpdateOne(ctx,filter,update)
 	if err != nil {
 		return nil, err
 	}
