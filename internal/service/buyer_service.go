@@ -9,7 +9,7 @@ import (
 
 type IBuyerService interface {
 	CreateBuyerData(*model.Buyer) (*dto.Buyer, error)
-	GetBuyerByID(string) (*dto.Seller, error)
+	GetBuyerByID(string) (*dto.Buyer, error)
 	UpdateBuyerData(string, *model.Buyer) (*dto.Buyer, error)
 }
 
@@ -50,27 +50,20 @@ func (s BuyerService) GetBuyerByID(buyerID string) (*dto.Buyer, error) {
 	if err != nil {
 		return nil, err
 	}
-	return BuyerDTO, nil
+	return buyerDTO, nil
 }
 
 func (s BuyerService) UpdateBuyerData(buyerID string, updatedBuyer *model.Buyer) (*dto.Buyer, error) {
 	
-	currentBuyer, err := s.buyerRepository.GetBuyerByID(buyerID)
-	if err != nil {
-		return nil, err
-	}
-
-	if updatedBuyer.Password != "" && updatedBuyer.Password != currentBuyer.Password {
-
+	if updatedBuyer.Password != "" {
 		passwordBytes := []byte(updatedBuyer.Password)
 		hashPasswordBytes, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
 		if err != nil {
-			return nil, fmt.Errorf("failed to hash password: %v", err)
+			return nil, err
 		}
-		updatedBuyer.Password = string(hashPasswordBytes)
 
-	} else {
-		updatedBuyer.Password = currentBuyer.Password
+		encryptPassword := string(hashPasswordBytes)
+		updatedBuyer.Password = encryptPassword
 	}
  
 	updatedBuyerDTO, err := s.buyerRepository.UpdateBuyerData(buyerID, updatedBuyer)
