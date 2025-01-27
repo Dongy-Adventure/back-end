@@ -16,6 +16,7 @@ type ISellerRepository interface {
 	GetSellerByID(string) (*dto.Seller, error)
 	CreateSellerData(*model.Seller) (*dto.Seller, error)
 	GetSellerByUsername(*dto.LoginRequest) (*dto.Seller, error)
+	UpdateSellerData(string, *model.Seller) (*dto.Seller, error)
 }
 
 type SellerRepository struct {
@@ -97,3 +98,34 @@ func (r SellerRepository) GetSellerByUsername(req *dto.LoginRequest) (*dto.Selle
 	}
 	return converter.SellerModelToDTO(seller)
 }
+
+func (r SellerRepository) UpdateSellerData(sellerID string, updatedSeller *model.Seller) (*dto.Seller, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	update := bson.M{
+		"$set": bson.M{
+			"seller_id": updatedSeller.SellerID,
+			"username":  updatedSeller.Username,
+			"password":  updatedSeller.Password,
+			"name":      updatedSeller.Name,
+			"surname":   updatedSeller.Surname,
+			"payment":   updatedSeller.Password
+		},
+	}
+
+	filter := bson.M{"seller_id": sellerID}
+	_, err := r.sellerCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return nil, err
+	}
+
+	var newUpdatedSeller *model.Seller
+	err = r.sellerCollection.FindOne(ctx, filter).Decode(&newUpdatedSeller)
+	if err != nil {
+		return nil, err
+	}
+
+	return converter.SellerModelToDTO(newUpdatedSeller)
+}
+
