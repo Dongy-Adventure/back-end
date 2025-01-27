@@ -12,8 +12,8 @@ import (
 )
 
 type IBuyerRepository interface {
-	GetBuyer() ([]dto.Seller, error)
-	GetBuyerByID(string) (*dto.Seller, error)
+	GetBuyer() ([]dto.Buyer, error)
+	GetBuyerByID(string) (*dto.Buyer, error)
 	CreateBuyerData(*model.Buyer) (*dto.Buyer, error)
 	UpdateBuyerData(string, *model.Buyer) (*dto.Buyer, error)
 }
