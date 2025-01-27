@@ -9,6 +9,7 @@ import (
 
 type ISellerService interface {
 	CreateSellerData(*model.Seller) (*dto.Seller, error)
+	GetSellerByID(string) (*dto.Seller, error)
 }
 
 type SellerService struct {
@@ -41,4 +42,12 @@ func (s SellerService) CreateSellerData(seller *model.Seller) (*dto.Seller, erro
 	}
 
 	return newSeller, nil
+}
+
+func (s SellerService) GetSellerByID(sellerID string) (*dto.Seller, error) {
+	selletDTO, err := s.sellerRepository.GetSellerByID(sellerID)
+	if err != nil {
+		return nil, err
+	}
+	return selletDTO, nil
 }

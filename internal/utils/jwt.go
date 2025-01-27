@@ -35,7 +35,7 @@ func GenerateToken(tokenType tokenmode.TokenType) (string, error) {
 	switch tokenType {
 	case tokenmode.TokenMode.ACCESS_TOKEN:
 		token_lifespan, err = strconv.Atoi(config.Auth.AccessTokenLifespanMinutes)
-	case tokenmode.TokenMode.ACCESS_TOKEN:
+	case tokenmode.TokenMode.REFRESH_TOKEN:
 		token_lifespan, err = strconv.Atoi(config.Auth.RefreshTokenLifespanMinutes)
 	default:
 		return "", errors.New("token type is invalid")
@@ -49,7 +49,7 @@ func GenerateToken(tokenType tokenmode.TokenType) (string, error) {
 	switch tokenType {
 	case tokenmode.TokenMode.ACCESS_TOKEN:
 		return token.SignedString([]byte(config.Auth.AccessTokenSecret))
-	case tokenmode.TokenMode.ACCESS_TOKEN:
+	case tokenmode.TokenMode.REFRESH_TOKEN:
 		return token.SignedString([]byte(config.Auth.RefreshTokenSecret))
 	default:
 		return "", errors.New("token type is invalid")

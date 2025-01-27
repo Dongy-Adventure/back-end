@@ -12,9 +12,10 @@ import (
 )
 
 type ISellerRepository interface {
-	GetSellerData() ([]dto.Seller, error)
-	GetOneSellerData(string) (*dto.Seller, error)
+	GetSeller() ([]dto.Seller, error)
+	GetSellerByID(string) (*dto.Seller, error)
 	CreateSellerData(*model.Seller) (*dto.Seller, error)
+	GetSellerByUsername(*dto.LoginRequest) (*dto.Seller, error)
 }
 
 type SellerRepository struct {
@@ -27,7 +28,7 @@ func NewSellerRepository(db *mongo.Database, collectionName string) ISellerRepos
 	}
 }
 
-func (r SellerRepository) GetOneSellerData(sellerID string) (*dto.Seller, error) {
+func (r SellerRepository) GetSellerByID(sellerID string) (*dto.Seller, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -39,7 +40,7 @@ func (r SellerRepository) GetOneSellerData(sellerID string) (*dto.Seller, error)
 	}
 	return converter.SellerModelToDTO(seller)
 }
-func (r SellerRepository) GetSellerData() ([]dto.Seller, error) {
+func (r SellerRepository) GetSeller() ([]dto.Seller, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -81,4 +82,18 @@ func (r SellerRepository) CreateSellerData(seller *model.Seller) (*dto.Seller, e
 	}
 
 	return converter.SellerModelToDTO(newSeller)
+}
+
+// GetSellerByUsername implements ISellerRepository.
+func (r SellerRepository) GetSellerByUsername(req *dto.LoginRequest) (*dto.Seller, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	var seller *model.Seller
+
+	err := r.sellerCollection.FindOne(ctx, bson.M{"username": req.Username}).Decode(&seller)
+	if err != nil {
+		return nil, err
+	}
+	return converter.SellerModelToDTO(seller)
 }

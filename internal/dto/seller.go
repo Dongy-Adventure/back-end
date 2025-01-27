@@ -5,5 +5,5 @@ type Seller struct {
 	Username string `json:"username"`
 	Name     string `json:"name"`
 	Surname  string `json:"surname"`
-	Payment  string `json:"string"`
+	Payment  string `json:"payment"`
 }
