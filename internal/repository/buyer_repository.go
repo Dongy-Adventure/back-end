@@ -12,9 +12,10 @@ import (
 )
 
 type IBuyerRepository interface {
-	GetBuyerData() ([]dto.Buyer, error)
-	GetOneBuyerData(string) (*dto.Buyer, error)
+	GetBuyer() ([]dto.Buyer, error)
+	GetBuyerByID(string) (*dto.Buyer, error)
 	CreateBuyerData(*model.Buyer) (*dto.Buyer, error)
+	UpdateBuyerData(string, *model.Buyer) (*dto.Buyer, error)
 }
 
 type BuyerRepository struct {
@@ -27,7 +28,7 @@ func NewBuyerRepository(db *mongo.Database, collectionName string) IBuyerReposit
 	}
 }
 
-func (r BuyerRepository) GetOneBuyerData(buyerID string) (*dto.Buyer, error) {
+func (r BuyerRepository) GetBuyerByID(buyerID string) (*dto.Buyer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -39,7 +40,7 @@ func (r BuyerRepository) GetOneBuyerData(buyerID string) (*dto.Buyer, error) {
 	}
 	return converter.BuyerModelToDTO(buyer)
 }
-func (r BuyerRepository) GetBuyerData() ([]dto.Buyer, error) {
+func (r BuyerRepository) GetBuyer() ([]dto.Buyer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -82,3 +83,35 @@ func (r BuyerRepository) CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error)
 
 	return converter.BuyerModelToDTO(newBuyer)
 }
+
+func (r BuyerRepository) UpdateBuyerData(buyerID string, updatedBuyer *model.Buyer) (*dto.Buyer,error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	update := bson.M{
+		"$set": bson.M{
+		    "buyer_id": updatedBuyer.BuyerID,
+		    "username": updatedBuyer.Username,
+		    "password": updatedBuyer.Password,
+		    "name":     updatedBuyer.Name,
+		    "surname":  updatedBuyer.Surname,
+		},
+	 }
+
+	filter := bson.M{"buyer_id": buyerID}
+	_,err := r.buyerCollection.UpdateOne(ctx,filter,update)
+	if err != nil {
+		return nil, err
+	}
+
+	var newUpdatedBuyer *model.Buyer
+	err = r.buyerCollection.FindOne(ctx, filter).Decode(&newUpdatedBuyer)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return converter.BuyerModelToDTO(newUpdatedBuyer)
+}
+
+

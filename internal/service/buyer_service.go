@@ -9,6 +9,8 @@ import (
 
 type IBuyerService interface {
 	CreateBuyerData(*model.Buyer) (*dto.Buyer, error)
+	GetBuyerByID(string) (*dto.Buyer, error)
+	UpdateBuyerData(string, *model.Buyer) (*dto.Buyer, error)
 }
 
 type BuyerService struct {
@@ -42,3 +44,33 @@ func (s BuyerService) CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error) {
 
 	return newBuyer, nil
 }
+
+func (s BuyerService) GetBuyerByID(buyerID string) (*dto.Buyer, error) {
+	buyerDTO, err := s.buyerRepository.GetBuyerByID(buyerID)
+	if err != nil {
+		return nil, err
+	}
+	return buyerDTO, nil
+}
+
+func (s BuyerService) UpdateBuyerData(buyerID string, updatedBuyer *model.Buyer) (*dto.Buyer, error) {
+	
+	if updatedBuyer.Password != "" {
+		passwordBytes := []byte(updatedBuyer.Password)
+		hashPasswordBytes, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
+		if err != nil {
+			return nil, err
+		}
+
+		encryptPassword := string(hashPasswordBytes)
+		updatedBuyer.Password = encryptPassword
+	}
+ 
+	updatedBuyerDTO, err := s.buyerRepository.UpdateBuyerData(buyerID, updatedBuyer)
+	if err != nil {
+	    return nil, err
+	}
+ 
+	return updatedBuyerDTO, nil
+ }
+ 

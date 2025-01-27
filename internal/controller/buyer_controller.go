@@ -10,6 +10,8 @@ import (
 
 type IBuyerController interface {
 	CreateBuyer(c *gin.Context)
+	GetBuyerByID(c *gin.Context)
+	UpdateBuyer(c *gin.Context)
 }
 
 type BuyerController struct {
@@ -45,3 +47,48 @@ func (s BuyerController) CreateBuyer(c *gin.Context) {
 		"data":    res,
 	})
 }
+
+func (s BuyerController) GetBuyerByID(c *gin.Context) {
+	buyerID := c.Param("buyer_id")
+	buyerDTO, err := s.buyerService.GetBuyerByID(buyerID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "No buyer with this buyerID",
+			"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "get buyer success",
+		"data":    buyerDTO,
+	})
+}
+
+func (s BuyerController) UpdateBuyer(c *gin.Context) {
+	buyerID := c.Param("id")
+
+	var updatedBuyer model.Buyer
+	if err := c.BindJSON(&updatedBuyer); err != nil {
+	    c.JSON(http.StatusBadRequest, gin.H{
+		   "error":   "Invalid request body, failed to bind JSON",
+		   "message": err.Error(),
+	    })
+	    return
+	}
+ 
+	res, err := s.buyerService.UpdateBuyerData(buyerID, &updatedBuyer)
+	if err != nil {
+	    c.JSON(http.StatusInternalServerError, gin.H{
+		   "error":   "Failed to update buyer data",
+		   "message": err.Error(),
+	    })
+	    return
+	}
+ 
+	c.JSON(http.StatusOK, gin.H{
+	    "message": "Update buyer success",
+	    "data":    res,
+	})
+ }
+ 
