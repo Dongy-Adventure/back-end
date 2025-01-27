@@ -11,6 +11,7 @@ import (
 type ISellerController interface {
 	CreateSeller(c *gin.Context)
 	GetSellerByID(c *gin.Context)
+	UpdateSeller(c *gin.Context)
 }
 
 type SellerController struct {
@@ -63,3 +64,31 @@ func (s SellerController) GetSellerByID(c *gin.Context) {
 		"data":    sellerDTO,
 	})
 }
+
+func (s SellerController) UpdateSeller(c *gin.Context) {
+	sellerID := c.Param("id")
+
+	var updatedSeller model.Seller
+	if err := c.BindJSON(&updatedSeller); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error":   "Invalid request body, failed to bind JSON",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	res, err := s.sellerService.UpdateSellerData(sellerID, &updatedSeller)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "Failed to update seller data",
+			"message": err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Update seller success",
+		"data":    res,
+	})
+}
+

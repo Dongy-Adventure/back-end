@@ -10,6 +10,7 @@ import (
 type ISellerService interface {
 	CreateSellerData(*model.Seller) (*dto.Seller, error)
 	GetSellerByID(string) (*dto.Seller, error)
+	UpdateSellerData(string, *model.Seller) (*dto.Seller, error)
 }
 
 type SellerService struct {
@@ -50,4 +51,25 @@ func (s SellerService) GetSellerByID(sellerID string) (*dto.Seller, error) {
 		return nil, err
 	}
 	return selletDTO, nil
+}
+
+func (s SellerService) UpdateSellerData(sellerID string, updatedSeller *model.Seller) (*dto.Seller, error) {
+	
+	if updatedSeller.Password != "" {
+		passwordBytes := []byte(updatedSeller.Password)
+		hashPasswordBytes, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)
+		if err != nil {
+			return nil, err
+		}
+
+		encryptedPassword := string(hashPasswordBytes)
+		updatedSeller.Password = encryptedPassword
+	}
+
+	updatedSellerDTO, err := s.sellerRepository.UpdateSellerData(sellerID, updatedSeller)
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedSellerDTO, nil
 }
