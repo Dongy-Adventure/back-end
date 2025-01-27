@@ -16,4 +16,6 @@ func (r Router) AddBuyerRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
 	buyerRouter := rg.Group("buyer")
 
 	buyerRouter.POST("/", cont.CreateBuyer)
+	buyerRouter.GET("/:buyer_id",cont.GetBuyerByID)
+	buyerRouter.PUT("/:buyer_id",cont.UpdateBuyer)
 }
