@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
@@ -72,7 +71,6 @@ func (r SellerRepository) CreateSellerData(seller *model.Seller) (*dto.Seller, e
 
 	result, err := r.sellerCollection.InsertOne(ctx, seller)
 	if err != nil {
-		fmt.Println("HERE")
 		return nil, err
 	}
 	var newSeller *model.Seller
