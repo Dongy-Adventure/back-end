@@ -21,7 +21,7 @@ type BuyerRepository struct {
 	buyerCollection *mongo.Collection
 }
 
-func NewSellerRepository(db *mongo.Database, collectionName string) IBuyerRepository {
+func NewBuyerRepository(db *mongo.Database, collectionName string) IBuyerRepository {
 	return BuyerRepository{
 		buyerCollection: db.Collection(collectionName),
 	}
