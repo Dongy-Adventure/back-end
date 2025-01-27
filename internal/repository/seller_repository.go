@@ -110,7 +110,7 @@ func (r SellerRepository) UpdateSellerData(sellerID string, updatedSeller *model
 			"password":  updatedSeller.Password,
 			"name":      updatedSeller.Name,
 			"surname":   updatedSeller.Surname,
-			"payment":   updatedSeller.Password
+			"payment":   updatedSeller.Payment,
 		},
 	}
 
