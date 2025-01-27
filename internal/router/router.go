@@ -28,6 +28,7 @@ func (r *Router) Run(mongoDB *mongo.Database) {
 	v1 := r.g.Group("/api/v1")
 
 	r.AddSellerRouter(v1, mongoDB)
+	r.AddAuthRouter(v1, mongoDB)
 	err := r.g.Run(":" + r.conf.Port)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to run the server : %v", err))

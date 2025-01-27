@@ -10,6 +10,7 @@ import (
 
 type ISellerController interface {
 	CreateSeller(c *gin.Context)
+	GetSellerByID(c *gin.Context)
 }
 
 type SellerController struct {
@@ -43,5 +44,22 @@ func (s SellerController) CreateSeller(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "created seller success",
 		"data":    res,
+	})
+}
+
+func (s SellerController) GetSellerByID(c *gin.Context) {
+	sellerID := c.Param("seller_id")
+	sellerDTO, err := s.sellerService.GetSellerByID(sellerID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error":   "No seller with this sellerID",
+			"message": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "get seller success",
+		"data":    sellerDTO,
 	})
 }
