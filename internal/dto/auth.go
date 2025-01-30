@@ -13,3 +13,10 @@ type LoginResponse struct {
 	AccessToken  string      `json:"accessToken"`
 	RefreshToken string      `json:"refreshToken"`
 }
+
+type RefreshTokenResponse struct {
+	Success     bool   `json:"success"`
+	Status      int    `json:"status"`
+	Message     string `json:"message"`
+	AccessToken string `json:"accessToken"`
+}

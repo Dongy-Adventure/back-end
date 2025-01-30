@@ -8,9 +8,10 @@ import (
 )
 
 type ISellerService interface {
-	CreateSellerData(*model.Seller) (*dto.Seller, error)
-	GetSellerByID(string) (*dto.Seller, error)
-	UpdateSellerData(string, *model.Seller) (*dto.Seller, error)
+	CreateSellerData(seller *model.Seller) (*dto.Seller, error)
+	GetSellerByID(sellerID string) (*dto.Seller, error)
+	GetSellers() ([]dto.Seller, error)
+	UpdateSellerData(sellerID string, updatedSeller *model.Seller) (*dto.Seller, error)
 }
 
 type SellerService struct {
@@ -46,15 +47,23 @@ func (s SellerService) CreateSellerData(seller *model.Seller) (*dto.Seller, erro
 }
 
 func (s SellerService) GetSellerByID(sellerID string) (*dto.Seller, error) {
-	selletDTO, err := s.sellerRepository.GetSellerByID(sellerID)
+	sellerDTO, err := s.sellerRepository.GetSellerByID(sellerID)
 	if err != nil {
 		return nil, err
 	}
-	return selletDTO, nil
+	return sellerDTO, nil
+}
+
+func (s SellerService) GetSellers() ([]dto.Seller, error) {
+	sellers, err := s.sellerRepository.GetSellers()
+	if err != nil {
+		return nil, err
+	}
+	return sellers, nil
 }
 
 func (s SellerService) UpdateSellerData(sellerID string, updatedSeller *model.Seller) (*dto.Seller, error) {
-	
+
 	if updatedSeller.Password != "" {
 		passwordBytes := []byte(updatedSeller.Password)
 		hashPasswordBytes, err := bcrypt.GenerateFromPassword(passwordBytes, bcrypt.DefaultCost)

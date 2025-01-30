@@ -8,15 +8,16 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/utils/converter"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type IBuyerRepository interface {
 	GetBuyer() ([]dto.Buyer, error)
-	GetBuyerByID(string) (*dto.Buyer, error)
-	CreateBuyerData(*model.Buyer) (*dto.Buyer, error)
-	GetBuyerByUsername(*dto.LoginRequest) (*model.Buyer, error)
-	UpdateBuyerData(string, *model.Buyer) (*dto.Buyer, error)
+	GetBuyerByID(buyerID string) (*dto.Buyer, error)
+	CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error)
+	GetBuyerByUsername(req *dto.LoginRequest) (*model.Buyer, error)
+	UpdateBuyerData(buyerID string, updatedBuyer *model.Buyer) (*dto.Buyer, error)
 }
 
 type BuyerRepository struct {
@@ -24,24 +25,30 @@ type BuyerRepository struct {
 }
 
 func NewBuyerRepository(db *mongo.Database, collectionName string) IBuyerRepository {
-	return BuyerRepository{
+	return &BuyerRepository{
 		buyerCollection: db.Collection(collectionName),
 	}
 }
 
-func (r BuyerRepository) GetBuyerByID(buyerID string) (*dto.Buyer, error) {
+func (r *BuyerRepository) GetBuyerByID(buyerID string) (*dto.Buyer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	var buyer *model.Buyer
 
-	err := r.buyerCollection.FindOne(ctx, bson.M{"buyer_id": buyerID}).Decode(&buyer)
+	objectID, err := primitive.ObjectIDFromHex(buyerID)
+	if err != nil {
+		return nil, err
+	}
+
+	err = r.buyerCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&buyer)
 	if err != nil {
 		return nil, err
 	}
 	return converter.BuyerModelToDTO(buyer)
 }
-func (r BuyerRepository) GetBuyer() ([]dto.Buyer, error) {
+
+func (r *BuyerRepository) GetBuyer() ([]dto.Buyer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -52,6 +59,7 @@ func (r BuyerRepository) GetBuyer() ([]dto.Buyer, error) {
 		return nil, err
 	}
 	defer dataList.Close(ctx)
+
 	for dataList.Next(ctx) {
 		var buyerModel *model.Buyer
 		if err = dataList.Decode(&buyerModel); err != nil {
@@ -67,7 +75,7 @@ func (r BuyerRepository) GetBuyer() ([]dto.Buyer, error) {
 	return buyerList, nil
 }
 
-func (r BuyerRepository) GetBuyerByUsername(req *dto.LoginRequest) (*model.Buyer, error) {
+func (r *BuyerRepository) GetBuyerByUsername(req *dto.LoginRequest) (*model.Buyer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -80,7 +88,7 @@ func (r BuyerRepository) GetBuyerByUsername(req *dto.LoginRequest) (*model.Buyer
 	return buyer, nil
 }
 
-func (r BuyerRepository) CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error) {
+func (r *BuyerRepository) CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -98,13 +106,17 @@ func (r BuyerRepository) CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error)
 	return converter.BuyerModelToDTO(newBuyer)
 }
 
-func (r BuyerRepository) UpdateBuyerData(buyerID string, updatedBuyer *model.Buyer) (*dto.Buyer, error) {
+func (r *BuyerRepository) UpdateBuyerData(buyerID string, updatedBuyer *model.Buyer) (*dto.Buyer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
+	objectID, err := primitive.ObjectIDFromHex(buyerID)
+	if err != nil {
+		return nil, err
+	}
+
 	update := bson.M{
 		"$set": bson.M{
-			"buyer_id": updatedBuyer.BuyerID,
 			"username": updatedBuyer.Username,
 			"password": updatedBuyer.Password,
 			"name":     updatedBuyer.Name,
@@ -112,8 +124,8 @@ func (r BuyerRepository) UpdateBuyerData(buyerID string, updatedBuyer *model.Buy
 		},
 	}
 
-	filter := bson.M{"buyer_id": buyerID}
-	_, err := r.buyerCollection.UpdateOne(ctx, filter, update)
+	filter := bson.M{"_id": objectID}
+	_, err = r.buyerCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return nil, err
 	}

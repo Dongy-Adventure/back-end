@@ -11,6 +11,7 @@ import (
 
 type IBuyerController interface {
 	CreateBuyer(c *gin.Context)
+	GetBuyers(c *gin.Context)
 	GetBuyerByID(c *gin.Context)
 	UpdateBuyer(c *gin.Context)
 }
@@ -95,6 +96,36 @@ func (s BuyerController) GetBuyerByID(c *gin.Context) {
 		Success: true,
 		Status:  http.StatusOK,
 		Message: "Get buyer success",
+		Data:    res,
+	})
+}
+
+// GetBuyer godoc
+// @Summary Get all buyers
+// @Description Retrieves all buyers
+// @Tags buyer
+// @Accept json
+// @Produce json
+// @Success 200 {object} dto.SuccessResponse{data=[]dto.Buyer}
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /buyer/ [get]
+func (s BuyerController) GetBuyers(c *gin.Context) {
+	res, err := s.buyerService.GetBuyer()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "No buyers",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Status:  http.StatusOK,
+		Message: "Get buyers success",
 		Data:    res,
 	})
 }

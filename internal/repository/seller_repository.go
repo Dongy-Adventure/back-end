@@ -8,15 +8,16 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/utils/converter"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type ISellerRepository interface {
-	GetSeller() ([]dto.Seller, error)
-	GetSellerByID(string) (*dto.Seller, error)
-	CreateSellerData(*model.Seller) (*dto.Seller, error)
-	GetSellerByUsername(*dto.LoginRequest) (*model.Seller, error)
-	UpdateSellerData(string, *model.Seller) (*dto.Seller, error)
+	GetSellers() ([]dto.Seller, error)
+	GetSellerByID(sellerID string) (*dto.Seller, error)
+	CreateSellerData(seller *model.Seller) (*dto.Seller, error)
+	GetSellerByUsername(req *dto.LoginRequest) (*model.Seller, error)
+	UpdateSellerData(sellerID string, updatedSeller *model.Seller) (*dto.Seller, error)
 }
 
 type SellerRepository struct {
@@ -33,15 +34,21 @@ func (r SellerRepository) GetSellerByID(sellerID string) (*dto.Seller, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
+	objectID, err := primitive.ObjectIDFromHex(sellerID)
+	if err != nil {
+		return nil, err
+	}
+
 	var seller *model.Seller
 
-	err := r.sellerCollection.FindOne(ctx, bson.M{"seller_id": sellerID}).Decode(&seller)
+	err = r.sellerCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&seller)
 	if err != nil {
 		return nil, err
 	}
 	return converter.SellerModelToDTO(seller)
 }
-func (r SellerRepository) GetSeller() ([]dto.Seller, error) {
+
+func (r SellerRepository) GetSellers() ([]dto.Seller, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -102,19 +109,23 @@ func (r SellerRepository) UpdateSellerData(sellerID string, updatedSeller *model
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
+	objectID, err := primitive.ObjectIDFromHex(sellerID)
+	if err != nil {
+		return nil, err
+	}
+
 	update := bson.M{
 		"$set": bson.M{
-			"seller_id": updatedSeller.SellerID,
-			"username":  updatedSeller.Username,
-			"password":  updatedSeller.Password,
-			"name":      updatedSeller.Name,
-			"surname":   updatedSeller.Surname,
-			"payment":   updatedSeller.Payment,
+			"username": updatedSeller.Username,
+			"password": updatedSeller.Password,
+			"name":     updatedSeller.Name,
+			"surname":  updatedSeller.Surname,
+			"payment":  updatedSeller.Payment,
 		},
 	}
 
-	filter := bson.M{"seller_id": sellerID}
-	_, err := r.sellerCollection.UpdateOne(ctx, filter, update)
+	filter := bson.M{"_id": objectID}
+	_, err = r.sellerCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return nil, err
 	}
