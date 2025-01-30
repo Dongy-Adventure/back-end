@@ -4,14 +4,15 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/repository"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type ISellerService interface {
 	CreateSellerData(seller *model.Seller) (*dto.Seller, error)
-	GetSellerByID(sellerID string) (*dto.Seller, error)
+	GetSellerByID(sellerID primitive.ObjectID) (*dto.Seller, error)
 	GetSellers() ([]dto.Seller, error)
-	UpdateSellerData(sellerID string, updatedSeller *model.Seller) (*dto.Seller, error)
+	UpdateSeller(sellerID primitive.ObjectID, updatedSeller *model.Seller) (*dto.Seller, error)
 }
 
 type SellerService struct {
@@ -46,7 +47,7 @@ func (s SellerService) CreateSellerData(seller *model.Seller) (*dto.Seller, erro
 	return newSeller, nil
 }
 
-func (s SellerService) GetSellerByID(sellerID string) (*dto.Seller, error) {
+func (s SellerService) GetSellerByID(sellerID primitive.ObjectID) (*dto.Seller, error) {
 	sellerDTO, err := s.sellerRepository.GetSellerByID(sellerID)
 	if err != nil {
 		return nil, err
@@ -62,7 +63,7 @@ func (s SellerService) GetSellers() ([]dto.Seller, error) {
 	return sellers, nil
 }
 
-func (s SellerService) UpdateSellerData(sellerID string, updatedSeller *model.Seller) (*dto.Seller, error) {
+func (s SellerService) UpdateSeller(sellerID primitive.ObjectID, updatedSeller *model.Seller) (*dto.Seller, error) {
 
 	if updatedSeller.Password != "" {
 		passwordBytes := []byte(updatedSeller.Password)
@@ -75,7 +76,7 @@ func (s SellerService) UpdateSellerData(sellerID string, updatedSeller *model.Se
 		updatedSeller.Password = encryptedPassword
 	}
 
-	updatedSellerDTO, err := s.sellerRepository.UpdateSellerData(sellerID, updatedSeller)
+	updatedSellerDTO, err := s.sellerRepository.UpdateSeller(sellerID, updatedSeller)
 	if err != nil {
 		return nil, err
 	}

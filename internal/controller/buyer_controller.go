@@ -7,6 +7,7 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/service"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type IBuyerController interface {
@@ -79,7 +80,17 @@ func (s BuyerController) CreateBuyer(c *gin.Context) {
 // @Failure 500 {object} dto.ErrorResponse
 // @Router /buyer/{buyer_id} [get]
 func (s BuyerController) GetBuyerByID(c *gin.Context) {
-	buyerID := c.Param("buyer_id")
+	buyerIDstr := c.Param("buyer_id")
+	buyerID, err := primitive.ObjectIDFromHex(buyerIDstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Invalid buyerID format",
+			Message: err.Error(),
+		})
+		return
+	}
 	res, err := s.buyerService.GetBuyerByID(buyerID)
 
 	if err != nil {
@@ -143,8 +154,17 @@ func (s BuyerController) GetBuyers(c *gin.Context) {
 // @Failure 500 {object} dto.ErrorResponse
 // @Router /buyer/{id} [put]
 func (s BuyerController) UpdateBuyer(c *gin.Context) {
-	buyerID := c.Param("id")
-
+	buyerIDstr := c.Param("buyer_id")
+	buyerID, err := primitive.ObjectIDFromHex(buyerIDstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Invalid buyerID format",
+			Message: err.Error(),
+		})
+		return
+	}
 	var updatedBuyer model.Buyer
 	if err := c.BindJSON(&updatedBuyer); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{

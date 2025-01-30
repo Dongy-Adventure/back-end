@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
@@ -14,10 +15,10 @@ import (
 
 type ISellerRepository interface {
 	GetSellers() ([]dto.Seller, error)
-	GetSellerByID(sellerID string) (*dto.Seller, error)
+	GetSellerByID(sellerID primitive.ObjectID) (*dto.Seller, error)
 	CreateSellerData(seller *model.Seller) (*dto.Seller, error)
 	GetSellerByUsername(req *dto.LoginRequest) (*model.Seller, error)
-	UpdateSellerData(sellerID string, updatedSeller *model.Seller) (*dto.Seller, error)
+	UpdateSeller(sellerID primitive.ObjectID, updatedSeller *model.Seller) (*dto.Seller, error)
 }
 
 type SellerRepository struct {
@@ -30,18 +31,13 @@ func NewSellerRepository(db *mongo.Database, collectionName string) ISellerRepos
 	}
 }
 
-func (r SellerRepository) GetSellerByID(sellerID string) (*dto.Seller, error) {
+func (r SellerRepository) GetSellerByID(sellerID primitive.ObjectID) (*dto.Seller, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	objectID, err := primitive.ObjectIDFromHex(sellerID)
-	if err != nil {
-		return nil, err
-	}
-
 	var seller *model.Seller
 
-	err = r.sellerCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&seller)
+	err := r.sellerCollection.FindOne(ctx, bson.M{"_id": sellerID}).Decode(&seller)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +73,7 @@ func (r SellerRepository) GetSellers() ([]dto.Seller, error) {
 func (r SellerRepository) CreateSellerData(seller *model.Seller) (*dto.Seller, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-
+	seller.SellerID = primitive.NewObjectID()
 	result, err := r.sellerCollection.InsertOne(ctx, seller)
 	if err != nil {
 		return nil, err
@@ -105,15 +101,11 @@ func (r SellerRepository) GetSellerByUsername(req *dto.LoginRequest) (*model.Sel
 	return seller, nil
 }
 
-func (r SellerRepository) UpdateSellerData(sellerID string, updatedSeller *model.Seller) (*dto.Seller, error) {
+func (r SellerRepository) UpdateSeller(sellerID primitive.ObjectID, updatedSeller *model.Seller) (*dto.Seller, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	objectID, err := primitive.ObjectIDFromHex(sellerID)
-	if err != nil {
-		return nil, err
-	}
-
+	fmt.Println(updatedSeller.Username, "HERE")
 	update := bson.M{
 		"$set": bson.M{
 			"username": updatedSeller.Username,
@@ -124,8 +116,8 @@ func (r SellerRepository) UpdateSellerData(sellerID string, updatedSeller *model
 		},
 	}
 
-	filter := bson.M{"_id": objectID}
-	_, err = r.sellerCollection.UpdateOne(ctx, filter, update)
+	filter := bson.M{"_id": sellerID}
+	_, err := r.sellerCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return nil, err
 	}

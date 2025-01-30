@@ -7,6 +7,7 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/service"
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type ISellerController interface {
@@ -79,7 +80,17 @@ func (s SellerController) CreateSeller(c *gin.Context) {
 // @Failure 500 {object} dto.ErrorResponse
 // @Router /seller/{seller_id} [get]
 func (s SellerController) GetSellerByID(c *gin.Context) {
-	sellerID := c.Param("seller_id")
+	sellerIDstr := c.Param("seller_id")
+	sellerID, err := primitive.ObjectIDFromHex(sellerIDstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Invalid sellerID format",
+			Message: err.Error(),
+		})
+		return
+	}
 	res, err := s.sellerService.GetSellerByID(sellerID)
 
 	if err != nil {
@@ -142,8 +153,17 @@ func (s SellerController) GetSellers(c *gin.Context) {
 // @Failure 500 {object} dto.ErrorResponse
 // @Router /seller/{id} [put]
 func (s SellerController) UpdateSeller(c *gin.Context) {
-	sellerID := c.Param("id")
-
+	sellerIDstr := c.Param("seller_id")
+	sellerID, err := primitive.ObjectIDFromHex(sellerIDstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Invalid sellerID format",
+			Message: err.Error(),
+		})
+		return
+	}
 	var updatedSeller model.Seller
 	if err := c.BindJSON(&updatedSeller); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
@@ -155,7 +175,7 @@ func (s SellerController) UpdateSeller(c *gin.Context) {
 		return
 	}
 
-	res, err := s.sellerService.UpdateSellerData(sellerID, &updatedSeller)
+	res, err := s.sellerService.UpdateSeller(sellerID, &updatedSeller)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,

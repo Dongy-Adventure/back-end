@@ -43,6 +43,7 @@ func (r *Router) Run(mongoDB *mongo.Database) {
 
 	// Add related path
 	r.AddSellerRouter(v1, mongoDB)
+	r.AddBuyerRouter(v1, mongoDB)
 	r.AddAuthRouter(v1, mongoDB)
 	err := r.g.Run(":" + r.conf.Port)
 	if err != nil {

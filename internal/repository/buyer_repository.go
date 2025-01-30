@@ -14,10 +14,10 @@ import (
 
 type IBuyerRepository interface {
 	GetBuyer() ([]dto.Buyer, error)
-	GetBuyerByID(buyerID string) (*dto.Buyer, error)
+	GetBuyerByID(buyerID primitive.ObjectID) (*dto.Buyer, error)
 	CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error)
 	GetBuyerByUsername(req *dto.LoginRequest) (*model.Buyer, error)
-	UpdateBuyerData(buyerID string, updatedBuyer *model.Buyer) (*dto.Buyer, error)
+	UpdateBuyerData(buyerID primitive.ObjectID, updatedBuyer *model.Buyer) (*dto.Buyer, error)
 }
 
 type BuyerRepository struct {
@@ -30,18 +30,13 @@ func NewBuyerRepository(db *mongo.Database, collectionName string) IBuyerReposit
 	}
 }
 
-func (r *BuyerRepository) GetBuyerByID(buyerID string) (*dto.Buyer, error) {
+func (r *BuyerRepository) GetBuyerByID(buyerID primitive.ObjectID) (*dto.Buyer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	var buyer *model.Buyer
 
-	objectID, err := primitive.ObjectIDFromHex(buyerID)
-	if err != nil {
-		return nil, err
-	}
-
-	err = r.buyerCollection.FindOne(ctx, bson.M{"_id": objectID}).Decode(&buyer)
+	err := r.buyerCollection.FindOne(ctx, bson.M{"_id": buyerID}).Decode(&buyer)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +86,7 @@ func (r *BuyerRepository) GetBuyerByUsername(req *dto.LoginRequest) (*model.Buye
 func (r *BuyerRepository) CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-
+	buyer.BuyerID = primitive.NewObjectID()
 	result, err := r.buyerCollection.InsertOne(ctx, buyer)
 	if err != nil {
 		return nil, err
@@ -106,14 +101,9 @@ func (r *BuyerRepository) CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error
 	return converter.BuyerModelToDTO(newBuyer)
 }
 
-func (r *BuyerRepository) UpdateBuyerData(buyerID string, updatedBuyer *model.Buyer) (*dto.Buyer, error) {
+func (r *BuyerRepository) UpdateBuyerData(buyerID primitive.ObjectID, updatedBuyer *model.Buyer) (*dto.Buyer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-
-	objectID, err := primitive.ObjectIDFromHex(buyerID)
-	if err != nil {
-		return nil, err
-	}
 
 	update := bson.M{
 		"$set": bson.M{
@@ -124,8 +114,8 @@ func (r *BuyerRepository) UpdateBuyerData(buyerID string, updatedBuyer *model.Bu
 		},
 	}
 
-	filter := bson.M{"_id": objectID}
-	_, err = r.buyerCollection.UpdateOne(ctx, filter, update)
+	filter := bson.M{"_id": buyerID}
+	_, err := r.buyerCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return nil, err
 	}
