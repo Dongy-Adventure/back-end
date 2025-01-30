@@ -1,0 +1,387 @@
+definitions:
+  dto.Buyer:
+    properties:
+      buyerID:
+        type: string
+      name:
+        type: string
+      surname:
+        type: string
+      username:
+        type: string
+    type: object
+  dto.ErrorResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: integer
+      success:
+        type: boolean
+    type: object
+  dto.LoginRequest:
+    properties:
+      password:
+        type: string
+      username:
+        type: string
+    type: object
+  dto.LoginResponse:
+    properties:
+      accessToken:
+        type: string
+      data: {}
+      message:
+        type: string
+      refreshToken:
+        type: string
+      status:
+        type: integer
+      success:
+        type: boolean
+    type: object
+  dto.Seller:
+    properties:
+      name:
+        type: string
+      payment:
+        type: string
+      sellerID:
+        type: string
+      surname:
+        type: string
+      username:
+        type: string
+    type: object
+  dto.SuccessResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      status:
+        type: integer
+      success:
+        type: boolean
+    type: object
+  model.Buyer:
+    properties:
+      buyerID:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      surname:
+        type: string
+      username:
+        type: string
+    type: object
+  model.Seller:
+    properties:
+      name:
+        type: string
+      password:
+        type: string
+      payment:
+        type: string
+      sellerID:
+        type: string
+      surname:
+        type: string
+      username:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /auth/buyer/:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a buyer and returns tokens
+      parameters:
+      - description: Buyer login credential
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.LoginResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Buyer'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Buyer login
+      tags:
+      - auth
+  /auth/seller/:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a seller and returns tokens
+      parameters:
+      - description: Seller login credential
+        in: body
+        name: loginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.LoginResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Seller'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Seller login
+      tags:
+      - auth
+  /buyer/:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new buyer in the database
+      parameters:
+      - description: Buyer to create
+        in: body
+        name: buyer
+        required: true
+        schema:
+          $ref: '#/definitions/model.Buyer'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Buyer'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new buyer
+      tags:
+      - buyer
+  /buyer/{buyer_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a buyer's data by their ID
+      parameters:
+      - description: Buyer ID
+        in: path
+        name: buyer_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Buyer'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a buyer by ID
+      tags:
+      - buyer
+  /buyer/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing buyer's data by their ID
+      parameters:
+      - description: Buyer ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Buyer data to update
+        in: body
+        name: buyer
+        required: true
+        schema:
+          $ref: '#/definitions/model.Buyer'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Buyer'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a buyer by ID
+      tags:
+      - buyer
+  /seller/:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new seller in the database
+      parameters:
+      - description: Seller to create
+        in: body
+        name: seller
+        required: true
+        schema:
+          $ref: '#/definitions/model.Seller'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Seller'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new seller
+      tags:
+      - seller
+  /seller/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing seller's data by their ID
+      parameters:
+      - description: Seller ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Seller data to update
+        in: body
+        name: seller
+        required: true
+        schema:
+          $ref: '#/definitions/model.Seller'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Seller'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a seller by ID
+      tags:
+      - seller
+  /seller/{seller_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a seller's data by their ID
+      parameters:
+      - description: Seller ID
+        in: path
+        name: seller_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Seller'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a seller by ID
+      tags:
+      - seller
+swagger: "2.0"

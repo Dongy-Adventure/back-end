@@ -10,11 +10,14 @@ import (
 
 func (r Router) AddAuthRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
 	sellerRepo := repository.NewSellerRepository(mongoDB, "sellers")
-	serv := service.NewAuthService(sellerRepo)
+	buyerRepo := repository.NewBuyerRepository(mongoDB, "buyers")
+
+	serv := service.NewAuthService(sellerRepo, buyerRepo)
 	cont := controller.NewAuthController(serv)
 
-	sellerRouter := rg.Group("auth")
+	authRouter := rg.Group("auth")
 
-	sellerRouter.POST("/", cont.SellerLogin)
+	authRouter.POST("/seller", cont.SellerLogin)
+	authRouter.POST("/buyer", cont.BuyerLogin)
 
 }
