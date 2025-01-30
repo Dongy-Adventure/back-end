@@ -4,14 +4,15 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/repository"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type IBuyerService interface {
-	GetBuyerByID(buyerID string) (*dto.Buyer, error)
+	GetBuyerByID(buyerID primitive.ObjectID) (*dto.Buyer, error)
 	GetBuyer() ([]dto.Buyer, error)
 	CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error)
-	UpdateBuyerData(buyerID string, updatedBuyer *model.Buyer) (*dto.Buyer, error)
+	UpdateBuyerData(buyerID primitive.ObjectID, updatedBuyer *model.Buyer) (*dto.Buyer, error)
 }
 
 type BuyerService struct {
@@ -36,7 +37,6 @@ func (s BuyerService) CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error) {
 	encryptPassword := string(hashPasswordBytes)
 
 	buyer.Password = encryptPassword
-
 	newBuyer, err := s.buyerRepository.CreateBuyerData(buyer)
 
 	if err != nil {
@@ -46,7 +46,7 @@ func (s BuyerService) CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error) {
 	return newBuyer, nil
 }
 
-func (s BuyerService) GetBuyerByID(buyerID string) (*dto.Buyer, error) {
+func (s BuyerService) GetBuyerByID(buyerID primitive.ObjectID) (*dto.Buyer, error) {
 	buyerDTO, err := s.buyerRepository.GetBuyerByID(buyerID)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func (s BuyerService) GetBuyer() ([]dto.Buyer, error) {
 	return buyers, nil
 }
 
-func (s BuyerService) UpdateBuyerData(buyerID string, updatedBuyer *model.Buyer) (*dto.Buyer, error) {
+func (s BuyerService) UpdateBuyerData(buyerID primitive.ObjectID, updatedBuyer *model.Buyer) (*dto.Buyer, error) {
 
 	if updatedBuyer.Password != "" {
 		passwordBytes := []byte(updatedBuyer.Password)
