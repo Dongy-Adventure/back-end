@@ -12,6 +12,7 @@ import (
 type ISellerController interface {
 	CreateSeller(c *gin.Context)
 	GetSellerByID(c *gin.Context)
+	GetSellers(c *gin.Context)
 	UpdateSeller(c *gin.Context)
 }
 
@@ -94,6 +95,36 @@ func (s SellerController) GetSellerByID(c *gin.Context) {
 		Success: true,
 		Status:  http.StatusOK,
 		Message: "Get seller success",
+		Data:    res,
+	})
+}
+
+// GetSellers godoc
+// @Summary Get all sellers
+// @Description Retrieves all sellers
+// @Tags seller
+// @Accept json
+// @Produce json
+// @Success 200 {object} dto.SuccessResponse{data=[]dto.Seller}
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /seller/ [get]
+func (s SellerController) GetSellers(c *gin.Context) {
+	res, err := s.sellerService.GetSellers()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "No sellers",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Status:  http.StatusOK,
+		Message: "Get Sellers success",
 		Data:    res,
 	})
 }

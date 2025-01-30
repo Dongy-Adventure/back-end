@@ -9,8 +9,9 @@ import (
 )
 
 type IAuthController interface {
-	SellerLogin(*gin.Context)
-	BuyerLogin(*gin.Context)
+	SellerLogin(c *gin.Context)
+	BuyerLogin(c *gin.Context)
+	RefreshToken(c *gin.Context)
 }
 
 type AuthController struct {
@@ -115,4 +116,25 @@ func (a AuthController) BuyerLogin(c *gin.Context) {
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	})
+}
+
+// RefreshToken godoc
+// @Summary Refresh token
+// @Description Refresh access token for user
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param accessToken body string true "User accessToken"
+// @Success 200 {object} dto.RefreshTokenResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Router /auth/refresh/ [post]
+func (a AuthController) RefreshToken(c *gin.Context) {
+	accessToken, err := a.authService.RefreshToken(c)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Success: false, Status: http.StatusUnauthorized, Message: err.Error(), Error: "Unauthorized"})
+		return
+	}
+	c.JSON(http.StatusOK, dto.RefreshTokenResponse{Success: true, Status: http.StatusOK, Message: "Refresh success", AccessToken: accessToken})
+
 }

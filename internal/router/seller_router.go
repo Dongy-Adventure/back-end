@@ -2,6 +2,8 @@ package router
 
 import (
 	"github.com/Dongy-s-Advanture/back-end/internal/controller"
+	"github.com/Dongy-s-Advanture/back-end/internal/enum/tokenmode"
+	"github.com/Dongy-s-Advanture/back-end/internal/middleware"
 	"github.com/Dongy-s-Advanture/back-end/internal/repository"
 	"github.com/Dongy-s-Advanture/back-end/internal/service"
 	"github.com/gin-gonic/gin"
@@ -15,8 +17,8 @@ func (r Router) AddSellerRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
 
 	sellerRouter := rg.Group("seller")
 
-	sellerRouter.POST("/", cont.CreateSeller)
-	sellerRouter.GET("/:seller_id", cont.GetSellerByID)
-	sellerRouter.PUT("/:seller_id", cont.GetSellerByID)
+	sellerRouter.POST("/", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.CreateSeller)
+	sellerRouter.GET("/:seller_id", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.GetSellerByID)
+	sellerRouter.PUT("/:seller_id", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.GetSellerByID)
 
 }

@@ -1,4 +1,4 @@
-package utils
+package token
 
 import (
 	"errors"
@@ -14,7 +14,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func ExtractToken(c *gin.Context) string {
+func extractToken(c *gin.Context) string {
 	authHeader := c.GetHeader("Authorization")
 	if authHeader != "" {
 		parts := strings.Split(authHeader, " ")
@@ -61,7 +61,11 @@ func ValidateToken(c *gin.Context, tokenType tokenmode.TokenType) error {
 	if configErr != nil {
 		log.Fatal("Error loading .env file in validate token")
 	}
-	tokenString := ExtractToken(c)
+	tokenString := extractToken(c)
+
+	if tokenString == "" {
+		return errors.New("no token given")
+	}
 
 	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -69,15 +73,16 @@ func ValidateToken(c *gin.Context, tokenType tokenmode.TokenType) error {
 		}
 		switch tokenType {
 		case tokenmode.TokenMode.ACCESS_TOKEN:
-			return token.SignedString([]byte(config.Auth.AccessTokenSecret))
-		case tokenmode.TokenMode.ACCESS_TOKEN:
-			return token.SignedString([]byte(config.Auth.RefreshTokenSecret))
+			return []byte(config.Auth.AccessTokenSecret), nil
+		case tokenmode.TokenMode.REFRESH_TOKEN:
+			return []byte(config.Auth.RefreshTokenSecret), nil
 		default:
 			return "", errors.New("token type is invalid")
 		}
 	})
+
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	return nil

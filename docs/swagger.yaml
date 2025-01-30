@@ -42,6 +42,17 @@ definitions:
       success:
         type: boolean
     type: object
+  dto.RefreshTokenResponse:
+    properties:
+      accessToken:
+        type: string
+      message:
+        type: string
+      status:
+        type: integer
+      success:
+        type: boolean
+    type: object
   dto.Seller:
     properties:
       name:
@@ -135,6 +146,32 @@ paths:
       summary: Buyer login
       tags:
       - auth
+  /auth/refresh/:
+    post:
+      consumes:
+      - application/json
+      description: Refresh access token for user
+      parameters:
+      - description: User accessToken
+        in: body
+        name: accessToken
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.RefreshTokenResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Refresh token
+      tags:
+      - auth
   /auth/seller/:
     post:
       consumes:
@@ -175,6 +212,31 @@ paths:
       tags:
       - auth
   /buyer/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all buyers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Buyer'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all buyers
+      tags:
+      - buyer
     post:
       consumes:
       - application/json
@@ -280,6 +342,31 @@ paths:
       tags:
       - buyer
   /seller/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all sellers
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Seller'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all sellers
+      tags:
+      - seller
     post:
       consumes:
       - application/json
