@@ -10,6 +10,7 @@ import (
 
 type IAuthController interface {
 	SellerLogin(*gin.Context)
+	BuyerLogin(*gin.Context)
 }
 
 type AuthController struct {
@@ -22,12 +23,26 @@ func NewAuthController(s service.IAuthService) IAuthController {
 	}
 }
 
+// SellerLogin godoc
+// @Summary Seller login
+// @Description Authenticate a seller and returns tokens
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param loginRequest body dto.LoginRequest true "Seller login credential"
+// @Success 200 {object} dto.LoginResponse{data=dto.Seller}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /auth/seller/ [post]
 func (a AuthController) SellerLogin(c *gin.Context) {
 	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error":   "Invalid request body, failed to bind JSON",
-			"message": err.Error(),
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusBadRequest,
+			Error:   "Invalid request body, failed to bind JSON",
+			Message: err.Error(),
 		})
 		return
 	}
@@ -35,16 +50,69 @@ func (a AuthController) SellerLogin(c *gin.Context) {
 	sellerDTO, accessToken, refreshToken, err := a.authService.SellerLogin(&req)
 
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{
-			"error":   "Username or Password is incorrect",
-			"message": err.Error(),
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusUnauthorized,
+			Error:   "Username or Password is incorrect",
+			Message: err.Error(),
+		})
+		return
+
+	}
+
+	c.JSON(http.StatusOK, dto.LoginResponse{
+		Success:      true,
+		Status:       http.StatusOK,
+		Message:      "login success",
+		Data:         sellerDTO,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+	})
+}
+
+// BuyerLogin godoc
+// @Summary Buyer login
+// @Description Authenticate a buyer and returns tokens
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param loginRequest body dto.LoginRequest true "Buyer login credential"
+// @Success 200 {object} dto.LoginResponse{data=dto.Buyer}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /auth/buyer/ [post]
+func (a AuthController) BuyerLogin(c *gin.Context) {
+	var req dto.LoginRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusBadRequest,
+			Error:   "Invalid request body, failed to bind JSON",
+			Message: err.Error(),
 		})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"message":      "login success",
-		"data":         sellerDTO,
-		"accessToken":  accessToken,
-		"refreshToken": refreshToken,
+
+	buyerDTO, accessToken, refreshToken, err := a.authService.BuyerLogin(&req)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusUnauthorized,
+			Error:   "Username or Password is incorrect",
+			Message: err.Error(),
+		})
+		return
+
+	}
+
+	c.JSON(http.StatusOK, dto.LoginResponse{
+		Success:      true,
+		Status:       http.StatusOK,
+		Message:      "login success",
+		Data:         buyerDTO,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	})
 }

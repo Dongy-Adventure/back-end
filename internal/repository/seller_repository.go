@@ -15,7 +15,7 @@ type ISellerRepository interface {
 	GetSeller() ([]dto.Seller, error)
 	GetSellerByID(string) (*dto.Seller, error)
 	CreateSellerData(*model.Seller) (*dto.Seller, error)
-	GetSellerByUsername(*dto.LoginRequest) (*dto.Seller, error)
+	GetSellerByUsername(*dto.LoginRequest) (*model.Seller, error)
 	UpdateSellerData(string, *model.Seller) (*dto.Seller, error)
 }
 
@@ -85,8 +85,7 @@ func (r SellerRepository) CreateSellerData(seller *model.Seller) (*dto.Seller, e
 	return converter.SellerModelToDTO(newSeller)
 }
 
-// GetSellerByUsername implements ISellerRepository.
-func (r SellerRepository) GetSellerByUsername(req *dto.LoginRequest) (*dto.Seller, error) {
+func (r SellerRepository) GetSellerByUsername(req *dto.LoginRequest) (*model.Seller, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -96,7 +95,7 @@ func (r SellerRepository) GetSellerByUsername(req *dto.LoginRequest) (*dto.Selle
 	if err != nil {
 		return nil, err
 	}
-	return converter.SellerModelToDTO(seller)
+	return seller, nil
 }
 
 func (r SellerRepository) UpdateSellerData(sellerID string, updatedSeller *model.Seller) (*dto.Seller, error) {
@@ -128,4 +127,3 @@ func (r SellerRepository) UpdateSellerData(sellerID string, updatedSeller *model
 
 	return converter.SellerModelToDTO(newUpdatedSeller)
 }
-

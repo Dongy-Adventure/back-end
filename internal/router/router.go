@@ -3,8 +3,12 @@ package router
 import (
 	"fmt"
 
+	docs "github.com/Dongy-s-Advanture/back-end/docs"
 	"github.com/Dongy-s-Advanture/back-end/internal/config"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -19,14 +23,25 @@ func NewRouter(g *gin.Engine, conf *config.AppConfig) *Router {
 
 func (r *Router) Run(mongoDB *mongo.Database) {
 
+	// CORS setting
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"http://localhost:3000"}
+	r.g.Use(cors.New(corsConfig))
+
 	r.g.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{
 			"message": "OK",
 		})
 	})
 
+	// Swagger setting
+	docs.SwaggerInfo.BasePath = "/api/v1"
+	r.g.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+
+	// versioning
 	v1 := r.g.Group("/api/v1")
 
+	// Add related path
 	r.AddSellerRouter(v1, mongoDB)
 	r.AddAuthRouter(v1, mongoDB)
 	err := r.g.Run(":" + r.conf.Port)

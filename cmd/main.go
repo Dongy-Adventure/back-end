@@ -23,5 +23,6 @@ func main() {
 	}
 
 	r := routes.NewRouter(gin.Default(), &conf.App)
+
 	r.Run(mongoDB)
 }

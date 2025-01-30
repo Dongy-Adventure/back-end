@@ -15,6 +15,7 @@ type IBuyerRepository interface {
 	GetBuyer() ([]dto.Buyer, error)
 	GetBuyerByID(string) (*dto.Buyer, error)
 	CreateBuyerData(*model.Buyer) (*dto.Buyer, error)
+	GetBuyerByUsername(*dto.LoginRequest) (*model.Buyer, error)
 	UpdateBuyerData(string, *model.Buyer) (*dto.Buyer, error)
 }
 
@@ -66,6 +67,19 @@ func (r BuyerRepository) GetBuyer() ([]dto.Buyer, error) {
 	return buyerList, nil
 }
 
+func (r BuyerRepository) GetBuyerByUsername(req *dto.LoginRequest) (*model.Buyer, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	var buyer *model.Buyer
+
+	err := r.buyerCollection.FindOne(ctx, bson.M{"username": req.Username}).Decode(&buyer)
+	if err != nil {
+		return nil, err
+	}
+	return buyer, nil
+}
+
 func (r BuyerRepository) CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
@@ -84,22 +98,22 @@ func (r BuyerRepository) CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error)
 	return converter.BuyerModelToDTO(newBuyer)
 }
 
-func (r BuyerRepository) UpdateBuyerData(buyerID string, updatedBuyer *model.Buyer) (*dto.Buyer,error) {
+func (r BuyerRepository) UpdateBuyerData(buyerID string, updatedBuyer *model.Buyer) (*dto.Buyer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	update := bson.M{
 		"$set": bson.M{
-		    "buyer_id": updatedBuyer.BuyerID,
-		    "username": updatedBuyer.Username,
-		    "password": updatedBuyer.Password,
-		    "name":     updatedBuyer.Name,
-		    "surname":  updatedBuyer.Surname,
+			"buyer_id": updatedBuyer.BuyerID,
+			"username": updatedBuyer.Username,
+			"password": updatedBuyer.Password,
+			"name":     updatedBuyer.Name,
+			"surname":  updatedBuyer.Surname,
 		},
-	 }
+	}
 
 	filter := bson.M{"buyer_id": buyerID}
-	_,err := r.buyerCollection.UpdateOne(ctx,filter,update)
+	_, err := r.buyerCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return nil, err
 	}
@@ -113,5 +127,3 @@ func (r BuyerRepository) UpdateBuyerData(buyerID string, updatedBuyer *model.Buy
 
 	return converter.BuyerModelToDTO(newUpdatedBuyer)
 }
-
-
