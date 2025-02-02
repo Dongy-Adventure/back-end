@@ -14,10 +14,10 @@ import (
 
 type Router struct {
 	g    *gin.Engine
-	conf *config.AppConfig
+	conf *config.Config
 }
 
-func NewRouter(g *gin.Engine, conf *config.AppConfig) *Router {
+func NewRouter(g *gin.Engine, conf *config.Config) *Router {
 	return &Router{g, conf}
 }
 
@@ -45,7 +45,7 @@ func (r *Router) Run(mongoDB *mongo.Database) {
 	r.AddSellerRouter(v1, mongoDB)
 	r.AddBuyerRouter(v1, mongoDB)
 	r.AddAuthRouter(v1, mongoDB)
-	err := r.g.Run(":" + r.conf.Port)
+	err := r.g.Run(":" + r.conf.App.Port)
 	if err != nil {
 		panic(fmt.Sprintf("Failed to run the server : %v", err))
 	}

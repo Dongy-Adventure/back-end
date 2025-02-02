@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/Dongy-s-Advanture/back-end/internal/config"
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/service"
 	"github.com/gin-gonic/gin"
@@ -16,11 +17,13 @@ type IAuthController interface {
 
 type AuthController struct {
 	authService service.IAuthService
+	config      *config.Config
 }
 
-func NewAuthController(s service.IAuthService) IAuthController {
+func NewAuthController(s service.IAuthService, c *config.Config) IAuthController {
 	return AuthController{
 		authService: s,
+		config:      c,
 	}
 }
 
@@ -62,12 +65,14 @@ func (a AuthController) SellerLogin(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, dto.LoginResponse{
-		Success:      true,
-		Status:       http.StatusOK,
-		Message:      "login success",
-		Data:         sellerDTO,
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		Success:               true,
+		Status:                http.StatusOK,
+		Message:               "login success",
+		Data:                  sellerDTO,
+		AccessToken:           accessToken,
+		AccessTokenExpiredIn:  a.config.Auth.AccessTokenLifespanMinutes,
+		RefreshToken:          refreshToken,
+		RefreshTokenExpiredIn: a.config.Auth.RefreshTokenLifespanMinutes,
 	})
 }
 
@@ -105,16 +110,17 @@ func (a AuthController) BuyerLogin(c *gin.Context) {
 			Message: err.Error(),
 		})
 		return
-
 	}
 
 	c.JSON(http.StatusOK, dto.LoginResponse{
-		Success:      true,
-		Status:       http.StatusOK,
-		Message:      "login success",
-		Data:         buyerDTO,
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
+		Success:               true,
+		Status:                http.StatusOK,
+		Message:               "login success",
+		Data:                  buyerDTO,
+		AccessToken:           accessToken,
+		AccessTokenExpiredIn:  a.config.Auth.AccessTokenLifespanMinutes,
+		RefreshToken:          refreshToken,
+		RefreshTokenExpiredIn: a.config.Auth.RefreshTokenLifespanMinutes,
 	})
 }
 
@@ -124,7 +130,7 @@ func (a AuthController) BuyerLogin(c *gin.Context) {
 // @Tags auth
 // @Accept json
 // @Produce json
-// @Param accessToken body string true "User accessToken"
+// @Param refreshToken body string true "User accessToken"
 // @Success 200 {object} dto.RefreshTokenResponse
 // @Failure 401 {object} dto.ErrorResponse
 // @Router /auth/refresh/ [post]
@@ -135,6 +141,6 @@ func (a AuthController) RefreshToken(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Success: false, Status: http.StatusUnauthorized, Message: err.Error(), Error: "Unauthorized"})
 		return
 	}
-	c.JSON(http.StatusOK, dto.RefreshTokenResponse{Success: true, Status: http.StatusOK, Message: "Refresh success", AccessToken: accessToken})
+	c.JSON(http.StatusOK, dto.RefreshTokenResponse{Success: true, Status: http.StatusOK, Message: "Refresh success", AccessToken: accessToken, AccessTokenExpiredIn: a.config.Auth.AccessTokenLifespanMinutes})
 
 }

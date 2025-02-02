@@ -84,7 +84,7 @@
                 "parameters": [
                     {
                         "description": "User accessToken",
-                        "name": "accessToken",
+                        "name": "refreshToken",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -234,7 +234,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Buyer"
+                            "$ref": "#/definitions/dto.BuyerRegisterRequest"
                         }
                     }
                 ],
@@ -449,7 +449,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Seller"
+                            "$ref": "#/definitions/dto.SellerRegisterRequest"
                         }
                     }
                 ],
@@ -607,10 +607,42 @@
         "dto.Buyer": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "buyerID": {
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.BuyerRegisterRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "string"
+                },
+                "phoneNumber": {
                     "type": "string"
                 },
                 "surname": {
@@ -655,12 +687,18 @@
                 "accessToken": {
                     "type": "string"
                 },
+                "accessTokenExpiredIn": {
+                    "type": "integer"
+                },
                 "data": {},
                 "message": {
                     "type": "string"
                 },
                 "refreshToken": {
                     "type": "string"
+                },
+                "refreshTokenExpiredIn": {
+                    "type": "integer"
                 },
                 "status": {
                     "type": "integer"
@@ -676,6 +714,9 @@
                 "accessToken": {
                     "type": "string"
                 },
+                "accessTokenExpiredIn": {
+                    "type": "integer"
+                },
                 "message": {
                     "type": "string"
                 },
@@ -690,14 +731,52 @@
         "dto.Seller": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
                 "payment": {
                     "type": "string"
                 },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "number"
+                },
                 "sellerID": {
                     "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SellerRegisterRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "number"
                 },
                 "surname": {
                     "type": "string"
@@ -725,6 +804,9 @@
         "model.Buyer": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "buyerID": {
                     "type": "string"
                 },
@@ -732,6 +814,9 @@
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                },
+                "phoneNumber": {
                     "type": "string"
                 },
                 "surname": {
@@ -745,6 +830,9 @@
         "model.Seller": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -753,6 +841,12 @@
                 },
                 "payment": {
                     "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "number"
                 },
                 "sellerID": {
                     "type": "string"

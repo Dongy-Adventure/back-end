@@ -33,7 +33,7 @@ func NewBuyerController(s service.IBuyerService) IBuyerController {
 // @Tags buyer
 // @Accept json
 // @Produce json
-// @Param buyer body model.Buyer true "Buyer to create"
+// @Param buyer body dto.BuyerRegisterRequest true "Buyer to create"
 // @Success 201 {object} dto.SuccessResponse{data=dto.Buyer}
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
