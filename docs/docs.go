@@ -95,7 +95,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "User accessToken",
-                        "name": "accessToken",
+                        "name": "refreshToken",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -245,7 +245,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Buyer"
+                            "$ref": "#/definitions/dto.BuyerRegisterRequest"
                         }
                     }
                 ],
@@ -460,7 +460,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Seller"
+                            "$ref": "#/definitions/dto.SellerRegisterRequest"
                         }
                     }
                 ],
@@ -618,10 +618,42 @@ const docTemplate = `{
         "dto.Buyer": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "buyerID": {
                     "type": "string"
                 },
                 "name": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.BuyerRegisterRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "string"
+                },
+                "phoneNumber": {
                     "type": "string"
                 },
                 "surname": {
@@ -666,12 +698,18 @@ const docTemplate = `{
                 "accessToken": {
                     "type": "string"
                 },
+                "accessTokenExpiredIn": {
+                    "type": "integer"
+                },
                 "data": {},
                 "message": {
                     "type": "string"
                 },
                 "refreshToken": {
                     "type": "string"
+                },
+                "refreshTokenExpiredIn": {
+                    "type": "integer"
                 },
                 "status": {
                     "type": "integer"
@@ -687,6 +725,9 @@ const docTemplate = `{
                 "accessToken": {
                     "type": "string"
                 },
+                "accessTokenExpiredIn": {
+                    "type": "integer"
+                },
                 "message": {
                     "type": "string"
                 },
@@ -701,14 +742,52 @@ const docTemplate = `{
         "dto.Seller": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
                 "payment": {
                     "type": "string"
                 },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "number"
+                },
                 "sellerID": {
                     "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.SellerRegisterRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "number"
                 },
                 "surname": {
                     "type": "string"
@@ -736,6 +815,9 @@ const docTemplate = `{
         "model.Buyer": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "buyerID": {
                     "type": "string"
                 },
@@ -743,6 +825,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                },
+                "phoneNumber": {
                     "type": "string"
                 },
                 "surname": {
@@ -756,6 +841,9 @@ const docTemplate = `{
         "model.Seller": {
             "type": "object",
             "properties": {
+                "address": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -764,6 +852,12 @@ const docTemplate = `{
                 },
                 "payment": {
                     "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "number"
                 },
                 "sellerID": {
                     "type": "string"

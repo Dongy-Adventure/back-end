@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/joho/godotenv"
 )
@@ -19,8 +20,8 @@ type DbConfig struct {
 type AuthConfig struct {
 	AccessTokenSecret           string
 	RefreshTokenSecret          string
-	AccessTokenLifespanMinutes  string
-	RefreshTokenLifespanMinutes string
+	AccessTokenLifespanMinutes  int32
+	RefreshTokenLifespanMinutes int32
 }
 
 type Config struct {
@@ -46,12 +47,20 @@ func LoadConfig() (*Config, error) {
 		Env:  os.Getenv("APP_ENV"),
 		Port: os.Getenv("APP_PORT"),
 	}
+	accessTokenLifeSpan, err := strconv.Atoi(os.Getenv("ACCESS_TOKEN_MINUTE_LIFESPAN"))
+	if err != nil {
+		return nil, err
+	}
+	refreshTokenLifeSpan, err := strconv.Atoi(os.Getenv("REFRESH_TOKEN_MINUTE_LIFESPAN"))
+	if err != nil {
+		return nil, err
+	}
 
 	authConfig := AuthConfig{
 		AccessTokenSecret:           os.Getenv("ACCESS_TOKEN_SECRET"),
 		RefreshTokenSecret:          os.Getenv("REFRESH_TOKEN_SECRET"),
-		AccessTokenLifespanMinutes:  os.Getenv("ACCESS_TOKEN_MINUTE_LIFESPAN"),
-		RefreshTokenLifespanMinutes: os.Getenv("REFRESH_TOKEN_MINUTE_LIFESPAN"),
+		AccessTokenLifespanMinutes:  int32(accessTokenLifeSpan),
+		RefreshTokenLifespanMinutes: int32(refreshTokenLifeSpan),
 	}
 
 	dbConfig := DbConfig{

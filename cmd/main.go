@@ -22,7 +22,7 @@ func main() {
 		panic(fmt.Sprintf("Error connecting mongo: %v", err))
 	}
 
-	r := routes.NewRouter(gin.Default(), &conf.App)
+	r := routes.NewRouter(gin.Default(), conf)
 
 	r.Run(mongoDB)
 }

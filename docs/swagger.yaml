@@ -1,9 +1,30 @@
 definitions:
   dto.Buyer:
     properties:
+      address:
+        type: string
       buyerID:
         type: string
       name:
+        type: string
+      phoneNumber:
+        type: string
+      surname:
+        type: string
+      username:
+        type: string
+    type: object
+  dto.BuyerRegisterRequest:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      payment:
+        type: string
+      phoneNumber:
         type: string
       surname:
         type: string
@@ -32,11 +53,15 @@ definitions:
     properties:
       accessToken:
         type: string
+      accessTokenExpiredIn:
+        type: integer
       data: {}
       message:
         type: string
       refreshToken:
         type: string
+      refreshTokenExpiredIn:
+        type: integer
       status:
         type: integer
       success:
@@ -46,6 +71,8 @@ definitions:
     properties:
       accessToken:
         type: string
+      accessTokenExpiredIn:
+        type: integer
       message:
         type: string
       status:
@@ -55,12 +82,37 @@ definitions:
     type: object
   dto.Seller:
     properties:
+      address:
+        type: string
       name:
         type: string
       payment:
         type: string
+      phoneNumber:
+        type: string
+      score:
+        type: number
       sellerID:
         type: string
+      surname:
+        type: string
+      username:
+        type: string
+    type: object
+  dto.SellerRegisterRequest:
+    properties:
+      address:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      payment:
+        type: string
+      phoneNumber:
+        type: string
+      score:
+        type: number
       surname:
         type: string
       username:
@@ -78,11 +130,15 @@ definitions:
     type: object
   model.Buyer:
     properties:
+      address:
+        type: string
       buyerID:
         type: string
       name:
         type: string
       password:
+        type: string
+      phoneNumber:
         type: string
       surname:
         type: string
@@ -91,12 +147,18 @@ definitions:
     type: object
   model.Seller:
     properties:
+      address:
+        type: string
       name:
         type: string
       password:
         type: string
       payment:
         type: string
+      phoneNumber:
+        type: string
+      score:
+        type: number
       sellerID:
         type: string
       surname:
@@ -154,7 +216,7 @@ paths:
       parameters:
       - description: User accessToken
         in: body
-        name: accessToken
+        name: refreshToken
         required: true
         schema:
           type: string
@@ -247,7 +309,7 @@ paths:
         name: buyer
         required: true
         schema:
-          $ref: '#/definitions/model.Buyer'
+          $ref: '#/definitions/dto.BuyerRegisterRequest'
       produces:
       - application/json
       responses:
@@ -377,7 +439,7 @@ paths:
         name: seller
         required: true
         schema:
-          $ref: '#/definitions/model.Seller'
+          $ref: '#/definitions/dto.SellerRegisterRequest'
       produces:
       - application/json
       responses:

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strconv"
 	"strings"
 	"time"
 
@@ -31,12 +30,12 @@ func GenerateToken(tokenType tokenmode.TokenType) (string, error) {
 	if err != nil {
 		log.Fatal("Error loading .env File")
 	}
-	var token_lifespan int
+	var token_lifespan int32
 	switch tokenType {
 	case tokenmode.TokenMode.ACCESS_TOKEN:
-		token_lifespan, err = strconv.Atoi(config.Auth.AccessTokenLifespanMinutes)
+		token_lifespan = config.Auth.AccessTokenLifespanMinutes
 	case tokenmode.TokenMode.REFRESH_TOKEN:
-		token_lifespan, err = strconv.Atoi(config.Auth.RefreshTokenLifespanMinutes)
+		token_lifespan = config.Auth.RefreshTokenLifespanMinutes
 	default:
 		return "", errors.New("token type is invalid")
 	}

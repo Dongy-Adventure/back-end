@@ -33,7 +33,7 @@ func NewSellerController(s service.ISellerService) ISellerController {
 // @Tags seller
 // @Accept json
 // @Produce json
-// @Param seller body model.Seller true "Seller to create"
+// @Param seller body dto.SellerRegisterRequest true "Seller to create"
 // @Success 201 {object} dto.SuccessResponse{data=dto.Seller}
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse

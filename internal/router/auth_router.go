@@ -15,7 +15,7 @@ func (r Router) AddAuthRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
 	buyerRepo := repository.NewBuyerRepository(mongoDB, "buyers")
 
 	serv := service.NewAuthService(sellerRepo, buyerRepo)
-	cont := controller.NewAuthController(serv)
+	cont := controller.NewAuthController(serv, r.conf)
 
 	authRouter := rg.Group("auth")
 
