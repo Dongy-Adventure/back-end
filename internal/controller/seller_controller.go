@@ -237,9 +237,9 @@ func (s SellerController) AddTransaction(c *gin.Context) {
 			Message: err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, dto.SuccessResponse{
+	c.JSON(http.StatusCreated, dto.SuccessResponse{
 		Success: true,
-		Status:  http.StatusOK,
+		Status:  http.StatusCreated,
 		Message: "Add transaction success",
 		Data:    res,
 	})
