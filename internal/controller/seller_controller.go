@@ -15,6 +15,7 @@ type ISellerController interface {
 	GetSellerByID(c *gin.Context)
 	GetSellers(c *gin.Context)
 	UpdateSeller(c *gin.Context)
+	AddTransaction(c *gin.Context)
 }
 
 type SellerController struct {
@@ -146,12 +147,12 @@ func (s SellerController) GetSellers(c *gin.Context) {
 // @Tags seller
 // @Accept json
 // @Produce json
-// @Param id path string true "Seller ID"
+// @Param seller_id path string true "Seller ID"
 // @Param seller body model.Seller true "Seller data to update"
 // @Success 200 {object} dto.SuccessResponse{data=dto.Seller}
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /seller/{id} [put]
+// @Router /seller/{seller_id} [put]
 func (s SellerController) UpdateSeller(c *gin.Context) {
 	sellerIDstr := c.Param("seller_id")
 	sellerID, err := primitive.ObjectIDFromHex(sellerIDstr)
@@ -189,6 +190,57 @@ func (s SellerController) UpdateSeller(c *gin.Context) {
 		Success: true,
 		Status:  http.StatusOK,
 		Message: "Update seller success",
+		Data:    res,
+	})
+}
+
+// AddTransaction godoc
+// @Summary Add a transaction by sellerID
+// @Description Append transaction to seller transactions
+// @Tags seller
+// @Accept json
+// @Produce json
+// @Param seller_id path string true "Seller ID"
+// @Param transaction body dto.Transaction true "Transaction to append"
+// @Success 201 {object} dto.SuccessResponse{data=dto.Transaction}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /seller/{seller_id}/transaction [post]
+func (s SellerController) AddTransaction(c *gin.Context) {
+	sellerIDstr := c.Param("seller_id")
+	sellerID, err := primitive.ObjectIDFromHex(sellerIDstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Invalid sellerID format",
+			Message: err.Error(),
+		})
+		return
+	}
+	var newTransaction dto.Transaction
+	if err := c.ShouldBindJSON(&newTransaction); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusBadRequest,
+			Error:   "Invalid request body, failed to bind JSON",
+			Message: err.Error(),
+		})
+		return
+	}
+	res, err := s.sellerService.AddTransaction(sellerID, &newTransaction)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Failed to add transaction",
+			Message: err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Status:  http.StatusOK,
+		Message: "Add transaction success",
 		Data:    res,
 	})
 }

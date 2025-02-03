@@ -2,7 +2,6 @@ package repository
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
@@ -19,6 +18,8 @@ type ISellerRepository interface {
 	CreateSellerData(seller *model.Seller) (*dto.Seller, error)
 	GetSellerByUsername(req *dto.LoginRequest) (*model.Seller, error)
 	UpdateSeller(sellerID primitive.ObjectID, updatedSeller *model.Seller) (*dto.Seller, error)
+	AddTransaction(sellerID primitive.ObjectID, transaction *dto.Transaction) (*dto.Transaction, error)
+	// GetTransactions(sellerID primitive.ObjectID) ([]dto.Transaction, error)
 }
 
 type SellerRepository struct {
@@ -105,7 +106,6 @@ func (r SellerRepository) UpdateSeller(sellerID primitive.ObjectID, updatedSelle
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	fmt.Println(updatedSeller.Username, "HERE")
 	update := bson.M{
 		"$set": bson.M{
 			"username": updatedSeller.Username,
@@ -130,3 +130,26 @@ func (r SellerRepository) UpdateSeller(sellerID primitive.ObjectID, updatedSelle
 
 	return converter.SellerModelToDTO(newUpdatedSeller)
 }
+func (r SellerRepository) AddTransaction(sellerID primitive.ObjectID, transaction *dto.Transaction) (*dto.Transaction, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	filter := bson.M{"_id": sellerID}
+	update := bson.M{"$push": bson.M{"transaction": transaction}}
+	_, err := r.sellerCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return nil, err
+	}
+	return transaction, nil
+}
+
+// func (r SellerRepository) GetTransactions(sellerID primitive.ObjectID) ([]dto.Transaction, error) {
+// 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+// 	defer cancel()
+// 	var seller model.Seller
+// 	filter := bson.M{"_id": sellerID}
+// 	err := r.sellerCollection.FindOne(ctx, filter).Decode(&seller)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return seller.Transaction, nil
+// }
