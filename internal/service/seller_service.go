@@ -13,6 +13,7 @@ type ISellerService interface {
 	GetSellerByID(sellerID primitive.ObjectID) (*dto.Seller, error)
 	GetSellers() ([]dto.Seller, error)
 	UpdateSeller(sellerID primitive.ObjectID, updatedSeller *model.Seller) (*dto.Seller, error)
+	AddTransaction(sellerID primitive.ObjectID, transaction *dto.Transaction) (*dto.Transaction, error)
 }
 
 type SellerService struct {
@@ -82,4 +83,11 @@ func (s SellerService) UpdateSeller(sellerID primitive.ObjectID, updatedSeller *
 	}
 
 	return updatedSellerDTO, nil
+}
+func (s SellerService) AddTransaction(sellerID primitive.ObjectID, transaction *dto.Transaction) (*dto.Transaction, error) {
+	newTransaction, err := s.sellerRepository.AddTransaction(sellerID, transaction)
+	if err != nil {
+		return nil, err
+	}
+	return newTransaction, nil
 }

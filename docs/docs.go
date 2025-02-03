@@ -498,7 +498,55 @@ const docTemplate = `{
                 }
             }
         },
-        "/seller/{id}": {
+        "/seller/{seller_id}": {
+            "get": {
+                "description": "Retrieves a seller's data by their ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "seller"
+                ],
+                "summary": "Get a seller by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Seller ID",
+                        "name": "seller_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Seller"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
             "put": {
                 "description": "Updates an existing seller's data by their ID",
                 "consumes": [
@@ -515,7 +563,7 @@ const docTemplate = `{
                     {
                         "type": "string",
                         "description": "Seller ID",
-                        "name": "id",
+                        "name": "seller_id",
                         "in": "path",
                         "required": true
                     },
@@ -563,9 +611,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/seller/{seller_id}": {
-            "get": {
-                "description": "Retrieves a seller's data by their ID",
+        "/seller/{seller_id}/transaction": {
+            "post": {
+                "description": "Append transaction to seller transactions",
                 "consumes": [
                     "application/json"
                 ],
@@ -575,7 +623,7 @@ const docTemplate = `{
                 "tags": [
                     "seller"
                 ],
-                "summary": "Get a seller by ID",
+                "summary": "Add a transaction by sellerID",
                 "parameters": [
                     {
                         "type": "string",
@@ -583,11 +631,20 @@ const docTemplate = `{
                         "name": "seller_id",
                         "in": "path",
                         "required": true
+                    },
+                    {
+                        "description": "Transaction to append",
+                        "name": "transaction",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.Transaction"
+                        }
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "OK",
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "allOf": [
                                 {
@@ -597,11 +654,17 @@ const docTemplate = `{
                                     "type": "object",
                                     "properties": {
                                         "data": {
-                                            "$ref": "#/definitions/dto.Seller"
+                                            "$ref": "#/definitions/dto.Transaction"
                                         }
                                     }
                                 }
                             ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
                         }
                     },
                     "500": {
@@ -763,6 +826,9 @@ const docTemplate = `{
                 "surname": {
                     "type": "string"
                 },
+                "transaction": {
+                    "$ref": "#/definitions/dto.Transaction"
+                },
                 "username": {
                     "type": "string"
                 }
@@ -792,6 +858,12 @@ const docTemplate = `{
                 "surname": {
                     "type": "string"
                 },
+                "transaction": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Transaction"
+                    }
+                },
                 "username": {
                     "type": "string"
                 }
@@ -809,6 +881,24 @@ const docTemplate = `{
                 },
                 "success": {
                     "type": "boolean"
+                }
+            }
+        },
+        "dto.Transaction": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "data": {
+                    "type": "string"
+                },
+                "product": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         },
@@ -865,8 +955,32 @@ const docTemplate = `{
                 "surname": {
                     "type": "string"
                 },
+                "transaction": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Transaction"
+                    }
+                },
                 "username": {
                     "type": "string"
+                }
+            }
+        },
+        "model.Transaction": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number",
+                    "minimum": 0
+                },
+                "data": {
+                    "type": "string"
+                },
+                "product": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 }
             }
         }
