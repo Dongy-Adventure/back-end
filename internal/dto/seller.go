@@ -15,19 +15,18 @@ type Seller struct {
 	Address     string             `json:"address"`
 	PhoneNumber string             `json:"phoneNumber"`
 	Score       float32            `json:"score"`
-	Transaction Transaction        `json:"transaction"`
+	Transaction []Transaction      `json:"transaction"`
 }
 
 type SellerRegisterRequest struct {
-	Username    string        `json:"username"`
-	Password    string        `json:"password"`
-	Name        string        `json:"name"`
-	Surname     string        `json:"surname"`
-	Payment     string        `json:"payment"`
-	Address     string        `json:"address"`
-	PhoneNumber string        `json:"phoneNumber"`
-	Score       float32       `json:"score"`
-	Transaction []Transaction `json:"transaction"`
+	Username    string  `json:"username"`
+	Password    string  `json:"password"`
+	Name        string  `json:"name"`
+	Surname     string  `json:"surname"`
+	Payment     string  `json:"payment"`
+	Address     string  `json:"address"`
+	PhoneNumber string  `json:"phoneNumber"`
+	Score       float32 `json:"score"`
 }
 
 type Transaction struct {
