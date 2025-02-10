@@ -21,6 +21,7 @@ type ISellerRepository interface {
 	AddTransaction(sellerID primitive.ObjectID, transaction *dto.Transaction) (*dto.Transaction, error)
 	// GetTransactions(sellerID primitive.ObjectID) ([]dto.Transaction, error)
 	UpdateSellerScore(sellerID primitive.ObjectID) error
+	GetSellerBalanceByID(sellerID primitive.ObjectID) (float64, error)
 }
 
 type SellerRepository struct {
@@ -199,3 +200,23 @@ func (r SellerRepository) UpdateSellerScore(sellerID primitive.ObjectID) error {
 
 	return nil
 }
+
+func (r SellerRepository) GetSellerBalanceByID(sellerID primitive.ObjectID) (float64, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	var seller model.Seller
+
+	err := r.sellerCollection.FindOne(ctx, bson.M{"_id": sellerID}).Decode(&seller)
+	if err != nil {
+		return 0, err
+	}
+
+	var totalBalance float64
+	for _, transaction := range seller.Transaction {
+		totalBalance += transaction.Amount
+	}
+
+	return totalBalance, nil
+}
+
