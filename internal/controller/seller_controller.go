@@ -16,6 +16,7 @@ type ISellerController interface {
 	GetSellers(c *gin.Context)
 	UpdateSeller(c *gin.Context)
 	AddTransaction(c *gin.Context)
+	GetSellerBalanceByID(c *gin.Context)
 }
 
 type SellerController struct {
@@ -242,5 +243,48 @@ func (s SellerController) AddTransaction(c *gin.Context) {
 		Status:  http.StatusCreated,
 		Message: "Add transaction success",
 		Data:    res,
+	})
+}
+
+// GetSellerBalanceByID godoc
+// @Summary Get a seller's total balance by ID
+// @Description Retrieves a seller's total balance by their ID
+// @Tags seller
+// @Accept json
+// @Produce json
+// @Param seller_id path string true "Seller ID"
+// @Success 200 {object} dto.SuccessResponse{data=float64}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /seller/{seller_id}/balance [get]
+func (s SellerController) GetSellerBalanceByID(c *gin.Context) {
+	sellerIDstr := c.Param("seller_id")
+	sellerID, err := primitive.ObjectIDFromHex(sellerIDstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusBadRequest,
+			Error:   "Invalid sellerID format",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	balance, err := s.sellerService.GetSellerBalanceByID(sellerID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Failed to retrieve seller balance",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Status:  http.StatusOK,
+		Message: "Get seller balance success",
+		Data:    balance,
 	})
 }
