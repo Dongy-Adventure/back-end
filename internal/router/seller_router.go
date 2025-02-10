@@ -11,7 +11,7 @@ import (
 )
 
 func (r Router) AddSellerRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
-	repo := repository.NewSellerRepository(mongoDB, "sellers")
+	repo := repository.NewSellerRepository(mongoDB, "sellers", "reviews")
 	serv := service.NewSellerService(repo)
 	cont := controller.NewSellerController(serv)
 

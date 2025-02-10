@@ -11,7 +11,8 @@ import (
 )
 
 func (r Router) AddReviewRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
-	repo := repository.NewReviewRepository(mongoDB, "reviews")
+	sellerRepo := repository.NewSellerRepository(mongoDB, "sellers", "reviews")
+	repo := repository.NewReviewRepository(mongoDB, "reviews", sellerRepo)
 	serv := service.NewReviewService(repo)
 	cont := controller.NewReviewController(serv)
 
