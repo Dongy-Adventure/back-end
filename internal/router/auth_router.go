@@ -11,7 +11,7 @@ import (
 )
 
 func (r Router) AddAuthRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
-	sellerRepo := repository.NewSellerRepository(mongoDB, "sellers")
+	sellerRepo := repository.NewSellerRepository(mongoDB, "sellers", "reviews")
 	buyerRepo := repository.NewBuyerRepository(mongoDB, "buyers")
 
 	serv := service.NewAuthService(sellerRepo, buyerRepo)

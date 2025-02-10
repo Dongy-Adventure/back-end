@@ -15,7 +15,7 @@ type Seller struct {
 	Payment     string             `json:"payment" bson:"payment"`
 	PhoneNumber string             `json:"phoneNumber" bson:"phoneNumber"`
 	Address     string             `json:"address" bson:"addresss"`
-	Score       float32            `json:"score" bson:"score"`
+	Score       float64            `json:"score" bson:"score"`
 	Transaction []Transaction      `json:"transaction" bson:"transaction"`
 }
 

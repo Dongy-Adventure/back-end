@@ -22,11 +22,13 @@ type IReviewRepository interface {
 
 type ReviewRepository struct {
 	reviewCollection *mongo.Collection
+	sellerRepo 	  ISellerRepository
 }
 
-func NewReviewRepository(db *mongo.Database, collectionName string) IReviewRepository {
+func NewReviewRepository(db *mongo.Database, reviewcollectionName string, sellerRepo ISellerRepository) IReviewRepository {
 	return ReviewRepository{
-		reviewCollection: db.Collection(collectionName),
+		reviewCollection: db.Collection(reviewcollectionName),
+		sellerRepo:       sellerRepo,
 	}
 }
 
@@ -108,7 +110,12 @@ func (r ReviewRepository) CreateReview(review *model.Review) (*dto.Review, error
 	}
 	var newReview *model.Review
 	err = r.reviewCollection.FindOne(ctx, bson.M{"_id": result.InsertedID}).Decode(&newReview)
+	if err != nil {
+		return nil, err
+	}
 
+	//update seller's score
+	err = r.sellerRepo.UpdateSellerScore(newReview.SellerID)
 	if err != nil {
 		return nil, err
 	}
@@ -138,6 +145,12 @@ func (r ReviewRepository) UpdateReview(reviewID primitive.ObjectID, updatedRevie
 
 	var newUpdatedReview *model.Review
 	err = r.reviewCollection.FindOne(ctx, filter).Decode(&newUpdatedReview)
+	if err != nil {
+		return nil, err
+	}
+
+	//update seller's score
+	err = r.sellerRepo.UpdateSellerScore(newUpdatedReview.SellerID)
 	if err != nil {
 		return nil, err
 	}
