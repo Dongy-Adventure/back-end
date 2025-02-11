@@ -20,15 +20,19 @@ type ISellerRepository interface {
 	UpdateSeller(sellerID primitive.ObjectID, updatedSeller *model.Seller) (*dto.Seller, error)
 	AddTransaction(sellerID primitive.ObjectID, transaction *dto.Transaction) (*dto.Transaction, error)
 	// GetTransactions(sellerID primitive.ObjectID) ([]dto.Transaction, error)
+	UpdateSellerScore(sellerID primitive.ObjectID) error
+	GetSellerBalanceByID(sellerID primitive.ObjectID) (float64, error)
 }
 
 type SellerRepository struct {
 	sellerCollection *mongo.Collection
+	reviewCollection *mongo.Collection
 }
 
-func NewSellerRepository(db *mongo.Database, collectionName string) ISellerRepository {
+func NewSellerRepository(db *mongo.Database, sellercollectionName string, reviewcollectionName string) ISellerRepository {
 	return SellerRepository{
-		sellerCollection: db.Collection(collectionName),
+		sellerCollection: db.Collection(sellercollectionName),
+		reviewCollection: db.Collection(reviewcollectionName),
 	}
 }
 
@@ -153,3 +157,66 @@ func (r SellerRepository) AddTransaction(sellerID primitive.ObjectID, transactio
 // 	}
 // 	return seller.Transaction, nil
 // }
+
+func (r SellerRepository) UpdateSellerScore(sellerID primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	pipeline := []bson.M{
+		{"$match": bson.M{"seller_id": sellerID}}, 
+		{"$group": bson.M{
+			"_id":      "$seller_id",
+			"avgScore": bson.M{"$avg": "$score"},
+		}},
+	}
+
+	var result struct {
+		AvgScore float64 `bson:"avgScore"`
+	}
+
+	cursor, err := r.reviewCollection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return err
+	}
+	defer cursor.Close(ctx)
+
+	if cursor.Next(ctx) {
+		if err := cursor.Decode(&result); err != nil {
+			return err
+		}
+	} else {
+		result.AvgScore = 0
+	}
+
+	_, err = r.sellerCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": sellerID},
+		bson.M{"$set": bson.M{"score": result.AvgScore}},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r SellerRepository) GetSellerBalanceByID(sellerID primitive.ObjectID) (float64, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	var seller model.Seller
+
+	err := r.sellerCollection.FindOne(ctx, bson.M{"_id": sellerID}).Decode(&seller)
+	if err != nil {
+		return 0, err
+	}
+
+	var totalBalance float64
+	for _, transaction := range seller.Transaction {
+		totalBalance += transaction.Amount
+	}
+
+	return totalBalance, nil
+}
+

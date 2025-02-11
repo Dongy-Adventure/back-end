@@ -14,6 +14,7 @@ type ISellerService interface {
 	GetSellers() ([]dto.Seller, error)
 	UpdateSeller(sellerID primitive.ObjectID, updatedSeller *model.Seller) (*dto.Seller, error)
 	AddTransaction(sellerID primitive.ObjectID, transaction *dto.Transaction) (*dto.Transaction, error)
+	GetSellerBalanceByID(sellerID primitive.ObjectID) (float64, error)
 }
 
 type SellerService struct {
@@ -90,4 +91,12 @@ func (s SellerService) AddTransaction(sellerID primitive.ObjectID, transaction *
 		return nil, err
 	}
 	return newTransaction, nil
+}
+
+func (s SellerService) GetSellerBalanceByID(sellerID primitive.ObjectID) (float64, error) {
+	totalBalance, err := s.sellerRepository.GetSellerBalanceByID(sellerID)
+	if err != nil {
+		return 0, err
+	}
+	return totalBalance, nil
 }

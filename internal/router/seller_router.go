@@ -11,7 +11,7 @@ import (
 )
 
 func (r Router) AddSellerRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
-	repo := repository.NewSellerRepository(mongoDB, "sellers")
+	repo := repository.NewSellerRepository(mongoDB, "sellers", "reviews")
 	serv := service.NewSellerService(repo)
 	cont := controller.NewSellerController(serv)
 
@@ -22,5 +22,6 @@ func (r Router) AddSellerRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
 	sellerRouter.GET("/:seller_id", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.GetSellerByID)
 	sellerRouter.PUT("/:seller_id", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.UpdateSeller)
 	sellerRouter.POST("/:seller_id/transaction", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.AddTransaction)
+	sellerRouter.GET("/:seller_id/balance", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.GetSellerBalanceByID)
 
 }

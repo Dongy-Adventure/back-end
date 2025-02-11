@@ -80,6 +80,45 @@ definitions:
       success:
         type: boolean
     type: object
+  dto.Review:
+    properties:
+      buyerID:
+        type: string
+      date:
+        type: string
+      image:
+        type: string
+      message:
+        type: string
+      reviewID:
+        type: string
+      score:
+        type: integer
+      sellerID:
+        type: string
+    type: object
+  dto.ReviewCreateRequest:
+    properties:
+      buyerID:
+        type: string
+      image:
+        type: string
+      message:
+        type: string
+      score:
+        type: integer
+      sellerID:
+        type: string
+    type: object
+  dto.ReviewUpdateRequest:
+    properties:
+      image:
+        type: string
+      message:
+        type: string
+      score:
+        type: integer
+    type: object
   dto.Seller:
     properties:
       address:
@@ -97,7 +136,9 @@ definitions:
       surname:
         type: string
       transaction:
-        $ref: '#/definitions/dto.Transaction'
+        items:
+          $ref: '#/definitions/dto.Transaction'
+        type: array
       username:
         type: string
     type: object
@@ -117,10 +158,6 @@ definitions:
         type: number
       surname:
         type: string
-      transaction:
-        items:
-          $ref: '#/definitions/dto.Transaction'
-        type: array
       username:
         type: string
     type: object
@@ -437,6 +474,167 @@ paths:
       summary: Update a buyer by ID
       tags:
       - buyer
+  /review/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all reviews
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Review'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all reviews
+      tags:
+      - review
+    post:
+      consumes:
+      - application/json
+      description: Creates a new review in the database
+      parameters:
+      - description: Review to create
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReviewCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Review'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new review
+      tags:
+      - review
+  /review/{review_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a review's data by its ID
+      parameters:
+      - description: Review ID
+        in: path
+        name: review_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Review'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a review by ID
+      tags:
+      - review
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing review's data by its ID
+      parameters:
+      - description: Review ID
+        in: path
+        name: review_id
+        required: true
+        type: string
+      - description: Review data to update
+        in: body
+        name: review
+        required: true
+        schema:
+          $ref: '#/definitions/dto.ReviewUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Review'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a review by ID
+      tags:
+      - review
+  /review/seller/{seller_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves each seller's reviews by seller ID
+      parameters:
+      - description: Seller ID
+        in: path
+        name: seller_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Review'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get reviews by sellerID
+      tags:
+      - review
   /seller/:
     get:
       consumes:
@@ -564,6 +762,40 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: Update a seller by ID
+      tags:
+      - seller
+  /seller/{seller_id}/balance:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a seller's total balance by their ID
+      parameters:
+      - description: Seller ID
+        in: path
+        name: seller_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  type: number
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a seller's total balance by ID
       tags:
       - seller
   /seller/{seller_id}/transaction:
