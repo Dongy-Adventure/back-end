@@ -52,12 +52,12 @@ func (s ProductController) CreateProduct(c *gin.Context) {
 	}
 	product := model.Product{
 		// map fields from newProduct to product
-		Name:        newProduct.Name,
+		ProductName: newProduct.ProductName,
 		Description: newProduct.Description,
 		Price:       newProduct.Price,
 		// add other fields as necessary
 	}
-	res, err := s.productService.CreateProductData(&product)
+	res, err := s.productService.CreateProduct(&product)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
@@ -183,7 +183,7 @@ func (s ProductController) UpdateProduct(c *gin.Context) {
 		return
 	}
 
-	res, err := s.productService.UpdateProductData(productID, &updatedProduct)
+	res, err := s.productService.UpdateProduct(productID, &updatedProduct)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
