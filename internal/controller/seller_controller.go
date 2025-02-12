@@ -83,6 +83,16 @@ func (s SellerController) CreateSeller(c *gin.Context) {
 // @Router /seller/{seller_id} [get]
 func (s SellerController) GetSellerByID(c *gin.Context) {
 	sellerIDstr := c.Param("seller_id")
+	userID, exists := c.Get("userID")
+	if userID != sellerIDstr || !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusUnauthorized,
+			Error:   "ID not match or not exists",
+			Message: "param ID doesn't match with callerID"})
+		return
+	}
+
 	sellerID, err := primitive.ObjectIDFromHex(sellerIDstr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
@@ -156,6 +166,15 @@ func (s SellerController) GetSellers(c *gin.Context) {
 // @Router /seller/{seller_id} [put]
 func (s SellerController) UpdateSeller(c *gin.Context) {
 	sellerIDstr := c.Param("seller_id")
+	userID, exists := c.Get("userID")
+	if userID != sellerIDstr || !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusUnauthorized,
+			Error:   "ID not match or not exists",
+			Message: "param ID doesn't match with callerID"})
+		return
+	}
 	sellerID, err := primitive.ObjectIDFromHex(sellerIDstr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
@@ -209,6 +228,15 @@ func (s SellerController) UpdateSeller(c *gin.Context) {
 // @Router /seller/{seller_id}/transaction [post]
 func (s SellerController) AddTransaction(c *gin.Context) {
 	sellerIDstr := c.Param("seller_id")
+	userID, exists := c.Get("userID")
+	if userID != sellerIDstr || !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusUnauthorized,
+			Error:   "ID not match or not exists",
+			Message: "param ID doesn't match with callerID"})
+		return
+	}
 	sellerID, err := primitive.ObjectIDFromHex(sellerIDstr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
@@ -219,6 +247,7 @@ func (s SellerController) AddTransaction(c *gin.Context) {
 		})
 		return
 	}
+
 	var newTransaction dto.Transaction
 	if err := c.ShouldBindJSON(&newTransaction); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
@@ -259,6 +288,15 @@ func (s SellerController) AddTransaction(c *gin.Context) {
 // @Router /seller/{seller_id}/balance [get]
 func (s SellerController) GetSellerBalanceByID(c *gin.Context) {
 	sellerIDstr := c.Param("seller_id")
+	userID, exists := c.Get("userID")
+	if userID != sellerIDstr || !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusUnauthorized,
+			Error:   "ID not match or not exists",
+			Message: "param ID doesn't match with callerID"})
+		return
+	}
 	sellerID, err := primitive.ObjectIDFromHex(sellerIDstr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{

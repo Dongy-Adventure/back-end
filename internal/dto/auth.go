@@ -15,7 +15,10 @@ type LoginResponse struct {
 	RefreshToken          string      `json:"refreshToken"`
 	RefreshTokenExpiredIn int32       `json:"refreshTokenExpiredIn"`
 }
-
+type LogoutRequest struct {
+	AccessToken  string `json:"accessToken"`
+	RefreshToken string `json:"refreshToken"`
+}
 type RefreshTokenResponse struct {
 	Success              bool   `json:"success"`
 	Status               int    `json:"status"`

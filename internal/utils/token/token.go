@@ -25,64 +25,73 @@ func extractToken(c *gin.Context) string {
 
 }
 
-func GenerateToken(tokenType tokenmode.TokenType) (string, error) {
-	config, err := config.LoadConfig()
-	if err != nil {
-		log.Fatal("Error loading .env File")
-	}
-	var token_lifespan int32
+func GenerateToken(conf *config.Config, userID string, tokenType tokenmode.TokenType) (string, error) {
+
+	var tokenLifespan int32
 	switch tokenType {
 	case tokenmode.TokenMode.ACCESS_TOKEN:
-		token_lifespan = config.Auth.AccessTokenLifespanMinutes
+		tokenLifespan = conf.Auth.AccessTokenLifespanMinutes
 	case tokenmode.TokenMode.REFRESH_TOKEN:
-		token_lifespan = config.Auth.RefreshTokenLifespanMinutes
+		tokenLifespan = conf.Auth.RefreshTokenLifespanMinutes
 	default:
 		return "", errors.New("token type is invalid")
 	}
-	if err != nil {
-		return "", err
+
+	claims := jwt.MapClaims{
+		"exp":    time.Now().Add(time.Minute * time.Duration(tokenLifespan)).Unix(),
+		"userID": userID,
 	}
-	claims := jwt.MapClaims{}
-	claims["exp"] = time.Now().Add(time.Minute * time.Duration(token_lifespan)).Unix()
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	switch tokenType {
 	case tokenmode.TokenMode.ACCESS_TOKEN:
-		return token.SignedString([]byte(config.Auth.AccessTokenSecret))
+		return token.SignedString([]byte(conf.Auth.AccessTokenSecret))
 	case tokenmode.TokenMode.REFRESH_TOKEN:
-		return token.SignedString([]byte(config.Auth.RefreshTokenSecret))
+		return token.SignedString([]byte(conf.Auth.RefreshTokenSecret))
 	default:
 		return "", errors.New("token type is invalid")
 	}
 }
 
-func ValidateToken(c *gin.Context, tokenType tokenmode.TokenType) error {
-	config, configErr := config.LoadConfig()
-	if configErr != nil {
-		log.Fatal("Error loading .env file in validate token")
+func ValidateToken(c *gin.Context, tokenType tokenmode.TokenType) (*jwt.Token, error) {
+
+	conf, err := config.LoadConfig()
+	if err != nil {
+		log.Fatal("error loading .env")
 	}
 	tokenString := extractToken(c)
 
 	if tokenString == "" {
-		return errors.New("no token given")
+		return nil, errors.New("no token given")
 	}
 
-	_, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		switch tokenType {
 		case tokenmode.TokenMode.ACCESS_TOKEN:
-			return []byte(config.Auth.AccessTokenSecret), nil
+			return []byte(conf.Auth.AccessTokenSecret), nil
 		case tokenmode.TokenMode.REFRESH_TOKEN:
-			return []byte(config.Auth.RefreshTokenSecret), nil
+			return []byte(conf.Auth.RefreshTokenSecret), nil
 		default:
 			return "", errors.New("token type is invalid")
 		}
 	})
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return token, err
+}
+
+func ExtractID(token *jwt.Token) (string, error) {
+	if cliams, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID, exits := cliams["userID"].(string)
+		if !exits {
+			return "", errors.New("userID not found in token")
+		}
+		return userID, nil
+	}
+	return "", nil
 }

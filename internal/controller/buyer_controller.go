@@ -81,6 +81,15 @@ func (s BuyerController) CreateBuyer(c *gin.Context) {
 // @Router /buyer/{buyer_id} [get]
 func (s BuyerController) GetBuyerByID(c *gin.Context) {
 	buyerIDstr := c.Param("buyer_id")
+	userID, exists := c.Get("userID")
+	if userID != buyerIDstr || !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusUnauthorized,
+			Error:   "ID not match or not exists",
+			Message: "param ID doesn't match with callerID"})
+		return
+	}
 	buyerID, err := primitive.ObjectIDFromHex(buyerIDstr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
@@ -155,6 +164,15 @@ func (s BuyerController) GetBuyers(c *gin.Context) {
 // @Router /buyer/{id} [put]
 func (s BuyerController) UpdateBuyer(c *gin.Context) {
 	buyerIDstr := c.Param("buyer_id")
+	userID, exists := c.Get("userID")
+	if userID != buyerIDstr || !exists {
+		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusUnauthorized,
+			Error:   "ID not match or not exists",
+			Message: "param ID doesn't match with callerID"})
+		return
+	}
 	buyerID, err := primitive.ObjectIDFromHex(buyerIDstr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{

@@ -9,6 +9,7 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/config"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
 	"go.mongodb.org/mongo-driver/mongo"
@@ -23,7 +24,7 @@ func NewRouter(g *gin.Engine, conf *config.Config) *Router {
 	return &Router{g, conf}
 }
 
-func (r *Router) Run(mongoDB *mongo.Database) {
+func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client) {
 
 	// CORS setting
 	corsConfig := cors.DefaultConfig()
@@ -53,7 +54,7 @@ func (r *Router) Run(mongoDB *mongo.Database) {
 	// Add related path
 	r.AddSellerRouter(v1, mongoDB)
 	r.AddBuyerRouter(v1, mongoDB)
-	r.AddAuthRouter(v1, mongoDB)
+	r.AddAuthRouter(v1, mongoDB, redisDB)
 	r.AddProductRouter(v1, mongoDB)
 
 	err := r.g.Run(":" + r.conf.App.Port)
