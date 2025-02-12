@@ -1,14 +1,18 @@
 package service
 
 import (
+	"context"
 	"fmt"
+	"time"
 
+	"github.com/Dongy-s-Advanture/back-end/internal/config"
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/enum/tokenmode"
 	"github.com/Dongy-s-Advanture/back-end/internal/repository"
 	"github.com/Dongy-s-Advanture/back-end/internal/utils/converter"
 	"github.com/Dongy-s-Advanture/back-end/internal/utils/token"
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -16,15 +20,21 @@ type IAuthService interface {
 	SellerLogin(req *dto.LoginRequest) (*dto.Seller, string, string, error)
 	BuyerLogin(req *dto.LoginRequest) (*dto.Buyer, string, string, error)
 	RefreshToken(c *gin.Context) (string, error)
+	invalidateToken(token string, expirationTime time.Duration) error
+	Logout(accessToken string, refreshToken string) error
 }
 
 type AuthService struct {
+	conf             *config.Config
+	redisDB          *redis.Client
 	sellerRepository repository.ISellerRepository
 	buyerRepository  repository.IBuyerRepository
 }
 
-func NewAuthService(sellerRepo repository.ISellerRepository, buyerRepo repository.IBuyerRepository) IAuthService {
+func NewAuthService(conf *config.Config, redisDB *redis.Client, sellerRepo repository.ISellerRepository, buyerRepo repository.IBuyerRepository) IAuthService {
 	return AuthService{
+		conf:             conf,
+		redisDB:          redisDB,
 		sellerRepository: sellerRepo,
 		buyerRepository:  buyerRepo,
 	}
@@ -41,11 +51,11 @@ func (s AuthService) SellerLogin(req *dto.LoginRequest) (*dto.Seller, string, st
 		return nil, "", "", fmt.Errorf("invalid username or password")
 	}
 
-	accessToken, accessTokenErr := token.GenerateToken(tokenmode.TokenMode.ACCESS_TOKEN)
+	accessToken, accessTokenErr := token.GenerateToken(s.conf, sellerModel.SellerID.Hex(), tokenmode.TokenMode.ACCESS_TOKEN)
 	if accessTokenErr != nil {
 		return nil, "", "", accessTokenErr
 	}
-	refreshToken, refreshTokenErr := token.GenerateToken(tokenmode.TokenMode.REFRESH_TOKEN)
+	refreshToken, refreshTokenErr := token.GenerateToken(s.conf, sellerModel.SellerID.Hex(), tokenmode.TokenMode.REFRESH_TOKEN)
 	if refreshTokenErr != nil {
 		return nil, "", "", refreshTokenErr
 	}
@@ -63,11 +73,11 @@ func (s AuthService) BuyerLogin(req *dto.LoginRequest) (*dto.Buyer, string, stri
 	if err != nil {
 		return nil, "", "", err
 	}
-	accessToken, accessTokenErr := token.GenerateToken(tokenmode.TokenMode.ACCESS_TOKEN)
+	accessToken, accessTokenErr := token.GenerateToken(s.conf, buyerModel.BuyerID.Hex(), tokenmode.TokenMode.ACCESS_TOKEN)
 	if accessTokenErr != nil {
 		return nil, "", "", accessTokenErr
 	}
-	refreshToken, refreshTokenErr := token.GenerateToken(tokenmode.TokenMode.REFRESH_TOKEN)
+	refreshToken, refreshTokenErr := token.GenerateToken(s.conf, buyerModel.BuyerID.Hex(), tokenmode.TokenMode.REFRESH_TOKEN)
 	if refreshTokenErr != nil {
 		return nil, "", "", refreshTokenErr
 	}
@@ -81,13 +91,39 @@ func (s AuthService) BuyerLogin(req *dto.LoginRequest) (*dto.Buyer, string, stri
 }
 
 func (s AuthService) RefreshToken(c *gin.Context) (string, error) {
-	err := token.ValidateToken(c, tokenmode.TokenMode.REFRESH_TOKEN)
+	tkn, err := token.ValidateToken(c, tokenmode.TokenMode.REFRESH_TOKEN)
 	if err != nil {
 		return "", fmt.Errorf("invalid refresh token: %w", err)
 	}
-	accessToken, accessTokenErr := token.GenerateToken(tokenmode.TokenMode.ACCESS_TOKEN)
+	userID, err := token.ExtractID(tkn)
+	if err != nil {
+		return "", fmt.Errorf("no userID in token")
+	}
+	accessToken, accessTokenErr := token.GenerateToken(s.conf, userID, tokenmode.TokenMode.ACCESS_TOKEN)
 	if accessTokenErr != nil {
 		return "", accessTokenErr
 	}
 	return accessToken, nil
+}
+
+func (s AuthService) invalidateToken(token string, expirationTime time.Duration) error {
+	ctx := context.Background()
+	err := s.redisDB.SetEx(ctx, "blacklist:"+token, "invalid", expirationTime).Err()
+	if err != nil {
+		return fmt.Errorf("could not invalidate token: %v", err)
+	}
+	return nil
+}
+
+func (s AuthService) Logout(accessToken string, refreshToken string) error {
+	accessTokenExpiredIn := s.conf.Auth.AccessTokenLifespanMinutes
+	refreshTokenExpiredIn := s.conf.Auth.RefreshTokenLifespanMinutes
+
+	if err := s.invalidateToken(accessToken, time.Duration(accessTokenExpiredIn)); err != nil {
+		return err
+	}
+	if err := s.invalidateToken(refreshToken, time.Duration(refreshTokenExpiredIn)); err != nil {
+		return err
+	}
+	return nil
 }

@@ -67,6 +67,13 @@ definitions:
       success:
         type: boolean
     type: object
+  dto.LogoutRequest:
+    properties:
+      accessToken:
+        type: string
+      refreshToken:
+        type: string
+    type: object
   dto.Product:
     properties:
       SellerID:
@@ -346,18 +353,52 @@ paths:
       summary: Buyer login
       tags:
       - auth
+  /auth/logout/:
+    post:
+      consumes:
+      - application/json
+      description: Invalidate user's token
+      parameters:
+      - description: User's tokens
+        in: body
+        name: logoutRequest
+        required: true
+        schema:
+          $ref: '#/definitions/dto.LogoutRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: User logout
+      tags:
+      - auth
   /auth/refresh/:
     post:
       consumes:
       - application/json
       description: Refresh access token for user
       parameters:
-      - description: User accessToken
-        in: body
+      - description: Bearer {refreshToken}
+        in: header
         name: refreshToken
         required: true
-        schema:
-          type: string
+        type: string
       produces:
       - application/json
       responses:

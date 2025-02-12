@@ -14,7 +14,10 @@ type AppConfig struct {
 }
 
 type DbConfig struct {
-	MongoURL string
+	MongoURL      string
+	RedisAddr     string
+	RedisPassword string
+	RedisDB       int
 }
 
 type AuthConfig struct {
@@ -62,9 +65,15 @@ func LoadConfig() (*Config, error) {
 		AccessTokenLifespanMinutes:  int32(accessTokenLifeSpan),
 		RefreshTokenLifespanMinutes: int32(refreshTokenLifeSpan),
 	}
-
+	redisDB, err := strconv.Atoi(os.Getenv("REDIS_DB"))
+	if err != nil {
+		return nil, err
+	}
 	dbConfig := DbConfig{
-		MongoURL: os.Getenv("MONGODB_URL"),
+		MongoURL:      os.Getenv("MONGODB_URL"),
+		RedisAddr:     os.Getenv("REDIS_URL"),
+		RedisPassword: os.Getenv("REDIS_PASSWORD"),
+		RedisDB:       redisDB,
 	}
 
 	return &Config{

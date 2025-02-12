@@ -22,7 +22,13 @@ func main() {
 		panic(fmt.Sprintf("Error connecting mongo: %v", err))
 	}
 
+	redisDB, err := database.InitRedis(&conf.Db)
+
+	if err != nil {
+		panic(fmt.Sprintf("Error connecting redis: %v", err))
+	}
+
 	r := routes.NewRouter(gin.Default(), conf)
 
-	r.Run(mongoDB)
+	r.Run(mongoDB, redisDB)
 }
