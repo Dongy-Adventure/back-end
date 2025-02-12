@@ -17,7 +17,7 @@ type Product struct {
 	SellerID    primitive.ObjectID `json:"SellerID,omitempty"`
 	CreatedAt   time.Time          `json:"createdAt,omitempty"`
 }
-type ProductPost struct {
+type ProductCreateRequest struct {
 	ProductName string             `json:"productName"`
 	Price       float64            `json:"price,omitempty"`
 	Description string             `json:"description,omitempty"`
