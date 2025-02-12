@@ -117,6 +117,8 @@ func (r SellerRepository) UpdateSeller(sellerID primitive.ObjectID, updatedSelle
 			"name":     updatedSeller.Name,
 			"surname":  updatedSeller.Surname,
 			"payment":  updatedSeller.Payment,
+			"address":  updateSeller.Address,
+			"phoneNumber": updateSeller.PhoneNumber
 		},
 	}
 
