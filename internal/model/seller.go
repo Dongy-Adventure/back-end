@@ -14,7 +14,10 @@ type Seller struct {
 	Surname     string             `json:"surname" bson:"surname"`
 	Payment     string             `json:"payment" bson:"payment"`
 	PhoneNumber string             `json:"phoneNumber" bson:"phoneNumber"`
-	Address     string             `json:"address" bson:"addresss"`
+	Address     string             `json:"address" bson:"address"`
+	City        string             `json:"city" bson:"city"`
+	Province    string             `json:"province" bson:"province"`
+	Zip         string             `json:"zip" bson:"zip"`
 	Score       float64            `json:"score" bson:"score"`
 	Transaction []Transaction      `json:"transaction" bson:"transaction"`
 }

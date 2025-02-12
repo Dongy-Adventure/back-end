@@ -119,6 +119,9 @@ func (r SellerRepository) UpdateSeller(sellerID primitive.ObjectID, updatedSelle
 			"payment":     updatedSeller.Payment,
 			"address":     updatedSeller.Address,
 			"phoneNumber": updatedSeller.PhoneNumber,
+			"city":        updatedSeller.City,
+			"province":    updatedSeller.Province,
+			"zip":         updatedSeller.Zip,
 		},
 	}
 
@@ -165,7 +168,7 @@ func (r SellerRepository) UpdateSellerScore(sellerID primitive.ObjectID) error {
 	defer cancel()
 
 	pipeline := []bson.M{
-		{"$match": bson.M{"seller_id": sellerID}}, 
+		{"$match": bson.M{"seller_id": sellerID}},
 		{"$group": bson.M{
 			"_id":      "$seller_id",
 			"avgScore": bson.M{"$avg": "$score"},
@@ -221,4 +224,3 @@ func (r SellerRepository) GetSellerBalanceByID(sellerID primitive.ObjectID) (flo
 
 	return totalBalance, nil
 }
-

@@ -15,6 +15,9 @@ type Seller struct {
 	Address     string             `json:"address"`
 	PhoneNumber string             `json:"phoneNumber"`
 	Score       float32            `json:"score"`
+	Province    string             `json:"province"`
+	City        string             `json:"city"`
+	Zip         string             `json:"zip"`
 	Transaction []Transaction      `json:"transaction"`
 }
 
@@ -27,6 +30,9 @@ type SellerRegisterRequest struct {
 	Address     string  `json:"address"`
 	PhoneNumber string  `json:"phoneNumber"`
 	Score       float32 `json:"score"`
+	Province    string  `json:"province"`
+	City        string  `json:"city"`
+	Zip         string  `json:"zip"`
 }
 
 type Transaction struct {
