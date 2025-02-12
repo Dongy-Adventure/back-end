@@ -112,11 +112,13 @@ func (r SellerRepository) UpdateSeller(sellerID primitive.ObjectID, updatedSelle
 
 	update := bson.M{
 		"$set": bson.M{
-			"username": updatedSeller.Username,
-			"password": updatedSeller.Password,
-			"name":     updatedSeller.Name,
-			"surname":  updatedSeller.Surname,
-			"payment":  updatedSeller.Payment,
+			"username":    updatedSeller.Username,
+			"password":    updatedSeller.Password,
+			"name":        updatedSeller.Name,
+			"surname":     updatedSeller.Surname,
+			"payment":     updatedSeller.Payment,
+			"address":     updatedSeller.Address,
+			"phoneNumber": updatedSeller.PhoneNumber,
 		},
 	}
 
