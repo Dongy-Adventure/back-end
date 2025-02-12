@@ -7,31 +7,31 @@ import (
 )
 
 type Product struct {
-	ProductID   primitive.ObjectID `json:"productID,omitempty" bson:"_id,omitempty"`
-	ProductName string             `json:"productName" bson:"productName"`
-	Price       float64            `json:"price,omitempty" bson:"price"`
-	Description string             `json:"description,omitempty" bson:"description"`
-	ImageURL    string             `json:"imageURL,omitempty" bson:"imageURL"`
-	Tag         []string           `json:"tag,omitempty" bson:"tag"`
-	Color       string             `json:"color,omitempty" bson:"color"`
-	SellerID    primitive.ObjectID `json:"SellerID,omitempty" bson:"sellerID"`
-	CreatedAt   time.Time          `json:"createdAt,omitempty" bson:"createdAt"`
+	ProductID   primitive.ObjectID `json:"productID,omitempty"`
+	ProductName string             `json:"productName"`
+	Price       float64            `json:"price,omitempty"`
+	Description string             `json:"description,omitempty"`
+	ImageURL    string             `json:"imageURL,omitempty"`
+	Tag         []string           `json:"tag,omitempty"`
+	Color       string             `json:"color,omitempty"`
+	SellerID    primitive.ObjectID `json:"SellerID,omitempty"`
+	CreatedAt   time.Time          `json:"createdAt,omitempty"`
 }
 type ProductPost struct {
-	ProductName string             `json:"productName" bson:"productName"`
-	Price       float64            `json:"price,omitempty" bson:"price"`
-	Description string             `json:"description,omitempty" bson:"description"`
-	ImageURL    string             `json:"imageURL,omitempty" bson:"imageURL"`
-	Tag         []string           `json:"tag,omitempty" bson:"tag"`
-	Color       string             `json:"color,omitempty" bson:"color"`
-	SellerID    primitive.ObjectID `json:"SellerID,omitempty" bson:"sellerID"`
-	CreatedAt   time.Time          `json:"createdAt,omitempty" bson:"createdAt"`
+	ProductName string             `json:"productName"`
+	Price       float64            `json:"price,omitempty"`
+	Description string             `json:"description,omitempty"`
+	ImageURL    string             `json:"imageURL,omitempty"`
+	Tag         []string           `json:"tag,omitempty"`
+	Color       string             `json:"color,omitempty"`
+	SellerID    primitive.ObjectID `json:"SellerID,omitempty"`
+	CreatedAt   time.Time          `json:"createdAt,omitempty"`
 }
 type UpdateProductRequest struct {
-	ProductName string   `json:"productName" bson:"productName"`
-	Price       float64  `json:"price,omitempty" bson:"price"`
-	Description string   `json:"description,omitempty" bson:"description"`
-	ImageURL    string   `json:"imageURL,omitempty" bson:"imageURL"`
-	Tag         []string `json:"tag,omitempty" bson:"tag"`
-	Color       string   `json:"color,omitempty" bson:"color"`
+	ProductName string   `json:"productName"`
+	Price       float64  `json:"price,omitempty"`
+	Description string   `json:"description,omitempty"`
+	ImageURL    string   `json:"imageURL,omitempty"`
+	Tag         []string `json:"tag,omitempty"`
+	Color       string   `json:"color,omitempty"`
 }

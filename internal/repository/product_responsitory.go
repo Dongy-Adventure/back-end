@@ -13,11 +13,11 @@ import (
 )
 
 type IProductRepository interface {
-	GetProductByID(ctx context.Context, productID primitive.ObjectID) (*dto.Product, error)
-	GetProducts(ctx context.Context) ([]dto.Product, error)
-	CreateProduct(ctx context.Context, product *model.Product) (*dto.Product, error)
-	UpdateProduct(ctx context.Context, productID primitive.ObjectID, updatedProduct *model.Product) (*dto.Product, error)
-	DeleteProduct(ctx context.Context, productID primitive.ObjectID) error
+	GetProductByID(productID primitive.ObjectID) (*dto.Product, error)
+	GetProducts() ([]dto.Product, error)
+	CreateProduct(product *model.Product) (*dto.Product, error)
+	UpdateProduct(productID primitive.ObjectID, updatedProduct *model.Product) (*dto.Product, error)
+	DeleteProduct(productID primitive.ObjectID) error
 }
 
 type ProductRepository struct {
@@ -30,8 +30,8 @@ func NewProductRepository(db *mongo.Database, collectionName string) IProductRep
 	}
 }
 
-func (r *ProductRepository) GetProductByID(ctx context.Context, productID primitive.ObjectID) (*dto.Product, error) {
-	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+func (r *ProductRepository) GetProductByID(productID primitive.ObjectID) (*dto.Product, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	var product *model.Product
@@ -43,7 +43,7 @@ func (r *ProductRepository) GetProductByID(ctx context.Context, productID primit
 	return converter.ProductModelToDTO(product)
 }
 
-func (r *ProductRepository) GetProducts(ctx context.Context) ([]dto.Product, error) {
+func (r *ProductRepository) GetProducts() ([]dto.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -70,8 +70,8 @@ func (r *ProductRepository) GetProducts(ctx context.Context) ([]dto.Product, err
 	return productList, nil
 }
 
-func (r *ProductRepository) CreateProduct(ctx context.Context, product *model.Product) (*dto.Product, error) {
-	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+func (r *ProductRepository) CreateProduct(product *model.Product) (*dto.Product, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	product.ProductID = primitive.NewObjectID()
 	result, err := r.productCollection.InsertOne(ctx, product)
@@ -88,7 +88,7 @@ func (r *ProductRepository) CreateProduct(ctx context.Context, product *model.Pr
 	return converter.ProductModelToDTO(newProduct)
 }
 
-func (r *ProductRepository) UpdateProduct(ctx context.Context, productID primitive.ObjectID, updatedProduct *model.Product) (*dto.Product, error) {
+func (r *ProductRepository) UpdateProduct(productID primitive.ObjectID, updatedProduct *model.Product) (*dto.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -119,7 +119,7 @@ func (r *ProductRepository) UpdateProduct(ctx context.Context, productID primiti
 	return converter.ProductModelToDTO(newUpdatedProduct)
 }
 
-func (r *ProductRepository) DeleteProduct(ctx context.Context, productID primitive.ObjectID) error {
+func (r *ProductRepository) DeleteProduct(productID primitive.ObjectID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
