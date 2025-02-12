@@ -14,7 +14,7 @@ type Product struct {
 	ImageURL    string             `json:"imageURL,omitempty"`
 	Tag         []string           `json:"tag,omitempty"`
 	Color       string             `json:"color,omitempty"`
-	SellerID    primitive.ObjectID `json:"SellerID,omitempty"`
+	SellerID    primitive.ObjectID `json:"sellerID,omitempty"`
 	CreatedAt   time.Time          `json:"createdAt,omitempty"`
 }
 type ProductCreateRequest struct {
@@ -24,7 +24,7 @@ type ProductCreateRequest struct {
 	ImageURL    string             `json:"imageURL,omitempty"`
 	Tag         []string           `json:"tag,omitempty"`
 	Color       string             `json:"color,omitempty"`
-	SellerID    primitive.ObjectID `json:"SellerID,omitempty"`
+	SellerID    primitive.ObjectID `json:"sellerID,omitempty"`
 	CreatedAt   time.Time          `json:"createdAt,omitempty"`
 }
 type UpdateProductRequest struct {
