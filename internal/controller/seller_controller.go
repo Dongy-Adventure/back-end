@@ -83,15 +83,6 @@ func (s SellerController) CreateSeller(c *gin.Context) {
 // @Router /seller/{seller_id} [get]
 func (s SellerController) GetSellerByID(c *gin.Context) {
 	sellerIDstr := c.Param("seller_id")
-	userID, exists := c.Get("userID")
-	if userID != sellerIDstr || !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Success: false,
-			Status:  http.StatusUnauthorized,
-			Error:   "ID not match or not exists",
-			Message: "param ID doesn't match with callerID"})
-		return
-	}
 
 	sellerID, err := primitive.ObjectIDFromHex(sellerIDstr)
 	if err != nil {
