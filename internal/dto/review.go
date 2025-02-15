@@ -9,7 +9,9 @@ import (
 type Review struct {
 	ReviewID primitive.ObjectID  `json:"reviewID"`
 	BuyerID  primitive.ObjectID `json:"buyerID"`
+	BuyerName string			`json:"buyerName"`
 	SellerID primitive.ObjectID `json:"sellerID"`
+	SellerName string 			`json:"sellerName"`
 	Image     string            `json:"image,omitempty"`
 	Message  string             `json:"message"`
 	Score    int                `json:"score"`
@@ -18,7 +20,9 @@ type Review struct {
 
 type ReviewCreateRequest struct {
 	BuyerID  primitive.ObjectID `json:"buyerID"`
+	BuyerName string			`json:"buyerName"`
 	SellerID primitive.ObjectID `json:"sellerID"`
+	SellerName string 			`json:"sellerName"`
 	Image     string            `json:"image,omitempty"`
 	Message  string             `json:"message"`
 	Score    int                `json:"score"`

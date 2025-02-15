@@ -33,13 +33,13 @@ func NewProductController(s service.IProductService) IProductController {
 // @Tags product
 // @Accept json
 // @Produce json
-// @Param product body dto.ProductCreateRequest true "Product to create"
+// @Param product body model.Product true "Product to create"
 // @Success 201 {object} dto.SuccessResponse{data=dto.Product}
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
 // @Router /product/ [post]
 func (s ProductController) CreateProduct(c *gin.Context) {
-	var newProduct dto.ProductCreateRequest
+	var newProduct model.Product
 
 	if err := c.BindJSON(&newProduct); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
@@ -50,14 +50,7 @@ func (s ProductController) CreateProduct(c *gin.Context) {
 		})
 		return
 	}
-	product := model.Product{
-		// map fields from newProduct to product
-		ProductName: newProduct.ProductName,
-		Description: newProduct.Description,
-		Price:       newProduct.Price,
-		// add other fields as necessary
-	}
-	res, err := s.productService.CreateProduct(&product)
+	res, err := s.productService.CreateProduct(&newProduct)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{

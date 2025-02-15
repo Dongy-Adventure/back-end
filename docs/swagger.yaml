@@ -1,4 +1,56 @@
 definitions:
+  dto.Appointment:
+    properties:
+      address:
+        type: string
+      appointmentID:
+        type: string
+      buyerID:
+        type: string
+      city:
+        type: string
+      createdAt:
+        type: string
+      date:
+        type: string
+      orderID:
+        type: string
+      province:
+        type: string
+      sellerID:
+        type: string
+      timeSlot:
+        type: string
+      zip:
+        type: string
+    type: object
+  dto.AppointmentCreateRequest:
+    properties:
+      buyerID:
+        type: string
+      orderID:
+        type: string
+      sellerID:
+        type: string
+    type: object
+  dto.AppointmentDateRequest:
+    properties:
+      date:
+        type: string
+      timeSlot:
+        type: string
+    type: object
+  dto.AppointmentPlaceRequest:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      province:
+        type: string
+      zip:
+        type: string
+    type: object
   dto.Buyer:
     properties:
       address:
@@ -364,6 +416,206 @@ definitions:
 info:
   contact: {}
 paths:
+  /appointment/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all appointments
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Appointment'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all appointments
+      tags:
+      - appointment
+    post:
+      consumes:
+      - application/json
+      description: Creates a new appointment in the database
+      parameters:
+      - description: Appointment to create
+        in: body
+        name: appointment
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AppointmentCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Appointment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new appointment
+      tags:
+      - appointment
+  /appointment/{appointment_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a appointment's data by its ID
+      parameters:
+      - description: Appointment ID
+        in: path
+        name: appointment_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Appointment'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a appointment by ID
+      tags:
+      - appointment
+  /appointment/{appointment_id}/date:
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing appointment's date by its ID
+      parameters:
+      - description: Appointment ID
+        in: path
+        name: appointment_id
+        required: true
+        type: string
+      - description: Appointment date to update
+        in: body
+        name: appointment
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AppointmentDateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Appointment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update an appointment date by ID
+      tags:
+      - appointment
+  /appointment/{appointment_id}/place:
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing appointment's place by its ID
+      parameters:
+      - description: Appointment ID
+        in: path
+        name: appointment_id
+        required: true
+        type: string
+      - description: Appointment place to update
+        in: body
+        name: appointment
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AppointmentPlaceRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Appointment'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update an appointment place by ID
+      tags:
+      - appointment
+  /appointment/order/{order_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves each order's appointment by order ID
+      parameters:
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Appointment'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get appointments by orderID
+      tags:
+      - appointment
   /auth/buyer/:
     post:
       consumes:
