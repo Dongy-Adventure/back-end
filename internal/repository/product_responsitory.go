@@ -100,6 +100,7 @@ func (r *ProductRepository) UpdateProduct(productID primitive.ObjectID, updatedP
 			"tag":         updatedProduct.Tag,
 			"imageURL":    updatedProduct.ImageURL,
 			"color":       updatedProduct.Color,
+			"sellerID":    updatedProduct.SellerID,
 		},
 	}
 

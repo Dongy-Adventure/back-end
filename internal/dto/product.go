@@ -28,10 +28,11 @@ type ProductCreateRequest struct {
 	CreatedAt   time.Time          `json:"createdAt,omitempty"`
 }
 type UpdateProductRequest struct {
-	ProductName string   `json:"productName"`
-	Price       float64  `json:"price,omitempty"`
-	Description string   `json:"description,omitempty"`
-	ImageURL    string   `json:"imageURL,omitempty"`
-	Tag         []string `json:"tag,omitempty"`
-	Color       string   `json:"color,omitempty"`
+	ProductName string             `json:"productName"`
+	Price       float64            `json:"price,omitempty"`
+	Description string             `json:"description,omitempty"`
+	ImageURL    string             `json:"imageURL,omitempty"`
+	Tag         []string           `json:"tag,omitempty"`
+	Color       string             `json:"color,omitempty"`
+	SellerID    primitive.ObjectID `json:"sellerID,omitempty"`
 }
