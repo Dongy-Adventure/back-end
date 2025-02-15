@@ -17,8 +17,8 @@ func ProductModelToDTO(dataModel *model.Product) (*dto.Product, error) {
 	return dataDTO, nil
 }
 
-func ProductDTOToModel(dataDTO *dto.Product) (*dto.Product, error) {
-	dataModel := &dto.Product{}
+func ProductDTOToModel(dataDTO *dto.Product) (*model.Product, error) {
+	dataModel := &model.Product{}
 	err := copier.CopyWithOption(&dataModel, &dataDTO, copier.Option{DeepCopy: true})
 	if err != nil {
 		return nil, errors.New("error converting product dto to model")

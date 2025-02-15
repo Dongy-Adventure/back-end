@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   mongo:
     image: mongo:latest
@@ -7,18 +9,21 @@ services:
       - mongo_data:/data/db
       - ./init.js:/docker-entrypoint-initdb.d/init.js:ro
     environment:
-      MONGO_INITDB_ROOT_USERNAME: root
-      MONGO_INITDB_ROOT_PASSWORD: rootpassword
-      MONGO_INITDB_CONNECT_TIMEOUT: 30000
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_CONNECT_TIMEOUT: ${MONGO_INITDB_CONNECT_TIMEOUT}
     networks:
       - dongy
     restart: always
+
   redis:
     image: redis:latest
     ports:
       - "6379:6379"
     volumes:
       - "redis_data:/data"
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
     networks:
       - dongy
     restart: always
@@ -26,6 +31,7 @@ services:
 volumes:
   mongo_data: 
   redis_data:
+
 networks:
   dongy:
     driver: bridge

@@ -454,6 +454,128 @@ const docTemplate = `{
                 }
             }
         },
+        "/order/": {
+            "get": {
+                "description": "Get all orders by userID and userType",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "Get orders by userID and userType",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "user_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "User Type",
+                        "name": "user_type",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.Order"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new order in the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "order"
+                ],
+                "summary": "Create a new order",
+                "parameters": [
+                    {
+                        "description": "Order to create",
+                        "name": "buyer",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.OrderCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Order"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/product/": {
             "get": {
                 "description": "Retrieves all products",
@@ -1384,6 +1506,55 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.Order": {
+            "type": "object",
+            "properties": {
+                "appointmentID": {
+                    "type": "string"
+                },
+                "buyerID": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "orderID": {
+                    "type": "string"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Product"
+                    }
+                },
+                "sellerID": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "totalPrice": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.OrderCreateRequest": {
+            "type": "object",
+            "properties": {
+                "buyerID": {
+                    "type": "string"
+                },
+                "products": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Product"
+                    }
+                },
+                "sellerID": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.Product": {
             "type": "object",
             "properties": {
@@ -1537,6 +1708,9 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
+                "city": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -1544,6 +1718,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "phoneNumber": {
+                    "type": "string"
+                },
+                "province": {
                     "type": "string"
                 },
                 "score": {
@@ -1563,6 +1740,9 @@ const docTemplate = `{
                 },
                 "username": {
                     "type": "string"
+                },
+                "zip": {
+                    "type": "string"
                 }
             }
         },
@@ -1570,6 +1750,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "address": {
+                    "type": "string"
+                },
+                "city": {
                     "type": "string"
                 },
                 "name": {
@@ -1584,6 +1767,9 @@ const docTemplate = `{
                 "phoneNumber": {
                     "type": "string"
                 },
+                "province": {
+                    "type": "string"
+                },
                 "score": {
                     "type": "number"
                 },
@@ -1591,6 +1777,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                },
+                "zip": {
                     "type": "string"
                 }
             }
@@ -1695,6 +1884,9 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
+                "city": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
@@ -1705,6 +1897,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "phoneNumber": {
+                    "type": "string"
+                },
+                "province": {
                     "type": "string"
                 },
                 "score": {
@@ -1723,6 +1918,9 @@ const docTemplate = `{
                     }
                 },
                 "username": {
+                    "type": "string"
+                },
+                "zip": {
                     "type": "string"
                 }
             }

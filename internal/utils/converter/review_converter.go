@@ -17,8 +17,8 @@ func ReviewModelToDTO(dataModel *model.Review) (*dto.Review, error) {
 	return dataDTO, nil
 }
 
-func ReviewDTOToModel(dataDTO *dto.Review) (*dto.Review, error) {
-	dataModel := &dto.Review{}
+func ReviewDTOToModel(dataDTO *dto.Review) (*model.Review, error) {
+	dataModel := &model.Review{}
 	err := copier.CopyWithOption(&dataModel, &dataDTO, copier.Option{DeepCopy: true})
 	if err != nil {
 		return nil, errors.New("error converting review dto to model")

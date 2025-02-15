@@ -74,6 +74,38 @@ definitions:
       refreshToken:
         type: string
     type: object
+  dto.Order:
+    properties:
+      appointmentID:
+        type: string
+      buyerID:
+        type: string
+      createdAt:
+        type: string
+      orderID:
+        type: string
+      products:
+        items:
+          $ref: '#/definitions/dto.Product'
+        type: array
+      sellerID:
+        type: string
+      status:
+        type: integer
+      totalPrice:
+        type: number
+    type: object
+  dto.OrderCreateRequest:
+    properties:
+      buyerID:
+        type: string
+      products:
+        items:
+          $ref: '#/definitions/dto.Product'
+        type: array
+      sellerID:
+        type: string
+    type: object
   dto.Product:
     properties:
       SellerID:
@@ -174,11 +206,15 @@ definitions:
     properties:
       address:
         type: string
+      city:
+        type: string
       name:
         type: string
       payment:
         type: string
       phoneNumber:
+        type: string
+      province:
         type: string
       score:
         type: number
@@ -192,10 +228,14 @@ definitions:
         type: array
       username:
         type: string
+      zip:
+        type: string
     type: object
   dto.SellerRegisterRequest:
     properties:
       address:
+        type: string
+      city:
         type: string
       name:
         type: string
@@ -205,11 +245,15 @@ definitions:
         type: string
       phoneNumber:
         type: string
+      province:
+        type: string
       score:
         type: number
       surname:
         type: string
       username:
+        type: string
+      zip:
         type: string
     type: object
   dto.SuccessResponse:
@@ -278,6 +322,8 @@ definitions:
     properties:
       address:
         type: string
+      city:
+        type: string
       name:
         type: string
       password:
@@ -285,6 +331,8 @@ definitions:
       payment:
         type: string
       phoneNumber:
+        type: string
+      province:
         type: string
       score:
         type: number
@@ -297,6 +345,8 @@ definitions:
           $ref: '#/definitions/model.Transaction'
         type: array
       username:
+        type: string
+      zip:
         type: string
     type: object
   model.Transaction:
@@ -582,6 +632,81 @@ paths:
       summary: Update a buyer by ID
       tags:
       - buyer
+  /order/:
+    get:
+      consumes:
+      - application/json
+      description: Get all orders by userID and userType
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: User Type
+        in: path
+        name: user_type
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Order'
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get orders by userID and userType
+      tags:
+      - order
+    post:
+      consumes:
+      - application/json
+      description: Creates a new order in the database
+      parameters:
+      - description: Order to create
+        in: body
+        name: buyer
+        required: true
+        schema:
+          $ref: '#/definitions/dto.OrderCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Order'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new order
+      tags:
+      - order
   /product/:
     get:
       consumes:

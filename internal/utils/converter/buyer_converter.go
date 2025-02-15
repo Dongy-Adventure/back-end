@@ -17,8 +17,8 @@ func BuyerModelToDTO(dataModel *model.Buyer) (*dto.Buyer, error) {
 	return dataDTO, nil
 }
 
-func BuyerDTOToModel(dataDTO *dto.Buyer) (*dto.Buyer, error) {
-	dataModel := &dto.Buyer{}
+func BuyerDTOToModel(dataDTO *dto.Buyer) (*model.Buyer, error) {
+	dataModel := &model.Buyer{}
 	err := copier.CopyWithOption(&dataModel, &dataDTO, copier.Option{DeepCopy: true})
 	if err != nil {
 		return nil, errors.New("error converting buyer dto to model")
