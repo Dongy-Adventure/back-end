@@ -51,11 +51,11 @@ func (s AuthService) SellerLogin(req *dto.LoginRequest) (*dto.Seller, string, st
 		return nil, "", "", fmt.Errorf("invalid username or password")
 	}
 
-	accessToken, accessTokenErr := token.GenerateToken(s.conf, sellerModel.SellerID.Hex(), tokenmode.TokenMode.ACCESS_TOKEN)
+	accessToken, accessTokenErr := token.GenerateToken(s.conf, sellerModel.SellerID.Hex(), tokenmode.ACCESS_TOKEN)
 	if accessTokenErr != nil {
 		return nil, "", "", accessTokenErr
 	}
-	refreshToken, refreshTokenErr := token.GenerateToken(s.conf, sellerModel.SellerID.Hex(), tokenmode.TokenMode.REFRESH_TOKEN)
+	refreshToken, refreshTokenErr := token.GenerateToken(s.conf, sellerModel.SellerID.Hex(), tokenmode.REFRESH_TOKEN)
 	if refreshTokenErr != nil {
 		return nil, "", "", refreshTokenErr
 	}
@@ -73,11 +73,11 @@ func (s AuthService) BuyerLogin(req *dto.LoginRequest) (*dto.Buyer, string, stri
 	if err != nil {
 		return nil, "", "", err
 	}
-	accessToken, accessTokenErr := token.GenerateToken(s.conf, buyerModel.BuyerID.Hex(), tokenmode.TokenMode.ACCESS_TOKEN)
+	accessToken, accessTokenErr := token.GenerateToken(s.conf, buyerModel.BuyerID.Hex(), tokenmode.ACCESS_TOKEN)
 	if accessTokenErr != nil {
 		return nil, "", "", accessTokenErr
 	}
-	refreshToken, refreshTokenErr := token.GenerateToken(s.conf, buyerModel.BuyerID.Hex(), tokenmode.TokenMode.REFRESH_TOKEN)
+	refreshToken, refreshTokenErr := token.GenerateToken(s.conf, buyerModel.BuyerID.Hex(), tokenmode.REFRESH_TOKEN)
 	if refreshTokenErr != nil {
 		return nil, "", "", refreshTokenErr
 	}
@@ -91,7 +91,7 @@ func (s AuthService) BuyerLogin(req *dto.LoginRequest) (*dto.Buyer, string, stri
 }
 
 func (s AuthService) RefreshToken(c *gin.Context) (string, error) {
-	tkn, err := token.ValidateToken(c, tokenmode.TokenMode.REFRESH_TOKEN)
+	tkn, err := token.ValidateToken(c, tokenmode.REFRESH_TOKEN)
 	if err != nil {
 		return "", fmt.Errorf("invalid refresh token: %w", err)
 	}
@@ -99,7 +99,7 @@ func (s AuthService) RefreshToken(c *gin.Context) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("no userID in token")
 	}
-	accessToken, accessTokenErr := token.GenerateToken(s.conf, userID, tokenmode.TokenMode.ACCESS_TOKEN)
+	accessToken, accessTokenErr := token.GenerateToken(s.conf, userID, tokenmode.ACCESS_TOKEN)
 	if accessTokenErr != nil {
 		return "", accessTokenErr
 	}

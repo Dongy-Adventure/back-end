@@ -8,20 +8,20 @@ import (
 	"github.com/jinzhu/copier"
 )
 
-func SellerModelToDTO(dataModel *model.Seller) (*dto.Seller, error) {
-	dataDTO := &dto.Seller{}
+func OrderModelToDTO(dataModel *model.Order) (*dto.Order, error) {
+	dataDTO := &dto.Order{}
 	err := copier.Copy(&dataDTO, &dataModel)
 	if err != nil {
-		return nil, errors.New("error converting seller model to dto")
+		return nil, errors.New("error converting product model to dto")
 	}
 	return dataDTO, nil
 }
 
-func SellerDTOToModel(dataDTO *dto.Seller) (*model.Seller, error) {
-	dataModel := &model.Seller{}
+func OrderDTOToModel(dataDTO *dto.Order) (*model.Order, error) {
+	dataModel := &model.Order{}
 	err := copier.CopyWithOption(&dataModel, &dataDTO, copier.Option{DeepCopy: true})
 	if err != nil {
-		return nil, errors.New("error converting seller dto to model")
+		return nil, errors.New("error converting product dto to model")
 	}
 	return dataModel, nil
 }

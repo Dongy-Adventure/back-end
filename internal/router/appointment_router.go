@@ -17,11 +17,11 @@ func (r Router) AddAppointmentRouter(rg *gin.RouterGroup, mongoDB *mongo.Databas
 
 	appointmentRouter := rg.Group("appointment")
 
-	appointmentRouter.POST("/", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.CreateAppointment)
-	appointmentRouter.GET("/", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.GetAppointments)
-	appointmentRouter.GET("/:appointment_id", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.GetAppointmentByID)
-	appointmentRouter.GET("/order/:order_id", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.GetAppointmentByOrderID)
-	appointmentRouter.PUT("/:appointment_id/date", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.UpdateAppointmentDate)
-	appointmentRouter.PUT("/:appointment_id/place", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.UpdateAppointmentPlace)
+	appointmentRouter.POST("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.CreateAppointment)
+	appointmentRouter.GET("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.GetAppointments)
+	appointmentRouter.GET("/:appointment_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.GetAppointmentByID)
+	appointmentRouter.GET("/order/:order_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.GetAppointmentByOrderID)
+	appointmentRouter.PUT("/:appointment_id/date", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.UpdateAppointmentDate)
+	appointmentRouter.PUT("/:appointment_id/place", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.UpdateAppointmentPlace)
 
 }

@@ -4,12 +4,11 @@ import (
 	"net/http"
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
-	"github.com/Dongy-s-Advanture/back-end/internal/enum/tokenmode"
 	token "github.com/Dongy-s-Advanture/back-end/internal/utils/token"
 	"github.com/gin-gonic/gin"
 )
 
-func JWTAuthMiddleWare(tokenType tokenmode.TokenType) gin.HandlerFunc {
+func JWTAuthMiddleWare(tokenType int) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tkn, err := token.ValidateToken(c, tokenType)
 		if err != nil {

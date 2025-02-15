@@ -25,13 +25,13 @@ func extractToken(c *gin.Context) string {
 
 }
 
-func GenerateToken(conf *config.Config, userID string, tokenType tokenmode.TokenType) (string, error) {
+func GenerateToken(conf *config.Config, userID string, tokenType int) (string, error) {
 
 	var tokenLifespan int32
 	switch tokenType {
-	case tokenmode.TokenMode.ACCESS_TOKEN:
+	case tokenmode.ACCESS_TOKEN:
 		tokenLifespan = conf.Auth.AccessTokenLifespanMinutes
-	case tokenmode.TokenMode.REFRESH_TOKEN:
+	case tokenmode.REFRESH_TOKEN:
 		tokenLifespan = conf.Auth.RefreshTokenLifespanMinutes
 	default:
 		return "", errors.New("token type is invalid")
@@ -43,16 +43,16 @@ func GenerateToken(conf *config.Config, userID string, tokenType tokenmode.Token
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	switch tokenType {
-	case tokenmode.TokenMode.ACCESS_TOKEN:
+	case tokenmode.ACCESS_TOKEN:
 		return token.SignedString([]byte(conf.Auth.AccessTokenSecret))
-	case tokenmode.TokenMode.REFRESH_TOKEN:
+	case tokenmode.REFRESH_TOKEN:
 		return token.SignedString([]byte(conf.Auth.RefreshTokenSecret))
 	default:
 		return "", errors.New("token type is invalid")
 	}
 }
 
-func ValidateToken(c *gin.Context, tokenType tokenmode.TokenType) (*jwt.Token, error) {
+func ValidateToken(c *gin.Context, tokenType int) (*jwt.Token, error) {
 
 	conf, err := config.LoadConfig()
 	if err != nil {
@@ -69,9 +69,9 @@ func ValidateToken(c *gin.Context, tokenType tokenmode.TokenType) (*jwt.Token, e
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		switch tokenType {
-		case tokenmode.TokenMode.ACCESS_TOKEN:
+		case tokenmode.ACCESS_TOKEN:
 			return []byte(conf.Auth.AccessTokenSecret), nil
-		case tokenmode.TokenMode.REFRESH_TOKEN:
+		case tokenmode.REFRESH_TOKEN:
 			return []byte(conf.Auth.RefreshTokenSecret), nil
 		default:
 			return "", errors.New("token type is invalid")

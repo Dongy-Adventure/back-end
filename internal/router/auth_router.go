@@ -22,6 +22,6 @@ func (r Router) AddAuthRouter(rg *gin.RouterGroup, mongoDB *mongo.Database, redi
 
 	authRouter.POST("/seller", cont.SellerLogin)
 	authRouter.POST("/buyer", cont.BuyerLogin)
-	authRouter.POST("/refresh", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.REFRESH_TOKEN), cont.RefreshToken)
-	authRouter.POST("/logout", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.Logout)
+	authRouter.POST("/refresh", middleware.JWTAuthMiddleWare(tokenmode.REFRESH_TOKEN), cont.RefreshToken)
+	authRouter.POST("/logout", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.Logout)
 }

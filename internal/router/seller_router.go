@@ -18,10 +18,10 @@ func (r Router) AddSellerRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
 	sellerRouter := rg.Group("seller")
 
 	sellerRouter.POST("/", cont.CreateSeller)
-	sellerRouter.GET("/", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.GetSellers)
-	sellerRouter.GET("/:seller_id", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.GetSellerByID)
-	sellerRouter.PUT("/:seller_id", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.UpdateSeller)
-	sellerRouter.POST("/:seller_id/transaction", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.AddTransaction)
-	sellerRouter.GET("/:seller_id/balance", middleware.JWTAuthMiddleWare(tokenmode.TokenMode.ACCESS_TOKEN), cont.GetSellerBalanceByID)
+	sellerRouter.GET("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.GetSellers)
+	sellerRouter.GET("/:seller_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.GetSellerByID)
+	sellerRouter.PUT("/:seller_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.UpdateSeller)
+	sellerRouter.POST("/:seller_id/transaction", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.AddTransaction)
+	sellerRouter.GET("/:seller_id/balance", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.GetSellerBalanceByID)
 
 }
