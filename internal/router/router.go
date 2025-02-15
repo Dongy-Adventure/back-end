@@ -56,7 +56,7 @@ func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client) {
 	r.AddBuyerRouter(v1, mongoDB)
 	r.AddAuthRouter(v1, mongoDB, redisDB)
 	r.AddProductRouter(v1, mongoDB)
-	r.AddAppointmentRouter(v1, mongoDB)
+	r.AddReviewRouter(v1,mongoDB)
 
 	err := r.g.Run(":" + r.conf.App.Port)
 	if err != nil {

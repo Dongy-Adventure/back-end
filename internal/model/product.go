@@ -14,6 +14,6 @@ type Product struct {
 	ImageURL    string             `json:"imageURL,omitempty" bson:"imageURL"`
 	Tag         []string           `json:"tag,omitempty" bson:"tag"`
 	Color       string             `json:"color,omitempty" bson:"color"`
-	SellerID    primitive.ObjectID `json:"SellerID,omitempty" bson:"sellerID"`
+	SellerID    primitive.ObjectID `json:"sellerID,omitempty" bson:"sellerID"`
 	CreatedAt   time.Time          `json:"createdAt,omitempty" bson:"createdAt"`
 }
