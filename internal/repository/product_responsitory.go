@@ -94,7 +94,7 @@ func (r *ProductRepository) UpdateProduct(productID primitive.ObjectID, updatedP
 
 	update := bson.M{
 		"$set": bson.M{
-			"name":        updatedProduct.ProductName,
+			"productName": updatedProduct.ProductName,
 			"description": updatedProduct.Description,
 			"price":       updatedProduct.Price,
 			"tag":         updatedProduct.Tag,
