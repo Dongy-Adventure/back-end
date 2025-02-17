@@ -109,24 +109,24 @@ func (r SellerRepository) GetSellerByUsername(req *dto.LoginRequest) (*model.Sel
 func (r SellerRepository) UpdateSeller(sellerID primitive.ObjectID, updatedSeller *model.Seller) (*dto.Seller, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-
-	update := bson.M{
-		"$set": bson.M{
-			"username":    updatedSeller.Username,
-			"password":    updatedSeller.Password,
-			"name":        updatedSeller.Name,
-			"surname":     updatedSeller.Surname,
-			"payment":     updatedSeller.Payment,
-			"address":     updatedSeller.Address,
-			"phoneNumber": updatedSeller.PhoneNumber,
-			"city":        updatedSeller.City,
-			"province":    updatedSeller.Province,
-			"zip":         updatedSeller.Zip,
-		},
+	data, err := bson.Marshal(updatedSeller)
+	if err != nil {
+		return nil, err
+	}
+	var update bson.M
+	err = bson.Unmarshal(data, &update)
+	if err != nil {
+		return nil, err
+	}
+	for key, value := range update {
+		if value == "" || value == nil || key == "_id" {
+			delete(update, key)
+		}
 	}
 
 	filter := bson.M{"_id": sellerID}
-	_, err := r.sellerCollection.UpdateOne(ctx, filter, update)
+	_, err = r.sellerCollection.UpdateOne(ctx, filter, bson.M{"$set": update})
+
 	if err != nil {
 		return nil, err
 	}

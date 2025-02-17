@@ -104,18 +104,23 @@ func (r *BuyerRepository) CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error
 func (r *BuyerRepository) UpdateBuyerData(buyerID primitive.ObjectID, updatedBuyer *model.Buyer) (*dto.Buyer, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-
-	update := bson.M{
-		"$set": bson.M{
-			"username": updatedBuyer.Username,
-			"password": updatedBuyer.Password,
-			"name":     updatedBuyer.Name,
-			"surname":  updatedBuyer.Surname,
-		},
+	data, err := bson.Marshal(updatedBuyer)
+	if err != nil {
+		return nil, err
+	}
+	var update bson.M
+	err = bson.Unmarshal(data, &update)
+	if err != nil {
+		return nil, err
+	}
+	for key, value := range update {
+		if value == "" || value == nil || key == "_id" {
+			delete(update, key)
+		}
 	}
 
 	filter := bson.M{"_id": buyerID}
-	_, err := r.buyerCollection.UpdateOne(ctx, filter, update)
+	_, err = r.buyerCollection.UpdateOne(ctx, filter, bson.M{"$set": update})
 	if err != nil {
 		return nil, err
 	}
