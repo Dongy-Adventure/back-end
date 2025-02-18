@@ -18,7 +18,7 @@ type Seller struct {
 	City        string             `json:"city" bson:"city"`
 	Province    string             `json:"province" bson:"province"`
 	Zip         string             `json:"zip" bson:"zip"`
-	Score       float64            `json:"score" bson:"score"`
+	Score       float64            `json:"score" bson:"score,omitempty"`
 	Transaction []Transaction      `json:"transaction" bson:"transaction"`
 }
 
