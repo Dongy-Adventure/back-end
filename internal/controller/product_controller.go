@@ -14,6 +14,7 @@ type IProductController interface {
 	CreateProduct(c *gin.Context)
 	GetProducts(c *gin.Context)
 	GetProductByID(c *gin.Context)
+	GetProductsBySellerID(c *gin.Context)
 	UpdateProduct(c *gin.Context)
 }
 
@@ -100,6 +101,47 @@ func (s ProductController) GetProductByID(c *gin.Context) {
 			Error:   "No product with this productID",
 			Message: err.Error(),
 		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Status:  http.StatusOK,
+		Message: "Get product success",
+		Data:    res,
+	})
+}
+
+// GetProductsBySellerID godoc
+// @Summary Get products by sellerID
+// @Description Retrieves each seller's products-on-display by seller ID
+// @Tags product
+// @Accept json
+// @Produce json
+// @Param seller_id path string true "Seller ID"
+// @Success 200 {object} dto.SuccessResponse{data=[]dto.Product}
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /product/seller/{seller_id} [get]
+func (s ProductController) GetProductsBySellerID(c *gin.Context) {
+	sellerIDstr := c.Param("seller_id")
+	sellerID, err := primitive.ObjectIDFromHex(sellerIDstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Invalid sellerID format",
+			Message: err.Error(),
+		})
+		return
+	}
+	res, err := s.productService.GetProductsBySellerID(sellerID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "No product with this sellerID",
+			Message: err.Error()})
 		return
 	}
 

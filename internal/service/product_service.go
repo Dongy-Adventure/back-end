@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/repository"
@@ -9,6 +10,7 @@ import (
 
 type IProductService interface {
 	GetProductByID(productID primitive.ObjectID) (*dto.Product, error)
+	GetProductsBySellerID(sellerID primitive.ObjectID) ([]dto.Product, error)
 	GetProducts() ([]dto.Product, error)
 	CreateProduct(product *model.Product) (*dto.Product, error)
 	UpdateProduct(productID primitive.ObjectID, updatedProduct *model.Product) (*dto.Product, error)
@@ -39,6 +41,17 @@ func (s ProductService) GetProductByID(productID primitive.ObjectID) (*dto.Produ
 		return nil, err
 	}
 	return productDTO, nil
+}
+
+func (s ProductService) GetProductsBySellerID(sellerID primitive.ObjectID) ([]dto.Product, error) {
+	products, err := s.productRepository.GetProductsBySellerID(sellerID)
+	if err != nil {
+		return nil, err
+	}
+	if len(products) == 0 {
+		return nil, errors.New("no products found for this seller ID")
+	}
+	return products, nil
 }
 
 func (s ProductService) GetProducts() ([]dto.Product, error) {
