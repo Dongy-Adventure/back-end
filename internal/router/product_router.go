@@ -20,6 +20,7 @@ func (r Router) AddProductRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
 	productRouter.POST("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.CreateProduct)
 	productRouter.GET("/", cont.GetProducts)
 	productRouter.GET("/:product_id", cont.GetProductByID)
+	productRouter.GET("/seller/:seller_id", cont.GetProductsBySellerID)
 	productRouter.PUT("/:product_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.UpdateProduct)
 
 	//test

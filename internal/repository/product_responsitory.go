@@ -14,6 +14,7 @@ import (
 
 type IProductRepository interface {
 	GetProductByID(productID primitive.ObjectID) (*dto.Product, error)
+	GetProductsBySellerID(sellerID primitive.ObjectID) ([]dto.Product, error)
 	GetProducts() ([]dto.Product, error)
 	CreateProduct(product *model.Product) (*dto.Product, error)
 	UpdateProduct(productID primitive.ObjectID, updatedProduct *model.Product) (*dto.Product, error)
@@ -41,6 +42,32 @@ func (r *ProductRepository) GetProductByID(productID primitive.ObjectID) (*dto.P
 		return nil, err
 	}
 	return converter.ProductModelToDTO(product)
+}
+
+func (r ProductRepository) GetProductsBySellerID(sellerID primitive.ObjectID) ([]dto.Product, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	var productList []dto.Product
+
+	dataList, err := r.productCollection.Find(ctx, bson.M{"seller_id": sellerID})
+	if err != nil {
+		return nil, err
+	}
+	defer dataList.Close(ctx)
+	for dataList.Next(ctx) {
+		var productModel *model.Product
+		if err = dataList.Decode(&productModel); err != nil {
+			return nil, err
+		}
+		productDTO, productErr := converter.ProductModelToDTO(productModel)
+		if productErr != nil {
+			return nil, err
+		}
+		productList = append(productList, *productDTO)
+	}
+
+	return productList, nil
 }
 
 func (r *ProductRepository) GetProducts() ([]dto.Product, error) {

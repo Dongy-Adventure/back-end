@@ -968,7 +968,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.ProductCreateRequest"
+                            "$ref": "#/definitions/model.Product"
                         }
                     }
                 ],
@@ -995,6 +995,59 @@ const docTemplate = `{
                         "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/product/seller/{seller_id}": {
+            "get": {
+                "description": "Retrieves each seller's products-on-display by seller ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "product"
+                ],
+                "summary": "Get products by sellerID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Seller ID",
+                        "name": "seller_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.Product"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "500": {
@@ -1968,9 +2021,6 @@ const docTemplate = `{
         "dto.Product": {
             "type": "object",
             "properties": {
-                "SellerID": {
-                    "type": "string"
-                },
                 "color": {
                     "type": "string"
                 },
@@ -1992,36 +2042,7 @@ const docTemplate = `{
                 "productName": {
                     "type": "string"
                 },
-                "tag": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
-        "dto.ProductCreateRequest": {
-            "type": "object",
-            "properties": {
-                "SellerID": {
-                    "type": "string"
-                },
-                "color": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "imageURL": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number"
-                },
-                "productName": {
+                "sellerID": {
                     "type": "string"
                 },
                 "tag": {
@@ -2058,6 +2079,9 @@ const docTemplate = `{
                 "buyerID": {
                     "type": "string"
                 },
+                "buyerName": {
+                    "type": "string"
+                },
                 "date": {
                     "type": "string"
                 },
@@ -2075,6 +2099,9 @@ const docTemplate = `{
                 },
                 "sellerID": {
                     "type": "string"
+                },
+                "sellerName": {
+                    "type": "string"
                 }
             }
         },
@@ -2082,6 +2109,9 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "buyerID": {
+                    "type": "string"
+                },
+                "buyerName": {
                     "type": "string"
                 },
                 "image": {
@@ -2094,6 +2124,9 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "sellerID": {
+                    "type": "string"
+                },
+                "sellerName": {
                     "type": "string"
                 }
             }
@@ -2256,9 +2289,6 @@ const docTemplate = `{
         "model.Product": {
             "type": "object",
             "properties": {
-                "SellerID": {
-                    "type": "string"
-                },
                 "color": {
                     "type": "string"
                 },
@@ -2278,6 +2308,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "productName": {
+                    "type": "string"
+                },
+                "sellerID": {
                     "type": "string"
                 },
                 "tag": {

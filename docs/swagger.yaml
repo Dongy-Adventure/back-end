@@ -160,8 +160,6 @@ definitions:
     type: object
   dto.Product:
     properties:
-      SellerID:
-        type: string
       color:
         type: string
       createdAt:
@@ -176,26 +174,7 @@ definitions:
         type: string
       productName:
         type: string
-      tag:
-        items:
-          type: string
-        type: array
-    type: object
-  dto.ProductCreateRequest:
-    properties:
-      SellerID:
-        type: string
-      color:
-        type: string
-      createdAt:
-        type: string
-      description:
-        type: string
-      imageURL:
-        type: string
-      price:
-        type: number
-      productName:
+      sellerID:
         type: string
       tag:
         items:
@@ -219,6 +198,8 @@ definitions:
     properties:
       buyerID:
         type: string
+      buyerName:
+        type: string
       date:
         type: string
       image:
@@ -231,10 +212,14 @@ definitions:
         type: integer
       sellerID:
         type: string
+      sellerName:
+        type: string
     type: object
   dto.ReviewCreateRequest:
     properties:
       buyerID:
+        type: string
+      buyerName:
         type: string
       image:
         type: string
@@ -243,6 +228,8 @@ definitions:
       score:
         type: integer
       sellerID:
+        type: string
+      sellerName:
         type: string
     type: object
   dto.ReviewUpdateRequest:
@@ -349,8 +336,6 @@ definitions:
     type: object
   model.Product:
     properties:
-      SellerID:
-        type: string
       color:
         type: string
       createdAt:
@@ -364,6 +349,8 @@ definitions:
       productID:
         type: string
       productName:
+        type: string
+      sellerID:
         type: string
       tag:
         items:
@@ -995,7 +982,7 @@ paths:
         name: product
         required: true
         schema:
-          $ref: '#/definitions/dto.ProductCreateRequest'
+          $ref: '#/definitions/model.Product'
       produces:
       - application/json
       responses:
@@ -1086,6 +1073,38 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: Update a product by ID
+      tags:
+      - product
+  /product/seller/{seller_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves each seller's products-on-display by seller ID
+      parameters:
+      - description: Seller ID
+        in: path
+        name: seller_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Product'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get products by sellerID
       tags:
       - product
   /review/:
