@@ -16,6 +16,7 @@ type IReviewRepository interface {
 	GetReviews() ([]dto.Review, error)
 	GetReviewByID(reviewID primitive.ObjectID) (*dto.Review, error)
 	GetReviewsBySellerID(sellerID primitive.ObjectID) ([]dto.Review, error)
+	GetReviewsByBuyerID(buyerID primitive.ObjectID) ([]dto.Review, error)
 	CreateReview(review *model.Review) (*dto.Review, error)
 	UpdateReview(reviewID primitive.ObjectID, updatedReview *model.Review) (*dto.Review, error)
 }
@@ -78,6 +79,32 @@ func (r ReviewRepository) GetReviewsBySellerID(sellerID primitive.ObjectID) ([]d
 	var reviewList []dto.Review
 
 	dataList, err := r.reviewCollection.Find(ctx, bson.M{"seller_id": sellerID})
+	if err != nil {
+		return nil, err
+	}
+	defer dataList.Close(ctx)
+	for dataList.Next(ctx) {
+		var reviewModel *model.Review
+		if err = dataList.Decode(&reviewModel); err != nil {
+			return nil, err
+		}
+		reviewDTO, reviewErr := converter.ReviewModelToDTO(reviewModel)
+		if reviewErr != nil {
+			return nil, err
+		}
+		reviewList = append(reviewList, *reviewDTO)
+	}
+
+	return reviewList, nil
+}
+
+func (r ReviewRepository) GetReviewsByBuyerID(buyerID primitive.ObjectID) ([]dto.Review, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	var reviewList []dto.Review
+
+	dataList, err := r.reviewCollection.Find(ctx, bson.M{"buyer_id": buyerID})
 	if err != nil {
 		return nil, err
 	}

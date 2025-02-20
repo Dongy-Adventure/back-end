@@ -11,6 +11,7 @@ type IReviewService interface {
 	GetReviews() ([]dto.Review, error)
 	GetReviewByID(reviewID primitive.ObjectID) (*dto.Review, error)
 	GetReviewsBySellerID(sellerID primitive.ObjectID) ([]dto.Review, error)
+	GetReviewsByBuyerID(buyerID primitive.ObjectID) ([]dto.Review, error)
 	CreateReview(review *model.Review) (*dto.Review, error)
 	UpdateReview(reviewID primitive.ObjectID, updatedReview *model.Review) (*dto.Review, error)
 }
@@ -43,6 +44,14 @@ func (s ReviewService) GetReviewByID(reviewID primitive.ObjectID) (*dto.Review, 
 
 func (s ReviewService) GetReviewsBySellerID(sellerID primitive.ObjectID) ([]dto.Review, error) {
 	reviews, err := s.reviewRepository.GetReviewsBySellerID(sellerID)
+	if err != nil {
+		return nil, err
+	}
+	return reviews, nil
+}
+
+func (s ReviewService) GetReviewsByBuyerID(buyerID primitive.ObjectID) ([]dto.Review, error) {
+	reviews, err := s.reviewRepository.GetReviewsByBuyerID(buyerID)
 	if err != nil {
 		return nil, err
 	}

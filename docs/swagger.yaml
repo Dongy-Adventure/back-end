@@ -1236,6 +1236,38 @@ paths:
       summary: Update a review by ID
       tags:
       - review
+  /review/buyer/{buyer_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves each buyer's reviews by buyer ID
+      parameters:
+      - description: Buyer ID
+        in: path
+        name: buyer_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Review'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get reviews by buyerID
+      tags:
+      - review
   /review/seller/{seller_id}:
     get:
       consumes:
