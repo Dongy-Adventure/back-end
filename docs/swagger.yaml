@@ -57,18 +57,11 @@ definitions:
         type: string
       buyerID:
         type: string
-      name:
-        type: string
-      phoneNumber:
-        type: string
-      surname:
-        type: string
-      username:
-        type: string
-    type: object
-  dto.BuyerRegisterRequest:
-    properties:
-      address:
+      cart:
+        items:
+          type: string
+        type: array
+      city:
         type: string
       name:
         type: string
@@ -78,9 +71,36 @@ definitions:
         type: string
       phoneNumber:
         type: string
+      province:
+        type: string
       surname:
         type: string
       username:
+        type: string
+      zip:
+        type: string
+    type: object
+  dto.BuyerRegisterRequest:
+    properties:
+      address:
+        type: string
+      city:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+      payment:
+        type: string
+      phoneNumber:
+        type: string
+      province:
+        type: string
+      surname:
+        type: string
+      username:
+        type: string
+      zip:
         type: string
     type: object
   dto.ErrorResponse:
@@ -317,21 +337,38 @@ definitions:
           type: string
         type: array
     type: object
+  dto.UpdateCartRequest:
+    properties:
+      productID:
+        type: string
+    type: object
   model.Buyer:
     properties:
       address:
         type: string
       buyerID:
         type: string
+      cart:
+        items:
+          type: string
+        type: array
+      city:
+        type: string
       name:
         type: string
       password:
         type: string
+      payment:
+        type: string
       phoneNumber:
+        type: string
+      province:
         type: string
       surname:
         type: string
       username:
+        type: string
+      zip:
         type: string
     type: object
   model.Product:
@@ -829,6 +866,49 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: Get a buyer by ID
+      tags:
+      - buyer
+  /buyer/{buyer_id}/cart:
+    patch:
+      consumes:
+      - application/json
+      description: Adds the product if not in the cart, removes it if already in the
+        cart
+      parameters:
+      - description: Buyer ID
+        in: path
+        name: buyer_id
+        required: true
+        type: string
+      - description: Product ID to add/remove
+        in: body
+        name: product_id
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateCartRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    type: string
+                  type: array
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a product in buyer's cart
       tags:
       - buyer
   /buyer/{id}:

@@ -13,6 +13,7 @@ type IBuyerService interface {
 	GetBuyer() ([]dto.Buyer, error)
 	CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error)
 	UpdateBuyerData(buyerID primitive.ObjectID, updatedBuyer *model.Buyer) (*dto.Buyer, error)
+	UpdateProductInCart(buyerID primitive.ObjectID, productID primitive.ObjectID) ([]primitive.ObjectID, error)
 }
 
 type BuyerService struct {
@@ -81,4 +82,13 @@ func (s BuyerService) UpdateBuyerData(buyerID primitive.ObjectID, updatedBuyer *
 	}
 
 	return updatedBuyerDTO, nil
+}
+
+func (s BuyerService) UpdateProductInCart(buyerID primitive.ObjectID, productID primitive.ObjectID) ([]primitive.ObjectID, error) {
+	updatedCart, err := s.buyerRepository.UpdateProductInCart(buyerID, productID)
+	if err != nil {
+		return nil, err
+	}
+	return updatedCart, nil
+
 }

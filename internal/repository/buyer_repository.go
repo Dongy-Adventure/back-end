@@ -18,6 +18,7 @@ type IBuyerRepository interface {
 	CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error)
 	GetBuyerByUsername(req *dto.LoginRequest) (*model.Buyer, error)
 	UpdateBuyerData(buyerID primitive.ObjectID, updatedBuyer *model.Buyer) (*dto.Buyer, error)
+	UpdateProductInCart(buyerID primitive.ObjectID, productID primitive.ObjectID) ([]primitive.ObjectID, error)
 }
 
 type BuyerRepository struct {
@@ -133,4 +134,46 @@ func (r *BuyerRepository) UpdateBuyerData(buyerID primitive.ObjectID, updatedBuy
 	}
 
 	return converter.BuyerModelToDTO(newUpdatedBuyer)
+}
+
+func (r *BuyerRepository) UpdateProductInCart(buyerID primitive.ObjectID, productID primitive.ObjectID) ([]primitive.ObjectID, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// Get buyer's cart
+	var buyer struct {
+		Cart []primitive.ObjectID `bson:"cart"`
+	}
+	err := r.buyerCollection.FindOne(ctx, bson.M{"_id": buyerID}).Decode(&buyer)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if product is in cart
+	newCart := []primitive.ObjectID{}
+	found := false
+	for _, id := range buyer.Cart {
+		if id == productID {
+			found = true
+			continue 
+		}
+		newCart = append(newCart, id)
+	}
+
+	// If not found, add the product
+	if !found {
+		newCart = append(newCart, productID)
+	}
+
+	// Update the cart in MongoDB
+	_, err = r.buyerCollection.UpdateOne(
+		ctx,
+		bson.M{"_id": buyerID},
+		bson.M{"$set": bson.M{"cart": newCart}},
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return newCart, nil
 }
