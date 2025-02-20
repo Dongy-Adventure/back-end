@@ -16,6 +16,7 @@ type IProductController interface {
 	GetProductByID(c *gin.Context)
 	GetProductsBySellerID(c *gin.Context)
 	UpdateProduct(c *gin.Context)
+	DeleteProduct(c *gin.Context)
 }
 
 type ProductController struct {
@@ -234,5 +235,45 @@ func (s ProductController) UpdateProduct(c *gin.Context) {
 		Status:  http.StatusOK,
 		Message: "Update product success",
 		Data:    res,
+	})
+}
+
+// DeleteProduct godoc
+// @Summary Delete a product by ID
+// @Description Delete a product's data by its ID
+// @Tags product
+// @Accept json
+// @Produce json
+// @Param product_id path string true "Product ID"
+// @Success 200 {object} dto.SuccessResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /product/{product_id} [delete]
+func (s ProductController) DeleteProduct(c *gin.Context) {
+	productIDstr := c.Param("product_id")
+	productID, err := primitive.ObjectIDFromHex(productIDstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Invalid productID format",
+			Message: err.Error(),
+		})
+		return
+	}
+	err = s.productService.DeleteProduct(productID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "No product with this productID",
+			Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Status:  http.StatusOK,
+		Message: "Delete product success",
 	})
 }

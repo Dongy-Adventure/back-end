@@ -1007,6 +1007,30 @@ paths:
       tags:
       - product
   /product/{product_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a product's data by its ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: product_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete a product by ID
+      tags:
+      - product
     get:
       consumes:
       - application/json
@@ -1168,6 +1192,30 @@ paths:
       tags:
       - review
   /review/{review_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a review's data by its ID
+      parameters:
+      - description: Review ID
+        in: path
+        name: review_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete a review by ID
+      tags:
+      - review
     get:
       consumes:
       - application/json

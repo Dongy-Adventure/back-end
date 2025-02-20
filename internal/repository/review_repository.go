@@ -19,6 +19,7 @@ type IReviewRepository interface {
 	GetReviewsByBuyerID(buyerID primitive.ObjectID) ([]dto.Review, error)
 	CreateReview(review *model.Review) (*dto.Review, error)
 	UpdateReview(reviewID primitive.ObjectID, updatedReview *model.Review) (*dto.Review, error)
+	DeleteReview(reviewID primitive.ObjectID) error
 }
 
 type ReviewRepository struct {
@@ -184,4 +185,13 @@ func (r ReviewRepository) UpdateReview(reviewID primitive.ObjectID, updatedRevie
 
 	return converter.ReviewModelToDTO(newUpdatedReview)
 }
+
+func (r ReviewRepository) DeleteReview(reviewID primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	_, err := r.reviewCollection.DeleteOne(ctx, bson.M{"_id": reviewID})
+	return err
+}
+
 

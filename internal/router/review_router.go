@@ -24,5 +24,7 @@ func (r Router) AddReviewRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
 	reviewRouter.GET("/seller/:seller_id", cont.GetReviewsBySellerID)
 	reviewRouter.GET("/buyer/:buyer_id", cont.GetReviewsByBuyerID)
 	reviewRouter.PUT("/:review_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.UpdateReview)
+	reviewRouter.DELETE("/:review_id", cont.DeleteReview)
+
 
 }

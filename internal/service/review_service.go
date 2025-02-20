@@ -14,6 +14,7 @@ type IReviewService interface {
 	GetReviewsByBuyerID(buyerID primitive.ObjectID) ([]dto.Review, error)
 	CreateReview(review *model.Review) (*dto.Review, error)
 	UpdateReview(reviewID primitive.ObjectID, updatedReview *model.Review) (*dto.Review, error)
+	DeleteReview(reviewID primitive.ObjectID) error
 }
 
 type ReviewService struct {
@@ -78,5 +79,15 @@ func (s ReviewService) UpdateReview(reviewID primitive.ObjectID, updatedReview *
 	}
 
 	return updatedReviewDTO, nil
+}
+
+func (s ReviewService) DeleteReview(reviewID primitive.ObjectID) error {
+
+	err := s.reviewRepository.DeleteReview(reviewID)
+	if err != nil {
+		return err 
+	}
+
+	return nil 
 }
 
