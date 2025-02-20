@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/repository"
@@ -47,9 +46,6 @@ func (s ProductService) GetProductsBySellerID(sellerID primitive.ObjectID) ([]dt
 	products, err := s.productRepository.GetProductsBySellerID(sellerID)
 	if err != nil {
 		return nil, err
-	}
-	if len(products) == 0 {
-		return nil, errors.New("no products found for this seller ID")
 	}
 	return products, nil
 }
