@@ -13,6 +13,7 @@ type IProductService interface {
 	GetProducts() ([]dto.Product, error)
 	CreateProduct(product *model.Product) (*dto.Product, error)
 	UpdateProduct(productID primitive.ObjectID, updatedProduct *model.Product) (*dto.Product, error)
+	DeleteProduct(productID primitive.ObjectID) error
 }
 
 type ProductService struct {
@@ -64,4 +65,14 @@ func (s ProductService) UpdateProduct(productID primitive.ObjectID, updatedProdu
 		return nil, err
 	}
 	return updatedProductDTO, nil
+}
+
+func (s ProductService) DeleteProduct(productID primitive.ObjectID) error {
+
+	err := s.productRepository.DeleteProduct(productID)
+	if err != nil {
+		return err 
+	}
+
+	return nil 
 }

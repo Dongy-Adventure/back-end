@@ -14,8 +14,10 @@ type IReviewController interface {
 	GetReviews(c *gin.Context)
 	GetReviewByID(c *gin.Context)
 	GetReviewsBySellerID(c *gin.Context)
+	GetReviewsByBuyerID(c *gin.Context)
 	CreateReview(c *gin.Context)
 	UpdateReview(c *gin.Context)
+	DeleteReview(c *gin.Context)
 }
 
 type ReviewController struct {
@@ -140,6 +142,49 @@ func (s ReviewController) GetReviewsBySellerID(c *gin.Context) {
 	})
 }
 
+// GetReviewsByBuyerID godoc
+// @Summary Get reviews by buyerID
+// @Description Retrieves each buyer's reviews by buyer ID
+// @Tags review
+// @Accept json
+// @Produce json
+// @Param buyer_id path string true "Buyer ID"
+// @Success 200 {object} dto.SuccessResponse{data=[]dto.Review}
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /review/buyer/{buyer_id} [get]
+func (s ReviewController) GetReviewsByBuyerID(c *gin.Context) {
+	buyerIDstr := c.Param("buyer_id")
+	buyerID, err := primitive.ObjectIDFromHex(buyerIDstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Invalid buyerID format",
+			Message: err.Error(),
+		})
+		return
+	}
+	res, err := s.reviewService.GetReviewsByBuyerID(buyerID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "No review with this buyerID",
+			Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Status:  http.StatusOK,
+		Message: "Get review success",
+		Data:    res,
+	})
+}
+
+// CreateReview godoc
+
 // CreateReview godoc
 // @Summary Create a new review
 // @Description Creates a new review in the database
@@ -253,6 +298,46 @@ func (s ReviewController) UpdateReview(c *gin.Context) {
 		Status:  http.StatusOK,
 		Message: "Update review success",
 		Data:    res,
+	})
+}
+
+// DeleteReview godoc
+// @Summary Delete a review by ID
+// @Description Delete a review's data by its ID
+// @Tags review
+// @Accept json
+// @Produce json
+// @Param review_id path string true "Review ID"
+// @Success 200 {object} dto.SuccessResponse
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /review/{review_id} [delete]
+func (s ReviewController) DeleteReview(c *gin.Context) {
+	reviewIDstr := c.Param("review_id")
+	reviewID, err := primitive.ObjectIDFromHex(reviewIDstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Invalid reviewID format",
+			Message: err.Error(),
+		})
+		return
+	}
+	err = s.reviewService.DeleteReview(reviewID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "No review with this reviewID",
+			Message: err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Status:  http.StatusOK,
+		Message: "Delete review success",
 	})
 }
 
