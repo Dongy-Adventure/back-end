@@ -8,6 +8,12 @@ type Buyer struct {
 	Password    string             `json:"password" bson:"password" copier:"-"`
 	Name        string             `json:"name" bson:"name"`
 	Surname     string             `json:"surname" bson:"surname"`
+	Payment     string             `json:"payment" bson:"payment"`
 	PhoneNumber string             `json:"phoneNumber" bson:"phoneNumber"`
 	Address     string             `json:"address" bson:"addresss"`
+	City        string             `json:"city" bson:"city"`
+	Province    string             `json:"province" bson:"province"`
+	Zip         string             `json:"zip" bson:"zip"`
+	Cart        []primitive.ObjectID `json:"cart" bson:"cart"`
 }
+

@@ -719,6 +719,74 @@ const docTemplate = `{
                 }
             }
         },
+        "/buyer/{buyer_id}/cart": {
+            "patch": {
+                "description": "Adds the product if not in the cart, removes it if already in the cart",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "buyer"
+                ],
+                "summary": "Update a product in buyer's cart",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Buyer ID",
+                        "name": "buyer_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Product ID to add/remove",
+                        "name": "product_id",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.UpdateCartRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "string"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/buyer/{id}": {
             "put": {
                 "description": "Updates an existing buyer's data by their ID",
@@ -1988,24 +2056,13 @@ const docTemplate = `{
                 "buyerID": {
                     "type": "string"
                 },
-                "name": {
-                    "type": "string"
+                "cart": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
-                "phoneNumber": {
-                    "type": "string"
-                },
-                "surname": {
-                    "type": "string"
-                },
-                "username": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.BuyerRegisterRequest": {
-            "type": "object",
-            "properties": {
-                "address": {
+                "city": {
                     "type": "string"
                 },
                 "name": {
@@ -2020,10 +2077,51 @@ const docTemplate = `{
                 "phoneNumber": {
                     "type": "string"
                 },
+                "province": {
+                    "type": "string"
+                },
                 "surname": {
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                },
+                "zip": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.BuyerRegisterRequest": {
+            "type": "object",
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "string"
+                },
+                "phoneNumber": {
+                    "type": "string"
+                },
+                "province": {
+                    "type": "string"
+                },
+                "surname": {
+                    "type": "string"
+                },
+                "username": {
+                    "type": "string"
+                },
+                "zip": {
                     "type": "string"
                 }
             }
@@ -2385,6 +2483,14 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.UpdateCartRequest": {
+            "type": "object",
+            "properties": {
+                "productID": {
+                    "type": "string"
+                }
+            }
+        },
         "model.Buyer": {
             "type": "object",
             "properties": {
@@ -2394,19 +2500,37 @@ const docTemplate = `{
                 "buyerID": {
                     "type": "string"
                 },
+                "cart": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "city": {
+                    "type": "string"
+                },
                 "name": {
                     "type": "string"
                 },
                 "password": {
                     "type": "string"
                 },
+                "payment": {
+                    "type": "string"
+                },
                 "phoneNumber": {
+                    "type": "string"
+                },
+                "province": {
                     "type": "string"
                 },
                 "surname": {
                     "type": "string"
                 },
                 "username": {
+                    "type": "string"
+                },
+                "zip": {
                     "type": "string"
                 }
             }
