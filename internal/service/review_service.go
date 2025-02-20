@@ -1,7 +1,6 @@
 package service
 
 import (
-	"errors"
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/repository"
@@ -46,9 +45,6 @@ func (s ReviewService) GetReviewsBySellerID(sellerID primitive.ObjectID) ([]dto.
 	reviews, err := s.reviewRepository.GetReviewsBySellerID(sellerID)
 	if err != nil {
 		return nil, err
-	}
-	if len(reviews) == 0 {
-		return nil, errors.New("no reviews found for this seller ID")
 	}
 	return reviews, nil
 }
