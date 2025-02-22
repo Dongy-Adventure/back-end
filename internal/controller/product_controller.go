@@ -15,6 +15,7 @@ type IProductController interface {
 	GetProducts(c *gin.Context)
 	GetProductByID(c *gin.Context)
 	UpdateProduct(c *gin.Context)
+	GetProductBySellerID(c *gin.Context)
 }
 
 type ProductController struct {
@@ -119,43 +120,48 @@ func (s ProductController) GetProductByID(c *gin.Context) {
 }
 
 // GetProductBySellerID godoc
-// @Summary Get a product by ID
-// @Description Retrieves a product's data by their ID
+// @Summary Get a product by seller ID
+// @Description Retrieves all products of a specific seller by their sellerID
 // @Tags product
 // @Accept json
 // @Produce json
-// @Param product_id path string true "Product ID"
-// @Success 200 {object} dto.SuccessResponse{data=dto.Product}
+// @Param seller_id path string true "Seller ID"
+// @Success 200 {object} dto.SuccessResponse{data=[]dto.Product}
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 404 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /product/{product_id} [get]
+// @Router /product/seller/{seller_id} [get]
 func (s ProductController) GetProductBySellerID(c *gin.Context) {
 	sellerIDstr := c.Param("seller_id")
 	sellerID, err := primitive.ObjectIDFromHex(sellerIDstr)
 	if err != nil {
+		// Return a 400 Bad Request for invalid sellerID format
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Success: false,
-			Status:  http.StatusInternalServerError,
+			Status:  http.StatusBadRequest,
 			Error:   "Invalid sellerID format",
 			Message: err.Error(),
 		})
 		return
 	}
-	res, err := s.productService.GetProductBySellerID(sellerID)
 
+	res, err := s.productService.GetProductBySellerID(sellerID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+		// If no products found, return a 404 Not Found
+		c.JSON(http.StatusNotFound, dto.ErrorResponse{
 			Success: false,
-			Status:  http.StatusInternalServerError,
-			Error:   "No product with this productID",
+			Status:  http.StatusNotFound,
+			Error:   "No products found for this sellerID",
 			Message: err.Error(),
 		})
 		return
 	}
 
+	// Return the product data with 200 OK status
 	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Success: true,
 		Status:  http.StatusOK,
-		Message: "Get product success",
+		Message: "Products retrieved successfully",
 		Data:    res,
 	})
 }

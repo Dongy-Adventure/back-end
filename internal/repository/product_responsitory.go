@@ -18,6 +18,7 @@ type IProductRepository interface {
 	CreateProduct(ctx context.Context, product *model.Product) (*dto.Product, error)
 	UpdateProduct(ctx context.Context, productID primitive.ObjectID, updatedProduct *model.Product) (*dto.Product, error)
 	DeleteProduct(ctx context.Context, productID primitive.ObjectID) error
+	GetProductBySellerID(ctx context.Context, sellerID primitive.ObjectID) ([]dto.Product, error)
 }
 
 type ProductRepository struct {
@@ -29,17 +30,34 @@ func NewProductRepository(db *mongo.Database, collectionName string) IProductRep
 		productCollection: db.Collection(collectionName),
 	}
 }
-func (r *ProductRepository) GetProductSellerByID(ctx context.Context, sellerID primitive.ObjectID) (*dto.Product, error) {
+func (r *ProductRepository) GetProductBySellerID(ctx context.Context, sellerID primitive.ObjectID) ([]dto.Product, error) {
 	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
 	defer cancel()
 
-	var product *model.Product
+	var productList []dto.Product
 
-	err := r.productCollection.FindOne(ctx, bson.M{"sellerID": sellerID}).Decode(&sellerID)
+	filter := bson.M{"sellerID": sellerID}
+	cursor, err := r.productCollection.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
-	return converter.ProductModelToDTO(product)
+	defer cursor.Close(ctx)
+	for cursor.Next(ctx) {
+		var productModel model.Product
+		if err = cursor.Decode(&productModel); err != nil {
+			return nil, err
+		}
+		productDTO, convertErr := converter.ProductModelToDTO(&productModel)
+		if convertErr != nil {
+			return nil, convertErr
+		}
+		productList = append(productList, *productDTO)
+		if err := cursor.Err(); err != nil {
+			return nil, err
+		}
+
+	}
+	return productList, nil
 }
 
 func (r *ProductRepository) GetProductByID(ctx context.Context, productID primitive.ObjectID) (*dto.Product, error) {
