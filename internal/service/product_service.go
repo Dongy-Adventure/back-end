@@ -14,6 +14,7 @@ type IProductService interface {
 	GetProducts() ([]dto.Product, error)
 	CreateProduct(product *model.Product) (*dto.Product, error)
 	UpdateProduct(productID primitive.ObjectID, updatedProduct *model.Product) (*dto.Product, error)
+	GetProductBySellerID(sellerID primitive.ObjectID) (*dto.Product, error)
 }
 
 type ProductService struct {
@@ -37,6 +38,14 @@ func (s ProductService) CreateProduct(product *model.Product) (*dto.Product, err
 
 func (s ProductService) GetProductByID(productID primitive.ObjectID) (*dto.Product, error) {
 	productDTO, err := s.productRepository.GetProductByID(context.Background(), productID)
+	if err != nil {
+		return nil, err
+	}
+	return productDTO, nil
+}
+
+func (s ProductService) GetProductBySellerID(sellerID primitive.ObjectID) (*dto.Product, error) {
+	productDTO, err := s.productRepository.GetProductByID(context.Background(), sellerID)
 	if err != nil {
 		return nil, err
 	}

@@ -118,6 +118,48 @@ func (s ProductController) GetProductByID(c *gin.Context) {
 	})
 }
 
+// GetProductBySellerID godoc
+// @Summary Get a product by ID
+// @Description Retrieves a product's data by their ID
+// @Tags product
+// @Accept json
+// @Produce json
+// @Param product_id path string true "Product ID"
+// @Success 200 {object} dto.SuccessResponse{data=dto.Product}
+// @Failure 500 {object} dto.ErrorResponse
+// @Router /product/{product_id} [get]
+func (s ProductController) GetProductBySellerID(c *gin.Context) {
+	sellerIDstr := c.Param("seller_id")
+	sellerID, err := primitive.ObjectIDFromHex(sellerIDstr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Invalid sellerID format",
+			Message: err.Error(),
+		})
+		return
+	}
+	res, err := s.productService.GetProductBySellerID(sellerID)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "No product with this productID",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Status:  http.StatusOK,
+		Message: "Get product success",
+		Data:    res,
+	})
+}
+
 // GetProducts godoc
 // @Summary Get all products
 // @Description Retrieves all products

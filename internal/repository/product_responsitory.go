@@ -29,6 +29,18 @@ func NewProductRepository(db *mongo.Database, collectionName string) IProductRep
 		productCollection: db.Collection(collectionName),
 	}
 }
+func (r *ProductRepository) GetProductSellerByID(ctx context.Context, sellerID primitive.ObjectID) (*dto.Product, error) {
+	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
+
+	var product *model.Product
+
+	err := r.productCollection.FindOne(ctx, bson.M{"sellerID": sellerID}).Decode(&sellerID)
+	if err != nil {
+		return nil, err
+	}
+	return converter.ProductModelToDTO(product)
+}
 
 func (r *ProductRepository) GetProductByID(ctx context.Context, productID primitive.ObjectID) (*dto.Product, error) {
 	ctx, cancel := context.WithTimeout(ctx, 60*time.Second)
