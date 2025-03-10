@@ -88,6 +88,7 @@ func (r *BuyerRepository) CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	buyer.BuyerID = primitive.NewObjectID()
+	buyer.Cart = []primitive.ObjectID{}
 	result, err := r.buyerCollection.InsertOne(ctx, buyer)
 	if err != nil {
 		return nil, err
