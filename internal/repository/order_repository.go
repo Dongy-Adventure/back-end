@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -17,6 +18,9 @@ import (
 type IOrderRepository interface {
 	CreateOrder(order *model.Order) (*dto.Order, error)
 	GetOrdersByUserID(userID primitive.ObjectID, userType userrole.UserType) ([]dto.Order, error)
+	DeleteOrderByOrderID(orderID primitive.ObjectID) error
+	UpdateOrder(orderID primitive.ObjectID, updatedOrder *model.Order) (*dto.Order, error)
+	UpdateOrderStatus(orderID primitive.ObjectID, orderStatus int) (int, error)
 }
 
 type OrderRepository struct {
@@ -75,4 +79,66 @@ func (r OrderRepository) GetOrdersByUserID(userID primitive.ObjectID, userType u
 		orders = append(orders, *order)
 	}
 	return orders, nil
+}
+
+func (r OrderRepository) DeleteOrderByOrderID(orderID primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	filter := bson.M{"_id": orderID}
+	deleteResult, err := r.orderCollection.DeleteOne(ctx, filter)
+	if err != nil {
+		return err
+	}
+	if deleteResult.DeletedCount == 0 {
+		return errors.New("no order found")
+	}
+
+	return nil
+}
+
+func (r OrderRepository) UpdateOrder(orderID primitive.ObjectID, updatedOrder *model.Order) (*dto.Order, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	filter := bson.M{"_id": orderID}
+	update := bson.M{
+		"$set": updatedOrder,
+	}
+	result := r.orderCollection.FindOneAndUpdate(ctx, filter, update)
+	if err := result.Err(); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, fmt.Errorf("no order found with the given ID")
+		}
+		return nil, fmt.Errorf("failed to update order: %w", err)
+	}
+
+	var updatedOrderFromDB model.Order
+	err := r.orderCollection.FindOne(ctx, filter).Decode(&updatedOrderFromDB)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve updated order: %w", err)
+	}
+
+	return converter.OrderModelToDTO(&updatedOrderFromDB)
+}
+
+func (r OrderRepository) UpdateOrderStatus(orderID primitive.ObjectID, orderStatus int) (int, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	filter := bson.M{"_id": orderID}
+
+	update := bson.M{
+		"$set": bson.M{
+			"status": orderStatus,
+		},
+	}
+
+	result := r.orderCollection.FindOneAndUpdate(ctx, filter, update)
+	if err := result.Err(); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return 0, fmt.Errorf("no order found with the given ID")
+		}
+		return 0, fmt.Errorf("failed to update order status: %w", err)
+	}
+
+	return orderStatus, nil
 }

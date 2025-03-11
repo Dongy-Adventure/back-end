@@ -952,6 +952,160 @@ paths:
       tags:
       - buyer
   /order/:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new order in the database
+      parameters:
+      - description: Order to create
+        in: body
+        name: buyer
+        required: true
+        schema:
+          $ref: '#/definitions/dto.OrderCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Order'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new order
+      tags:
+      - order
+  /order/{order_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete an order based on the provied orderID
+      parameters:
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: Successfully deleted the order
+        "400":
+          description: Bad request - invalid user or order ID
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Order not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete order by orderID
+      tags:
+      - order
+    put:
+      consumes:
+      - application/json
+      description: Updates the details of an order based on the provided orderID
+      parameters:
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      - description: Order details to update
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Order'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated the order
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Order'
+              type: object
+        "400":
+          description: Bad request - invalid order data
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Order not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update order details
+      tags:
+      - order
+  /order/{order_id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the status of an order based on the provided orderID and
+        status
+      parameters:
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      - description: Status to update
+        in: body
+        name: status
+        required: true
+        schema:
+          type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated the order status
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Order'
+              type: object
+        "400":
+          description: Bad request - invalid status data
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Order not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update the status of an order
+      tags:
+      - order
+  /order/{user_id}/{user_type}:
     get:
       consumes:
       - application/json
@@ -990,40 +1144,6 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: Get orders by userID and userType
-      tags:
-      - order
-    post:
-      consumes:
-      - application/json
-      description: Creates a new order in the database
-      parameters:
-      - description: Order to create
-        in: body
-        name: buyer
-        required: true
-        schema:
-          $ref: '#/definitions/dto.OrderCreateRequest'
-      produces:
-      - application/json
-      responses:
-        "201":
-          description: Created
-          schema:
-            allOf:
-            - $ref: '#/definitions/dto.SuccessResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.Order'
-              type: object
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Create a new order
       tags:
       - order
   /product/:

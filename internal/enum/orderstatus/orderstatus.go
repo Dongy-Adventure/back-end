@@ -1,8 +1,8 @@
 package orderstatus
 
 const (
-	CANCEL = iota
-	PENDING
+	// CANCEL = iota
+	PENDING = iota
 	PAID
 	APPOINTED
 	DONE

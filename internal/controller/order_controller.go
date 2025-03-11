@@ -5,6 +5,7 @@ import (
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/enum/userrole"
+	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/service"
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -13,6 +14,9 @@ import (
 type IOrderController interface {
 	CreateOrder(c *gin.Context)
 	GetOrdersByUserID(c *gin.Context)
+	DeleteOrderByOrderID(c *gin.Context)
+	UpdateOrderByOrderID(c *gin.Context)
+	UpdateOrderStatusByOrderID(c *gin.Context)
 }
 type OrderController struct {
 	orderService service.IOrderService
@@ -74,7 +78,7 @@ func (o OrderController) CreateOrder(c *gin.Context) {
 // @Success 200 {object} dto.SuccessResponse{data=[]dto.Order}
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /order/ [get]
+// @Router /order/{user_id}/{user_type} [get]
 func (o OrderController) GetOrdersByUserID(c *gin.Context) {
 	userIDStr := c.Param("user_id")
 	userTypeStr := c.Param("user_type")
@@ -120,5 +124,172 @@ func (o OrderController) GetOrdersByUserID(c *gin.Context) {
 		Status:  http.StatusOK,
 		Message: "Get orders success",
 		Data:    orders,
+	})
+}
+
+// DeleteOrderByOrderID godoc
+// @Summary Delete order by orderID
+// @Description Delete an order based on the provied orderID
+// @Tags order
+// @Accept json
+// @Produce json
+// @Param order_id path string true "Order ID"
+// @Success 204 {object} nil "Successfully deleted the order"
+// @Failure 400 {object} dto.ErrorResponse "Bad request - invalid user or order ID"
+// @Failure 404 {object} dto.ErrorResponse "Order not found"
+// @Failure 500 {object} dto.ErrorResponse "Internal server error"
+// @Router /order/{order_id} [delete]
+func (o OrderController) DeleteOrderByOrderID(c *gin.Context) {
+	orderIDStr := c.Param("order_id")
+	orderID, err := primitive.ObjectIDFromHex(orderIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Invalid orderID format",
+			Message: err.Error(),
+		})
+		return
+	}
+	err = o.orderService.DeleteOrderByOrderID(orderID)
+	if err != nil {
+		if err.Error() == "no order found with the given ID" {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Success: false,
+				Status:  http.StatusNotFound,
+				Error:   "Order not found",
+				Message: err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Failed to delete order",
+			Message: err.Error(),
+		})
+		return
+	}
+	c.JSON(http.StatusNoContent, nil)
+}
+
+// UpdateOrderByOrderID godoc
+// @Summary Update order details
+// @Description Updates the details of an order based on the provided orderID
+// @Tags order
+// @Accept json
+// @Produce json
+// @Param order_id path string true "Order ID"
+// @Param order body dto.Order true "Order details to update"
+// @Success 200 {object} dto.SuccessResponse{data=dto.Order} "Successfully updated the order"
+// @Failure 400 {object} dto.ErrorResponse "Bad request - invalid order data"
+// @Failure 404 {object} dto.ErrorResponse "Order not found"
+// @Failure 500 {object} dto.ErrorResponse "Internal server error"
+// @Router /order/{order_id} [put]
+func (o OrderController) UpdateOrderByOrderID(c *gin.Context) {
+	orderIDStr := c.Param("order_id")
+	orderID, err := primitive.ObjectIDFromHex(orderIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusBadRequest,
+			Error:   "Invalid orderID format",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	var updatedOrder model.Order
+	if err := c.ShouldBindJSON(&updatedOrder); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusBadRequest,
+			Error:   "Invalid request body",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	order, err := o.orderService.UpdateOrder(orderID, &updatedOrder)
+	if err != nil {
+		if err.Error() == "no order found with the given orderID" {
+			c.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Success: false,
+				Status:  http.StatusNotFound,
+				Error:   "Order not found",
+				Message: err.Error(),
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Failed to update order",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Status:  http.StatusOK,
+		Data:    order,
+	})
+}
+
+// UpdateOrderStatusByOrderID godoc
+// @Summary Update the status of an order
+// @Description Updates the status of an order based on the provided orderID and status
+// @Tags order
+// @Accept json
+// @Produce json
+// @Param order_id path string true "Order ID"
+// @Param status body int true "Status to update"
+// @Success 200 {object} dto.SuccessResponse{data=dto.Order} "Successfully updated the order status"
+// @Failure 400 {object} dto.ErrorResponse "Bad request - invalid status data"
+// @Failure 404 {object} dto.ErrorResponse "Order not found"
+// @Failure 500 {object} dto.ErrorResponse "Internal server error"
+// @Router /order/{order_id}/status [patch]
+func (o OrderController) UpdateOrderStatusByOrderID(c *gin.Context) {
+	orderIDStr := c.Param("order_id")
+	orderID, err := primitive.ObjectIDFromHex(orderIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusBadRequest,
+			Error:   "Invalid orderID format",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	var orderStatus int
+	if err := c.ShouldBindJSON(&orderStatus); err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusBadRequest,
+			Error:   "Invalid request body",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	updatedStatus, err := o.orderService.UpdateOrderStatus(orderID, orderStatus)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Failed to update order status",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Status:  http.StatusOK,
+		Data:    updatedStatus,
 	})
 }
