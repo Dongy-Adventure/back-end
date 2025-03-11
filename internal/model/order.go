@@ -14,5 +14,5 @@ type Order struct {
 	SellerID      primitive.ObjectID `json:"sellerID" bson:"sellerID"`
 	BuyerID       primitive.ObjectID `json:"buyerID" bson:"buyerID"`
 	TotalPrice    float64            `json:"totalPrice" bson:"totalPrice"`
-	CreatedAt     time.Time          `json:"createdAt"`
+	CreatedAt     time.Time          `json:"createdAt" bson:"createdAt"`
 }

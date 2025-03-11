@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
@@ -17,6 +18,9 @@ type IOrderService interface {
 	CreateOrder(products []dto.Product, buyerID primitive.ObjectID, sellerID primitive.ObjectID) (*dto.Order, error)
 	GetOrdersByUserID(userID primitive.ObjectID, userType userrole.UserType) ([]dto.Order, error)
 	getTotalPrice(products []dto.Product) float64
+	DeleteOrderByOrderID(orderID primitive.ObjectID) error
+	UpdateOrder(orderID primitive.ObjectID, updatedOrder *model.Order) (*dto.Order, error)
+	UpdateOrderStatus(orderID primitive.ObjectID, orderStatus int) (int, error)
 }
 
 type OrderService struct {
@@ -66,4 +70,30 @@ func (s OrderService) GetOrdersByUserID(userID primitive.ObjectID, userType user
 		return nil, err
 	}
 	return orders, nil
+}
+
+func (s OrderService) DeleteOrderByOrderID(orderID primitive.ObjectID) error {
+	err := s.orderRepository.DeleteOrderByOrderID(orderID)
+	if err != nil {
+		return fmt.Errorf("failed to delete order: %w", err)
+	}
+	return nil
+}
+
+func (s OrderService) UpdateOrder(orderID primitive.ObjectID, updatedOrder *model.Order) (*dto.Order, error) {
+	updatedOrderFromDB, err := s.orderRepository.UpdateOrder(orderID, updatedOrder)
+	if err != nil {
+		return nil, fmt.Errorf("failed to update order: %w", err)
+	}
+
+	return updatedOrderFromDB, nil
+}
+
+func (s OrderService) UpdateOrderStatus(orderID primitive.ObjectID, orderStatus int) (int, error) {
+	updatedStatus, err := s.orderRepository.UpdateOrderStatus(orderID, orderStatus)
+	if err != nil {
+		return 0, fmt.Errorf("failed to update order status: %w", err)
+	}
+
+	return updatedStatus, nil
 }
