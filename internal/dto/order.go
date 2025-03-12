@@ -12,7 +12,9 @@ type Order struct {
 	Products      []Product          `json:"products"`
 	AppointmentID primitive.ObjectID `json:"appointmentID"`
 	SellerID      primitive.ObjectID `json:"sellerID"`
+	SellerName    string             `json:"sellerName"`
 	BuyerID       primitive.ObjectID `json:"buyerID"`
+	BuyerName     string             `json:"buyerName"`
 	TotalPrice    float64            `json:"totalPrice"`
 	CreatedAt     time.Time          `json:"createdAt"`
 }
@@ -20,4 +22,8 @@ type OrderCreateRequest struct {
 	Products []Product          `json:"products"`
 	BuyerID  primitive.ObjectID `json:"buyerID"`
 	SellerID primitive.ObjectID `json:"sellerID"`
+}
+
+type OrderStatusRequest struct {
+	OrderStatus int `json:"orderStatus" binding:"required,gte=0,lte=3"`
 }

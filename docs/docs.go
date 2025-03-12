@@ -1024,9 +1024,7 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/order/{order_id}/status": {
+            },
             "patch": {
                 "description": "Updates the status of an order based on the provided orderID and status",
                 "consumes": [
@@ -1053,7 +1051,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "$ref": "#/definitions/dto.OrderStatusRequest"
                         }
                     }
                 ],
@@ -2390,6 +2388,9 @@ const docTemplate = `{
                 "buyerID": {
                     "type": "string"
                 },
+                "buyerName": {
+                    "type": "string"
+                },
                 "createdAt": {
                     "type": "string"
                 },
@@ -2403,6 +2404,9 @@ const docTemplate = `{
                     }
                 },
                 "sellerID": {
+                    "type": "string"
+                },
+                "sellerName": {
                     "type": "string"
                 },
                 "status": {
@@ -2430,9 +2434,29 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.OrderStatusRequest": {
+            "type": "object",
+            "required": [
+                "orderStatus"
+            ],
+            "properties": {
+                "orderStatus": {
+                    "type": "integer",
+                    "maximum": 3,
+                    "minimum": 0
+                }
+            }
+        },
         "dto.Product": {
             "type": "object",
+            "required": [
+                "amount"
+            ],
             "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 0
+                },
                 "color": {
                     "type": "string"
                 },
@@ -2726,7 +2750,16 @@ const docTemplate = `{
         },
         "model.Product": {
             "type": "object",
+            "required": [
+                "amount",
+                "price",
+                "productName"
+            ],
             "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 0
+                },
                 "color": {
                     "type": "string"
                 },
@@ -2740,7 +2773,8 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "price": {
-                    "type": "number"
+                    "type": "number",
+                    "minimum": 1
                 },
                 "productID": {
                     "type": "string"

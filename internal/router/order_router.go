@@ -21,6 +21,6 @@ func (r Router) AddOrderRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
 	orderRouter.GET("/:user_id/:user_type", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.GetOrdersByUserID)
 	orderRouter.DELETE("/:order_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.DeleteOrderByOrderID)
 	orderRouter.PUT("/:order_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.UpdateOrderByOrderID)
-	orderRouter.PATCH("/:order_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.UpdateOrderStatusByOrderID)
+	orderRouter.PATCH("/:order_id", cont.UpdateOrderStatusByOrderID)
 
 }

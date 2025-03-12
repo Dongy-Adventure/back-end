@@ -152,6 +152,8 @@ definitions:
         type: string
       buyerID:
         type: string
+      buyerName:
+        type: string
       createdAt:
         type: string
       orderID:
@@ -161,6 +163,8 @@ definitions:
           $ref: '#/definitions/dto.Product'
         type: array
       sellerID:
+        type: string
+      sellerName:
         type: string
       status:
         type: integer
@@ -178,8 +182,20 @@ definitions:
       sellerID:
         type: string
     type: object
+  dto.OrderStatusRequest:
+    properties:
+      orderStatus:
+        maximum: 3
+        minimum: 0
+        type: integer
+    required:
+    - orderStatus
+    type: object
   dto.Product:
     properties:
+      amount:
+        minimum: 0
+        type: integer
       color:
         type: string
       createdAt:
@@ -200,6 +216,8 @@ definitions:
         items:
           type: string
         type: array
+    required:
+    - amount
     type: object
   dto.RefreshTokenResponse:
     properties:
@@ -373,6 +391,9 @@ definitions:
     type: object
   model.Product:
     properties:
+      amount:
+        minimum: 0
+        type: integer
       color:
         type: string
       createdAt:
@@ -382,6 +403,7 @@ definitions:
       imageURL:
         type: string
       price:
+        minimum: 1
         type: number
       productID:
         type: string
@@ -393,6 +415,10 @@ definitions:
         items:
           type: string
         type: array
+    required:
+    - amount
+    - price
+    - productName
     type: object
   model.Seller:
     properties:
@@ -1017,6 +1043,50 @@ paths:
       summary: Delete order by orderID
       tags:
       - order
+    patch:
+      consumes:
+      - application/json
+      description: Updates the status of an order based on the provided orderID and
+        status
+      parameters:
+      - description: Order ID
+        in: path
+        name: order_id
+        required: true
+        type: string
+      - description: Status to update
+        in: body
+        name: status
+        required: true
+        schema:
+          $ref: '#/definitions/dto.OrderStatusRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully updated the order status
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Order'
+              type: object
+        "400":
+          description: Bad request - invalid status data
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Order not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update the status of an order
+      tags:
+      - order
     put:
       consumes:
       - application/json
@@ -1058,51 +1128,6 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: Update order details
-      tags:
-      - order
-  /order/{order_id}/status:
-    patch:
-      consumes:
-      - application/json
-      description: Updates the status of an order based on the provided orderID and
-        status
-      parameters:
-      - description: Order ID
-        in: path
-        name: order_id
-        required: true
-        type: string
-      - description: Status to update
-        in: body
-        name: status
-        required: true
-        schema:
-          type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: Successfully updated the order status
-          schema:
-            allOf:
-            - $ref: '#/definitions/dto.SuccessResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.Order'
-              type: object
-        "400":
-          description: Bad request - invalid status data
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "404":
-          description: Order not found
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-        "500":
-          description: Internal server error
-          schema:
-            $ref: '#/definitions/dto.ErrorResponse'
-      summary: Update the status of an order
       tags:
       - order
   /order/{user_id}/{user_type}:
