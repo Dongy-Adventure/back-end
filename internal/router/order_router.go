@@ -12,7 +12,8 @@ import (
 
 func (r Router) AddOrderRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
 	repo := repository.NewOrderRepository(mongoDB, "orders")
-	serv := service.NewOrderService(repo)
+	appointmentRepo := repository.NewAppointmentRepository(mongoDB, "appointments")
+	serv := service.NewOrderService(repo, appointmentRepo)
 	cont := controller.NewOrderController(serv)
 
 	orderRouter := rg.Group("order")

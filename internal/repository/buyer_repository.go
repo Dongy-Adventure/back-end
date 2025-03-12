@@ -6,7 +6,7 @@ import (
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
-	"github.com/Dongy-s-Advanture/back-end/internal/utils/converter"
+	"github.com/Dongy-s-Advanture/back-end/pkg/utils/converter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,7 +18,7 @@ type IBuyerRepository interface {
 	CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error)
 	GetBuyerByUsername(req *dto.LoginRequest) (*model.Buyer, error)
 	UpdateBuyerData(buyerID primitive.ObjectID, updatedBuyer *model.Buyer) (*dto.Buyer, error)
-	UpdateProductInCart(buyerID primitive.ObjectID, productID primitive.ObjectID) ([]primitive.ObjectID, error)
+	UpdateProductInCart(buyerID primitive.ObjectID, product dto.Product) ([]dto.Product, error)
 }
 
 type BuyerRepository struct {
@@ -88,7 +88,7 @@ func (r *BuyerRepository) CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	buyer.BuyerID = primitive.NewObjectID()
-	buyer.Cart = []primitive.ObjectID{}
+	buyer.Cart = []dto.Product{}
 	result, err := r.buyerCollection.InsertOne(ctx, buyer)
 	if err != nil {
 		return nil, err
@@ -137,13 +137,12 @@ func (r *BuyerRepository) UpdateBuyerData(buyerID primitive.ObjectID, updatedBuy
 	return converter.BuyerModelToDTO(newUpdatedBuyer)
 }
 
-func (r *BuyerRepository) UpdateProductInCart(buyerID primitive.ObjectID, productID primitive.ObjectID) ([]primitive.ObjectID, error) {
+func (r *BuyerRepository) UpdateProductInCart(buyerID primitive.ObjectID, product dto.Product) ([]dto.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	// Get buyer's cart
 	var buyer struct {
-		Cart []primitive.ObjectID `bson:"cart"`
+		Cart []dto.Product `bson:"cart"`
 	}
 	err := r.buyerCollection.FindOne(ctx, bson.M{"_id": buyerID}).Decode(&buyer)
 	if err != nil {
@@ -151,22 +150,19 @@ func (r *BuyerRepository) UpdateProductInCart(buyerID primitive.ObjectID, produc
 	}
 
 	// Check if product is in cart
-	newCart := []primitive.ObjectID{}
+	newCart := buyer.Cart
 	found := false
-	for _, id := range buyer.Cart {
-		if id == productID {
+	for _, pr := range newCart {
+		if pr.ProductID == product.ProductID {
 			found = true
-			continue 
 		}
-		newCart = append(newCart, id)
 	}
 
 	// If not found, add the product
 	if !found {
-		newCart = append(newCart, productID)
+		newCart = append(newCart, product)
 	}
 
-	// Update the cart in MongoDB
 	_, err = r.buyerCollection.UpdateOne(
 		ctx,
 		bson.M{"_id": buyerID},

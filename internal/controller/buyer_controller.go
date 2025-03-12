@@ -82,15 +82,15 @@ func (s BuyerController) CreateBuyer(c *gin.Context) {
 // @Router /buyer/{buyer_id} [get]
 func (s BuyerController) GetBuyerByID(c *gin.Context) {
 	buyerIDstr := c.Param("buyer_id")
-	userID, exists := c.Get("userID")
-	if userID != buyerIDstr || !exists {
-		c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-			Success: false,
-			Status:  http.StatusUnauthorized,
-			Error:   "ID not match or not exists",
-			Message: "param ID doesn't match with callerID"})
-		return
-	}
+	// userID, exists := c.Get("userID")
+	// if userID != buyerIDstr || !exists {
+	// 	c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+	// 		Success: false,
+	// 		Status:  http.StatusUnauthorized,
+	// 		Error:   "ID not match or not exists",
+	// 		Message: "param ID doesn't match with callerID"})
+	// 	return
+	// }
 	buyerID, err := primitive.ObjectIDFromHex(buyerIDstr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
@@ -251,7 +251,7 @@ func (s BuyerController) UpdateProductInCart(c *gin.Context) {
 		return
 	}
 
-	var request dto.UpdateCartRequest
+	var request dto.Product
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Success: false,
@@ -262,18 +262,7 @@ func (s BuyerController) UpdateProductInCart(c *gin.Context) {
 		return
 	}
 
-	productID, err := primitive.ObjectIDFromHex(request.ProductID)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Success: false,
-			Status:  http.StatusBadRequest,
-			Error:   "Invalid productID format",
-			Message: err.Error(),
-		})
-		return
-	}
-
-	updatedCart, err := s.buyerService.UpdateProductInCart(buyerID, productID)
+	updatedCart, err := s.buyerService.UpdateProductInCart(buyerID, request)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
@@ -291,4 +280,3 @@ func (s BuyerController) UpdateProductInCart(c *gin.Context) {
 		Data:    updatedCart,
 	})
 }
-
