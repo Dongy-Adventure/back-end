@@ -246,12 +246,12 @@ func (o OrderController) UpdateOrderByOrderID(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param order_id path string true "Order ID"
-// @Param status body int true "Status to update"
+// @Param status body dto.OrderStatusRequest true "Status to update"
 // @Success 200 {object} dto.SuccessResponse{data=dto.Order} "Successfully updated the order status"
 // @Failure 400 {object} dto.ErrorResponse "Bad request - invalid status data"
 // @Failure 404 {object} dto.ErrorResponse "Order not found"
 // @Failure 500 {object} dto.ErrorResponse "Internal server error"
-// @Router /order/{order_id}/status [patch]
+// @Router /order/{order_id} [patch]
 func (o OrderController) UpdateOrderStatusByOrderID(c *gin.Context) {
 	orderIDStr := c.Param("order_id")
 	orderID, err := primitive.ObjectIDFromHex(orderIDStr)
@@ -265,8 +265,8 @@ func (o OrderController) UpdateOrderStatusByOrderID(c *gin.Context) {
 		return
 	}
 
-	var orderStatus int
-	if err := c.ShouldBindJSON(&orderStatus); err != nil {
+	var req dto.OrderStatusRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Success: false,
 			Status:  http.StatusBadRequest,
@@ -276,7 +276,7 @@ func (o OrderController) UpdateOrderStatusByOrderID(c *gin.Context) {
 		return
 	}
 
-	updatedStatus, err := o.orderService.UpdateOrderStatus(orderID, orderStatus)
+	updatedStatus, err := o.orderService.UpdateOrderStatus(orderID, req.OrderStatus)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
@@ -290,6 +290,7 @@ func (o OrderController) UpdateOrderStatusByOrderID(c *gin.Context) {
 	c.JSON(http.StatusOK, dto.SuccessResponse{
 		Success: true,
 		Status:  http.StatusOK,
+		Message: "Update order success",
 		Data:    updatedStatus,
 	})
 }

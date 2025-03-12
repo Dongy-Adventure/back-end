@@ -12,7 +12,9 @@ type Order struct {
 	Products      []Product          `json:"products" bson:"products"`
 	AppointmentID primitive.ObjectID `json:"appointmentID" bson:"appointmentID"`
 	SellerID      primitive.ObjectID `json:"sellerID" bson:"sellerID"`
+	SellerName    string             `json:"sellerName" bson:"sellerName"`
 	BuyerID       primitive.ObjectID `json:"buyerID" bson:"buyerID"`
+	BuyerName     string             `json:"buyerName" bson:"buyerName"`
 	TotalPrice    float64            `json:"totalPrice" bson:"totalPrice"`
 	CreatedAt     time.Time          `json:"createdAt" bson:"createdAt"`
 }

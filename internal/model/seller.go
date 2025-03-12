@@ -23,7 +23,7 @@ type Seller struct {
 }
 
 type Transaction struct {
-	Amount  float64   `json:"amount" bson:"amount" validate:"min=0"`
+	Amount  float64   `json:"amount" bson:"amount" binding:"gte=0"`
 	Product []string  `json:"product" bson:"product"`
 	Date    time.Time `json:"data" bson:"date"`
 }
