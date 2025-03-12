@@ -1,6 +1,9 @@
 package model
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"github.com/Dongy-s-Advanture/back-end/internal/dto"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Buyer struct {
 	BuyerID     primitive.ObjectID `json:"buyerID,omitempty" bson:"_id,omitempty"`
@@ -14,6 +17,5 @@ type Buyer struct {
 	City        string             `json:"city" bson:"city"`
 	Province    string             `json:"province" bson:"province"`
 	Zip         string             `json:"zip" bson:"zip"`
-	Cart        []primitive.ObjectID `json:"cart" bson:"cart"`
+	Cart        []dto.Product      `json:"cart" bson:"cart"`
 }
-
