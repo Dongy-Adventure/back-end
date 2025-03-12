@@ -57,7 +57,7 @@ func (s OrderService) CreateOrder(products []dto.Product, buyerID primitive.Obje
         return nil, err
     }
 	return s.orderRepository.CreateOrder(&model.Order{
-		OrderID:       primitive.NewObjectID(),
+		OrderID:       orderID,
 		Status:        orderstatus.PENDING,
 		Products:      productsModel,
 		AppointmentID: app.AppointmentID,
