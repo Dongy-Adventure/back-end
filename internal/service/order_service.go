@@ -25,10 +25,11 @@ type IOrderService interface {
 
 type OrderService struct {
 	orderRepository repository.IOrderRepository
+	appointmentRepository repository.IAppointmentRepository
 }
 
-func NewOrderService(r repository.IOrderRepository) IOrderService {
-	return OrderService{orderRepository: r}
+func NewOrderService(r repository.IOrderRepository, a repository.IAppointmentRepository) IOrderService {
+	return OrderService{orderRepository: r, appointmentRepository: a}
 }
 
 func (s OrderService) CreateOrder(products []dto.Product, buyerID primitive.ObjectID, sellerID primitive.ObjectID) (*dto.Order, error) {
@@ -43,12 +44,23 @@ func (s OrderService) CreateOrder(products []dto.Product, buyerID primitive.Obje
 		}
 		productsModel = append(productsModel, *product)
 	}
+    orderID := primitive.NewObjectID()
+    app, err := s.appointmentRepository.CreateAppointment(&model.Appointment{
+        AppointmentID: primitive.NewObjectID(),
+        OrderID:       orderID,
+        BuyerID:       buyerID,
+        SellerID:      sellerID,
+        CreatedAt:     time.Now(),
+    })
 
+    if err != nil {
+        return nil, err
+    }
 	return s.orderRepository.CreateOrder(&model.Order{
 		OrderID:       primitive.NewObjectID(),
 		Status:        orderstatus.PENDING,
 		Products:      productsModel,
-		AppointmentID: primitive.NilObjectID,
+		AppointmentID: app.AppointmentID,
 		BuyerID:       buyerID,
 		SellerID:      sellerID,
 		TotalPrice:    s.getTotalPrice(products),
