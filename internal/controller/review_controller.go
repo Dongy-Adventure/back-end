@@ -209,16 +209,6 @@ func (s ReviewController) CreateReview(c *gin.Context) {
 		return
 	}
 
-	if err := newReview.Validate(); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Success: false,
-			Status:  http.StatusBadRequest,
-			Error:   "Validation failed",
-			Message: err.Error(),
-		})
-		return
-	}
-
 	res, err := s.reviewService.CreateReview(&newReview)
 
 	if err != nil {
@@ -268,16 +258,6 @@ func (s ReviewController) UpdateReview(c *gin.Context) {
 			Success: false,
 			Status:  http.StatusBadRequest,
 			Error:   "Invalid request body, failed to bind JSON",
-			Message: err.Error(),
-		})
-		return
-	}
-
-	if err := updatedReview.Validate(); err != nil {
-		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
-			Success: false,
-			Status:  http.StatusBadRequest,
-			Error:   "Validation failed",
 			Message: err.Error(),
 		})
 		return
@@ -340,4 +320,3 @@ func (s ReviewController) DeleteReview(c *gin.Context) {
 		Message: "Delete review success",
 	})
 }
-
