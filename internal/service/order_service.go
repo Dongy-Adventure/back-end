@@ -56,6 +56,7 @@ func (s OrderService) CreateOrder(products []dto.Product, buyerID primitive.Obje
 	if err != nil {
 		return nil, err
 	}
+
 	return s.orderRepository.CreateOrder(&model.Order{
 		OrderID:       orderID,
 		Status:        orderstatus.WAITFORLOCATION,
