@@ -23,7 +23,7 @@ var productOutOfStock bool
 var cart []dto.Product
 
 func InitializeOrderConfirmationScenario(ctx *godog.ScenarioContext) {
-	SetupRouter()
+	SetUpRouter()
 	router = gin.New()
 
 	orderController := controller.NewOrderController(mockOrderService)
@@ -123,14 +123,6 @@ func anOrderCreated(expectedStatus int) error {
 		return fmt.Errorf("failed to marshal request body: %v", err)
 	}
 
-	req := httptest.NewRequest(http.MethodPost, "/order", bytes.NewBuffer(jsonBody))
-	req.Header.Set("Content-Type", "application/json")
-
-	recorder := httptest.NewRecorder()
-
-	c, _ := gin.CreateTestContext(recorder)
-	c.Request = req
-
 	if paymentSuccess {
 		mockOrderService.EXPECT().
 			CreateOrder(gomock.Any(), buyerID, buyerID).
@@ -148,6 +140,13 @@ func anOrderCreated(expectedStatus int) error {
 			Return(nil, fmt.Errorf("payment failed")).Times(1)
 	}
 
+	req := httptest.NewRequest(http.MethodPost, "/order", bytes.NewBuffer(jsonBody))
+	req.Header.Set("Content-Type", "application/json")
+
+	recorder := httptest.NewRecorder()
+
+	c, _ := gin.CreateTestContext(recorder)
+	c.Request = req
 	controller := controller.NewOrderController(mockOrderService)
 	handler := controller.CreateOrder
 	handler(c)

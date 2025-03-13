@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,12 +24,10 @@ var appointmentID primitive.ObjectID
 var orderStatus int16
 
 func InitializeSellerAppointmentScenario(ctx *godog.ScenarioContext) {
-	SetupRouter()
 	router = gin.New()
-
 	orderController := controller.NewOrderController(mockOrderService)
 	appointmentController := controller.NewAppointmentController(mockAppointmentService)
-	router.POST("/order/", orderController.CreateOrder)
+	router.POST("/order", orderController.CreateOrder)
 	router.PUT("/appointment/:appointment_id", appointmentController.UpdateAppointmentPlace)
 	router.PUT("/order/:order_id", orderController.UpdateOrderStatusByOrderID)
 
@@ -59,13 +58,6 @@ func anOrderWithIDIsCreated(id string) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal request body: %v", err)
 	}
-	req := httptest.NewRequest(http.MethodPost, "/order", bytes.NewBuffer(jsonBody))
-	req.Header.Set("Content-Type", "application/json")
-
-	recorder := httptest.NewRecorder()
-
-	c, _ := gin.CreateTestContext(recorder)
-	c.Request = req
 
 	mockOrderService.EXPECT().
 		CreateOrder(gomock.Any(), buyerID, sellerID).
@@ -77,9 +69,16 @@ func anOrderWithIDIsCreated(id string) error {
 			CreatedAt: time.Now(),
 		}, nil).Times(1)
 
-	controller := controller.NewOrderController(mockOrderService)
-	handler := controller.CreateOrder
-	handler(c)
+	req := httptest.NewRequest(http.MethodPost, "/order", bytes.NewBuffer(jsonBody))
+
+	req.Header.Set("Content-Type", "application/json")
+
+	recorder := httptest.NewRecorder()
+	router.Use(func(c *gin.Context) {
+		log.Println("Request path:", c.Request.URL.Path)
+		c.Next()
+	})
+	router.ServeHTTP(recorder, req)
 
 	testResponse := recorder.Result()
 
@@ -127,7 +126,7 @@ func theSellerChoosesALocation(orderID string) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal request body: %v", err)
 	}
-	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/order/%s/", orderID), bytes.NewBuffer(jsonBody))
+	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/order/%s", orderID), bytes.NewBuffer(jsonBody))
 	req.Header.Set("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
@@ -161,7 +160,7 @@ func theBuyerRejectsTheSellersLocation(orderID string) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal request body: %v", err)
 	}
-	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/order/%s/", orderID), bytes.NewBuffer(jsonBody))
+	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/order/%s", orderID), bytes.NewBuffer(jsonBody))
 	req.Header.Set("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
@@ -184,7 +183,7 @@ func theBuyerAcceptsTheSellersLocation(orderID string) error {
 	orderIDPrimitive, _ := primitive.ObjectIDFromHex(orderID)
 
 	mockOrderService.EXPECT().
-		UpdateOrderStatus(orderIDPrimitive, 1).
+		UpdateOrderStatus(orderIDPrimitive, 2).
 		Return(2, nil).Times(1)
 
 	requestBody := dto.OrderStatusRequest{
@@ -195,7 +194,7 @@ func theBuyerAcceptsTheSellersLocation(orderID string) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal request body: %v", err)
 	}
-	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/order/%s/", orderID), bytes.NewBuffer(jsonBody))
+	req := httptest.NewRequest(http.MethodPut, fmt.Sprintf("/order/%s", orderID), bytes.NewBuffer(jsonBody))
 	req.Header.Set("Content-Type", "application/json")
 
 	recorder := httptest.NewRecorder()
@@ -203,14 +202,16 @@ func theBuyerAcceptsTheSellersLocation(orderID string) error {
 	router.ServeHTTP(recorder, req)
 
 	testResponse = recorder.Result()
-
+	if testResponse == nil {
+		return fmt.Errorf("testResponse is nil, router.ServeHTTP failed")
+	}
 	body, _ := io.ReadAll(testResponse.Body)
 	defer testResponse.Body.Close()
 
 	if testResponse.StatusCode != http.StatusOK {
 		return fmt.Errorf("error: expected status 200 but got %d. Response: %s", testResponse.StatusCode, string(body))
 	}
-
+	orderStatus = 2
 	return nil
 }
 

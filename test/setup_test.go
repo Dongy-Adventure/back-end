@@ -24,17 +24,16 @@ var (
 	testResponse           *http.Response
 	buyerID                primitive.ObjectID
 	sellerID               primitive.ObjectID
-	productID              primitive.ObjectID
 	product                dto.Product
 	textResponse           string
 )
 
-func SetupRouter() *gin.Engine {
+func SetUpRouter() {
 	if router == nil {
 		router = gin.New()
 	}
-	return router
 }
+
 func TestMain(m *testing.M) {
 
 	gin.SetMode(gin.TestMode)
