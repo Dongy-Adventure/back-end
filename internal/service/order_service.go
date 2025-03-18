@@ -15,7 +15,7 @@ import (
 )
 
 type IOrderService interface {
-	CreateOrder(products []dto.Product, buyerID primitive.ObjectID, sellerID primitive.ObjectID) (*dto.Order, error)
+	CreateOrder(products []dto.Product, buyerID primitive.ObjectID, sellerID primitive.ObjectID, sellerName string, buyerName string) (*dto.Order, error)
 	GetOrdersByUserID(userID primitive.ObjectID, userType userrole.UserType) ([]dto.Order, error)
 	getTotalPrice(products []dto.Product) float64
 	DeleteOrderByOrderID(orderID primitive.ObjectID) error
@@ -32,7 +32,7 @@ func NewOrderService(r repository.IOrderRepository, a repository.IAppointmentRep
 	return OrderService{orderRepository: r, appointmentRepository: a}
 }
 
-func (s OrderService) CreateOrder(products []dto.Product, buyerID primitive.ObjectID, sellerID primitive.ObjectID) (*dto.Order, error) {
+func (s OrderService) CreateOrder(products []dto.Product, buyerID primitive.ObjectID, sellerID primitive.ObjectID, sellerName string, buyerName string) (*dto.Order, error) {
 	var productsModel []model.Product
 	if len(products) <= 0 {
 		return nil, errors.New("no product")
@@ -62,7 +62,9 @@ func (s OrderService) CreateOrder(products []dto.Product, buyerID primitive.Obje
 		Products:      productsModel,
 		AppointmentID: app.AppointmentID,
 		BuyerID:       buyerID,
+		BuyerName: 	   buyerName,
 		SellerID:      sellerID,
+		SellerName:    sellerName,
 		TotalPrice:    s.getTotalPrice(products),
 		CreatedAt:     time.Now(),
 	})

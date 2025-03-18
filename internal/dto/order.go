@@ -22,6 +22,8 @@ type OrderCreateRequest struct {
 	Products []Product          `json:"products"`
 	BuyerID  primitive.ObjectID `json:"buyerID"`
 	SellerID primitive.ObjectID `json:"sellerID"`
+	BuyerName string			`json:"buyerName"`
+	SellerName string 			`json:"sellerName"`
 }
 
 type OrderStatusRequest struct {
