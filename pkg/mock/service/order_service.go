@@ -38,18 +38,18 @@ func (m *MockIOrderService) EXPECT() *MockIOrderServiceMockRecorder {
 }
 
 // CreateOrder mocks base method.
-func (m *MockIOrderService) CreateOrder(products []dto.Product, buyerID, sellerID primitive.ObjectID) (*dto.Order, error) {
+func (m *MockIOrderService) CreateOrder(products []dto.Product, buyerID, sellerID primitive.ObjectID, sellerName string, buyerName string) (*dto.Order, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateOrder", products, buyerID, sellerID)
+	ret := m.ctrl.Call(m, "CreateOrder", products, buyerID, sellerID, sellerName, buyerName)
 	ret0, _ := ret[0].(*dto.Order)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateOrder indicates an expected call of CreateOrder.
-func (mr *MockIOrderServiceMockRecorder) CreateOrder(products, buyerID, sellerID interface{}) *gomock.Call {
+func (mr *MockIOrderServiceMockRecorder) CreateOrder(products, buyerID, sellerID interface{}, sellerName string, buyerName string) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrder", reflect.TypeOf((*MockIOrderService)(nil).CreateOrder), products, buyerID, sellerID)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrder", reflect.TypeOf((*MockIOrderService)(nil).CreateOrder), products, buyerID, sellerID, sellerName, buyerName)
 }
 
 // DeleteOrderByOrderID mocks base method.
