@@ -6,7 +6,7 @@ import (
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
-	"github.com/Dongy-s-Advanture/back-end/internal/utils/converter"
+	"github.com/Dongy-s-Advanture/back-end/pkg/utils/converter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,7 +24,7 @@ type IReviewRepository interface {
 
 type ReviewRepository struct {
 	reviewCollection *mongo.Collection
-	sellerRepo 	  ISellerRepository
+	sellerRepo       ISellerRepository
 }
 
 func NewReviewRepository(db *mongo.Database, reviewcollectionName string, sellerRepo ISellerRepository) IReviewRepository {
@@ -125,8 +125,6 @@ func (r ReviewRepository) GetReviewsByBuyerID(buyerID primitive.ObjectID) ([]dto
 	return reviewList, nil
 }
 
-
-
 func (r ReviewRepository) CreateReview(review *model.Review) (*dto.Review, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
@@ -151,7 +149,6 @@ func (r ReviewRepository) CreateReview(review *model.Review) (*dto.Review, error
 	return converter.ReviewModelToDTO(newReview)
 }
 
-
 func (r ReviewRepository) UpdateReview(reviewID primitive.ObjectID, updatedReview *model.Review) (*dto.Review, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
@@ -159,9 +156,9 @@ func (r ReviewRepository) UpdateReview(reviewID primitive.ObjectID, updatedRevie
 	update := bson.M{
 		"$set": bson.M{
 			"message": updatedReview.Message,
-        		"score":   updatedReview.Score,
-        		"image":   updatedReview.Image,
-        		"date":    time.Now(),
+			"score":   updatedReview.Score,
+			"image":   updatedReview.Image,
+			"date":    time.Now(),
 		},
 	}
 
@@ -193,5 +190,3 @@ func (r ReviewRepository) DeleteReview(reviewID primitive.ObjectID) error {
 	_, err := r.reviewCollection.DeleteOne(ctx, bson.M{"_id": reviewID})
 	return err
 }
-
-

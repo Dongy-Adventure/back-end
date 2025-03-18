@@ -1,9 +1,8 @@
 package orderstatus
 
 const (
-	// CANCEL = iota
-	PENDING = iota
-	PAID
+	WAITFORLOCATION = iota
+	WAITFORTIME
 	APPOINTED
 	DONE
 )

@@ -6,7 +6,7 @@ import (
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
-	"github.com/Dongy-s-Advanture/back-end/internal/utils/converter"
+	"github.com/Dongy-s-Advanture/back-end/pkg/utils/converter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"

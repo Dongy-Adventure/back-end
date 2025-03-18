@@ -16,7 +16,7 @@ type Product struct {
 	Color       string             `json:"color,omitempty"`
 	SellerID    primitive.ObjectID `json:"sellerID,omitempty"`
 	CreatedAt   time.Time          `json:"createdAt,omitempty"`
-	Amount      int                `json:"amount" binding:"required,gte=0"`
+	Amount      int                `json:"amount"`
 }
 type ProductCreateRequest struct {
 	ProductName string             `json:"productName" binding:"required"`

@@ -10,21 +10,21 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/enum/userrole"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/repository"
-	"github.com/Dongy-s-Advanture/back-end/internal/utils/converter"
+	"github.com/Dongy-s-Advanture/back-end/pkg/utils/converter"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type IOrderService interface {
 	CreateOrder(products []dto.Product, buyerID primitive.ObjectID, sellerID primitive.ObjectID, sellerName string, buyerName string) (*dto.Order, error)
 	GetOrdersByUserID(userID primitive.ObjectID, userType userrole.UserType) ([]dto.Order, error)
-	getTotalPrice(products []dto.Product) float64
+	GetTotalPrice(products []dto.Product) float64
 	DeleteOrderByOrderID(orderID primitive.ObjectID) error
 	UpdateOrder(orderID primitive.ObjectID, updatedOrder *model.Order) (*dto.Order, error)
 	UpdateOrderStatus(orderID primitive.ObjectID, orderStatus int) (int, error)
 }
 
 type OrderService struct {
-	orderRepository repository.IOrderRepository
+	orderRepository       repository.IOrderRepository
 	appointmentRepository repository.IAppointmentRepository
 }
 
@@ -44,21 +44,22 @@ func (s OrderService) CreateOrder(products []dto.Product, buyerID primitive.Obje
 		}
 		productsModel = append(productsModel, *product)
 	}
-    orderID := primitive.NewObjectID()
-    app, err := s.appointmentRepository.CreateAppointment(&model.Appointment{
-        AppointmentID: primitive.NewObjectID(),
-        OrderID:       orderID,
-        BuyerID:       buyerID,
-        SellerID:      sellerID,
-        CreatedAt:     time.Now(),
-    })
+	orderID := primitive.NewObjectID()
+	app, err := s.appointmentRepository.CreateAppointment(&model.Appointment{
+		AppointmentID: primitive.NewObjectID(),
+		OrderID:       orderID,
+		BuyerID:       buyerID,
+		SellerID:      sellerID,
+		CreatedAt:     time.Now(),
+	})
 
-    if err != nil {
-        return nil, err
-    }
+	if err != nil {
+		return nil, err
+	}
+
 	return s.orderRepository.CreateOrder(&model.Order{
 		OrderID:       orderID,
-		Status:        orderstatus.PENDING,
+		Status:        orderstatus.WAITFORLOCATION,
 		Products:      productsModel,
 		AppointmentID: app.AppointmentID,
 		BuyerID:       buyerID,
@@ -70,7 +71,7 @@ func (s OrderService) CreateOrder(products []dto.Product, buyerID primitive.Obje
 	})
 }
 
-func (s OrderService) getTotalPrice(products []dto.Product) float64 {
+func (s OrderService) GetTotalPrice(products []dto.Product) float64 {
 	var totalPrice float64
 	for i := 0; i < len(products); i++ {
 		totalPrice += products[i].Price

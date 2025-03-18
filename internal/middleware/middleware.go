@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
-	token "github.com/Dongy-s-Advanture/back-end/internal/utils/token"
+	token "github.com/Dongy-s-Advanture/back-end/pkg/utils/token"
 	"github.com/gin-gonic/gin"
 )
 

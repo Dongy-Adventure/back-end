@@ -6,7 +6,7 @@ import (
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
-	"github.com/Dongy-s-Advanture/back-end/internal/utils/converter"
+	"github.com/Dongy-s-Advanture/back-end/pkg/utils/converter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,7 +19,6 @@ type IAppointmentRepository interface {
 	CreateAppointment(appointment *model.Appointment) (*dto.Appointment, error)
 	UpdateAppointmentDate(appointmentID primitive.ObjectID, updatedAppointment *model.Appointment) (*dto.Appointment, error)
 	UpdateAppointmentPlace(appointmentID primitive.ObjectID, updatedAppointment *model.Appointment) (*dto.Appointment, error)
-
 }
 
 type AppointmentRepository struct {
@@ -102,7 +101,6 @@ func (r AppointmentRepository) CreateAppointment(appointment *model.Appointment)
 	return converter.AppointmentModelToDTO(newAppointment)
 }
 
-
 func (r AppointmentRepository) UpdateAppointmentDate(appointmentID primitive.ObjectID, updatedAppointment *model.Appointment) (*dto.Appointment, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
@@ -112,8 +110,8 @@ func (r AppointmentRepository) UpdateAppointmentDate(appointmentID primitive.Obj
 
 	update := bson.M{
 		"$set": bson.M{
-			"date":    updatedAppointment.Date,
-        		"time_slot":   updatedAppointment.TimeSlot,
+			"date":      updatedAppointment.Date,
+			"time_slot": updatedAppointment.TimeSlot,
 		},
 	}
 
@@ -143,10 +141,10 @@ func (r AppointmentRepository) UpdateAppointmentPlace(appointmentID primitive.Ob
 
 	update := bson.M{
 		"$set": bson.M{
-			"address":    updatedAppointment.Address,
-        		"city":       updatedAppointment.City,
-			"province":   updatedAppointment.Province,
-			"zip":        updatedAppointment.Zip,
+			"address":  updatedAppointment.Address,
+			"city":     updatedAppointment.City,
+			"province": updatedAppointment.Province,
+			"zip":      updatedAppointment.Zip,
 		},
 	}
 
@@ -164,5 +162,3 @@ func (r AppointmentRepository) UpdateAppointmentPlace(appointmentID primitive.Ob
 
 	return converter.AppointmentModelToDTO(newUpdatedAppointment)
 }
-
-
