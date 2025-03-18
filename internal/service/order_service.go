@@ -66,7 +66,7 @@ func (s OrderService) CreateOrder(products []dto.Product, buyerID primitive.Obje
 		BuyerName: 	   buyerName,
 		SellerID:      sellerID,
 		SellerName:    sellerName,
-		TotalPrice:    s.getTotalPrice(products),
+		TotalPrice:    s.GetTotalPrice(products),
 		CreatedAt:     time.Now(),
 	})
 }
