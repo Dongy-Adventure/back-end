@@ -49,7 +49,7 @@ func (o OrderController) CreateOrder(c *gin.Context) {
 		return
 	}
 
-	newOrder, err := o.orderService.CreateOrder(req.Products, req.BuyerID, req.SellerID, req.SellerName, req.BuyerName)
+	newOrder, err := o.orderService.CreateOrder(req.Products, req.BuyerID, req.SellerID, req.SellerName, req.BuyerName, req.Payment)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,

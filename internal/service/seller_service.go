@@ -13,8 +13,9 @@ type ISellerService interface {
 	GetSellerByID(sellerID primitive.ObjectID) (*dto.Seller, error)
 	GetSellers() ([]dto.Seller, error)
 	UpdateSeller(sellerID primitive.ObjectID, updatedSeller *model.Seller) (*dto.Seller, error)
-	AddTransaction(sellerID primitive.ObjectID, transaction *dto.Transaction) (*dto.Transaction, error)
 	GetSellerBalanceByID(sellerID primitive.ObjectID) (float64, error)
+	WithdrawSellerBalance(sellerID primitive.ObjectID,payment string, amount float64) error
+	
 }
 
 type SellerService struct {
@@ -85,13 +86,6 @@ func (s SellerService) UpdateSeller(sellerID primitive.ObjectID, updatedSeller *
 
 	return updatedSellerDTO, nil
 }
-func (s SellerService) AddTransaction(sellerID primitive.ObjectID, transaction *dto.Transaction) (*dto.Transaction, error) {
-	newTransaction, err := s.sellerRepository.AddTransaction(sellerID, transaction)
-	if err != nil {
-		return nil, err
-	}
-	return newTransaction, nil
-}
 
 func (s SellerService) GetSellerBalanceByID(sellerID primitive.ObjectID) (float64, error) {
 	totalBalance, err := s.sellerRepository.GetSellerBalanceByID(sellerID)
@@ -99,4 +93,13 @@ func (s SellerService) GetSellerBalanceByID(sellerID primitive.ObjectID) (float6
 		return 0, err
 	}
 	return totalBalance, nil
+}
+
+func (s SellerService) WithdrawSellerBalance(sellerID primitive.ObjectID, payment string, amount float64) error {
+	err := s.sellerRepository.WithdrawSellerBalance(sellerID, payment, amount)
+	if err != nil {
+		return err 
+	}
+
+	return nil 
 }

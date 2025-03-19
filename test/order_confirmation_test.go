@@ -121,6 +121,7 @@ func anOrderCreated(expectedStatus int) error {
 		SellerID: sellerID,                // Ensure 'sellerID' is defined in the test context
 		SellerName: "Test",
 		BuyerName: "Test",
+		Payment: "Paypal",
 	}
 
 	jsonBody, err := json.Marshal(requestBody)

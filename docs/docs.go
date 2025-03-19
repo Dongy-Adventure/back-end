@@ -2087,9 +2087,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/seller/{seller_id}/transaction": {
+        "/seller/{seller_id}/withdraw": {
             "post": {
-                "description": "Append transaction to seller transactions",
+                "description": "Deduct seller balance \u0026 add debit transaction",
                 "consumes": [
                     "application/json"
                 ],
@@ -2099,7 +2099,7 @@ const docTemplate = `{
                 "tags": [
                     "seller"
                 ],
-                "summary": "Add a transaction by sellerID",
+                "summary": "Withdraw Seller Balance by sellerID",
                 "parameters": [
                     {
                         "type": "string",
@@ -2109,12 +2109,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Transaction to append",
-                        "name": "transaction",
+                        "description": "Withdraw detail",
+                        "name": "seller",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Transaction"
+                            "$ref": "#/definitions/dto.SellerWithdrawRequest"
                         }
                     }
                 ],
@@ -2122,19 +2122,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.SuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.Transaction"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/dto.SuccessResponse"
                         }
                     },
                     "400": {
@@ -2246,7 +2234,7 @@ const docTemplate = `{
                 "cart": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/dto.Product"
                     }
                 },
                 "city": {
@@ -2397,10 +2385,13 @@ const docTemplate = `{
                 "orderID": {
                     "type": "string"
                 },
+                "payment": {
+                    "type": "string"
+                },
                 "products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.Product"
+                        "$ref": "#/definitions/dto.OrderProduct"
                     }
                 },
                 "sellerID": {
@@ -2423,13 +2414,33 @@ const docTemplate = `{
                 "buyerID": {
                     "type": "string"
                 },
+                "buyerName": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "string"
+                },
                 "products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.Product"
+                        "$ref": "#/definitions/dto.OrderProduct"
                     }
                 },
                 "sellerID": {
+                    "type": "string"
+                },
+                "sellerName": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.OrderProduct": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "productID": {
                     "type": "string"
                 }
             }
@@ -2449,13 +2460,9 @@ const docTemplate = `{
         },
         "dto.Product": {
             "type": "object",
-            "required": [
-                "amount"
-            ],
             "properties": {
                 "amount": {
-                    "type": "integer",
-                    "minimum": 0
+                    "type": "integer"
                 },
                 "color": {
                     "type": "string"
@@ -2587,6 +2594,9 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
+                "balance": {
+                    "type": "number"
+                },
                 "city": {
                     "type": "string"
                 },
@@ -2663,6 +2673,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.SellerWithdrawRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "payment": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.SuccessResponse": {
             "type": "object",
             "properties": {
@@ -2682,25 +2703,42 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "amount": {
-                    "type": "number",
-                    "minimum": 0
+                    "type": "number"
                 },
                 "data": {
                     "type": "string"
                 },
-                "product": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "orderID": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/dto.TransactionType"
                 }
             }
+        },
+        "dto.TransactionType": {
+            "type": "string",
+            "enum": [
+                "credit",
+                "debit"
+            ],
+            "x-enum-comments": {
+                "Credit": "Money added",
+                "Debit": "Money withdrawn"
+            },
+            "x-enum-varnames": [
+                "Credit",
+                "Debit"
+            ]
         },
         "dto.UpdateCartRequest": {
             "type": "object",
             "properties": {
-                "productID": {
-                    "type": "string"
+                "product": {
+                    "$ref": "#/definitions/dto.Product"
                 }
             }
         },
@@ -2716,7 +2754,7 @@ const docTemplate = `{
                 "cart": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/dto.Product"
                     }
                 },
                 "city": {
@@ -2799,6 +2837,9 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
+                "balance": {
+                    "type": "number"
+                },
                 "city": {
                     "type": "string"
                 },
@@ -2850,11 +2891,14 @@ const docTemplate = `{
                 "data": {
                     "type": "string"
                 },
-                "product": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
+                "orderID": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/dto.TransactionType"
                 }
             }
         }

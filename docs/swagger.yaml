@@ -59,7 +59,7 @@ definitions:
         type: string
       cart:
         items:
-          type: string
+          $ref: '#/definitions/dto.Product'
         type: array
       city:
         type: string
@@ -158,9 +158,11 @@ definitions:
         type: string
       orderID:
         type: string
+      payment:
+        type: string
       products:
         items:
-          $ref: '#/definitions/dto.Product'
+          $ref: '#/definitions/dto.OrderProduct'
         type: array
       sellerID:
         type: string
@@ -175,11 +177,24 @@ definitions:
     properties:
       buyerID:
         type: string
+      buyerName:
+        type: string
+      payment:
+        type: string
       products:
         items:
-          $ref: '#/definitions/dto.Product'
+          $ref: '#/definitions/dto.OrderProduct'
         type: array
       sellerID:
+        type: string
+      sellerName:
+        type: string
+    type: object
+  dto.OrderProduct:
+    properties:
+      amount:
+        type: integer
+      productID:
         type: string
     type: object
   dto.OrderStatusRequest:
@@ -194,7 +209,6 @@ definitions:
   dto.Product:
     properties:
       amount:
-        minimum: 0
         type: integer
       color:
         type: string
@@ -216,8 +230,6 @@ definitions:
         items:
           type: string
         type: array
-    required:
-    - amount
     type: object
   dto.RefreshTokenResponse:
     properties:
@@ -283,6 +295,8 @@ definitions:
     properties:
       address:
         type: string
+      balance:
+        type: number
       city:
         type: string
       name:
@@ -333,6 +347,13 @@ definitions:
       zip:
         type: string
     type: object
+  dto.SellerWithdrawRequest:
+    properties:
+      amount:
+        type: number
+      payment:
+        type: string
+    type: object
   dto.SuccessResponse:
     properties:
       data: {}
@@ -346,19 +367,31 @@ definitions:
   dto.Transaction:
     properties:
       amount:
-        minimum: 0
         type: number
       data:
         type: string
-      product:
-        items:
-          type: string
-        type: array
+      orderID:
+        type: string
+      payment:
+        type: string
+      type:
+        $ref: '#/definitions/dto.TransactionType'
     type: object
+  dto.TransactionType:
+    enum:
+    - credit
+    - debit
+    type: string
+    x-enum-comments:
+      Credit: Money added
+      Debit: Money withdrawn
+    x-enum-varnames:
+    - Credit
+    - Debit
   dto.UpdateCartRequest:
     properties:
-      productID:
-        type: string
+      product:
+        $ref: '#/definitions/dto.Product'
     type: object
   model.Buyer:
     properties:
@@ -368,7 +401,7 @@ definitions:
         type: string
       cart:
         items:
-          type: string
+          $ref: '#/definitions/dto.Product'
         type: array
       city:
         type: string
@@ -424,6 +457,8 @@ definitions:
     properties:
       address:
         type: string
+      balance:
+        type: number
       city:
         type: string
       name:
@@ -458,10 +493,12 @@ definitions:
         type: number
       data:
         type: string
-      product:
-        items:
-          type: string
-        type: array
+      orderID:
+        type: string
+      payment:
+        type: string
+      type:
+        $ref: '#/definitions/dto.TransactionType'
     type: object
 info:
   contact: {}
@@ -1736,35 +1773,30 @@ paths:
       summary: Get a seller's total balance by ID
       tags:
       - seller
-  /seller/{seller_id}/transaction:
+  /seller/{seller_id}/withdraw:
     post:
       consumes:
       - application/json
-      description: Append transaction to seller transactions
+      description: Deduct seller balance & add debit transaction
       parameters:
       - description: Seller ID
         in: path
         name: seller_id
         required: true
         type: string
-      - description: Transaction to append
+      - description: Withdraw detail
         in: body
-        name: transaction
+        name: seller
         required: true
         schema:
-          $ref: '#/definitions/dto.Transaction'
+          $ref: '#/definitions/dto.SellerWithdrawRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            allOf:
-            - $ref: '#/definitions/dto.SuccessResponse'
-            - properties:
-                data:
-                  $ref: '#/definitions/dto.Transaction'
-              type: object
+            $ref: '#/definitions/dto.SuccessResponse'
         "400":
           description: Bad Request
           schema:
@@ -1773,7 +1805,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Add a transaction by sellerID
+      summary: Withdraw Seller Balance by sellerID
       tags:
       - seller
 swagger: "2.0"

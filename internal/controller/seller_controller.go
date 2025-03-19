@@ -15,8 +15,8 @@ type ISellerController interface {
 	GetSellerByID(c *gin.Context)
 	GetSellers(c *gin.Context)
 	UpdateSeller(c *gin.Context)
-	AddTransaction(c *gin.Context)
 	GetSellerBalanceByID(c *gin.Context)
+	WithdrawSellerBalance(c *gin.Context)
 }
 
 type SellerController struct {
@@ -205,19 +205,19 @@ func (s SellerController) UpdateSeller(c *gin.Context) {
 	})
 }
 
-// AddTransaction godoc
-// @Summary Add a transaction by sellerID
-// @Description Append transaction to seller transactions
+// WithdrawSellerBalance godoc
+// @Summary Withdraw Seller Balance by sellerID
+// @Description Deduct seller balance & add debit transaction
 // @Tags seller
 // @Accept json
 // @Produce json
 // @Param seller_id path string true "Seller ID"
-// @Param transaction body dto.Transaction true "Transaction to append"
-// @Success 201 {object} dto.SuccessResponse{data=dto.Transaction}
+// @Param seller body dto.SellerWithdrawRequest true "Withdraw detail"
+// @Success 201 {object} dto.SuccessResponse
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /seller/{seller_id}/transaction [post]
-func (s SellerController) AddTransaction(c *gin.Context) {
+// @Router /seller/{seller_id}/withdraw [post]
+func (s SellerController) WithdrawSellerBalance(c *gin.Context) {
 	sellerIDstr := c.Param("seller_id")
 	userID, exists := c.Get("userID")
 	if userID != sellerIDstr || !exists {
@@ -239,8 +239,8 @@ func (s SellerController) AddTransaction(c *gin.Context) {
 		return
 	}
 
-	var newTransaction dto.Transaction
-	if err := c.ShouldBindJSON(&newTransaction); err != nil {
+	var req dto.SellerWithdrawRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Success: false,
 			Status:  http.StatusBadRequest,
@@ -249,20 +249,19 @@ func (s SellerController) AddTransaction(c *gin.Context) {
 		})
 		return
 	}
-	res, err := s.sellerService.AddTransaction(sellerID, &newTransaction)
+	err = s.sellerService.WithdrawSellerBalance(sellerID, req.Payment, req.Amount)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
 			Status:  http.StatusInternalServerError,
-			Error:   "Failed to add transaction",
+			Error:   "Failed to withdraw from balance",
 			Message: err.Error()})
 		return
 	}
 	c.JSON(http.StatusCreated, dto.SuccessResponse{
 		Success: true,
 		Status:  http.StatusCreated,
-		Message: "Add transaction success",
-		Data:    res,
+		Message: "Withdrawal success",
 	})
 }
 

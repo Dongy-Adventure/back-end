@@ -1,8 +1,7 @@
 package dto
 
 import (
-	"time"
-
+	
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -19,6 +18,7 @@ type Seller struct {
 	City        string             `json:"city"`
 	Zip         string             `json:"zip"`
 	Transaction []Transaction      `json:"transaction"`
+	Balance     float64            `json:"balance"`
 }
 
 type SellerRegisterRequest struct {
@@ -35,8 +35,7 @@ type SellerRegisterRequest struct {
 	Zip         string  `json:"zip"`
 }
 
-type Transaction struct {
-	Amount  float64   `json:"amount" bson:"amount" binding:"min=0"`
-	Product []string  `json:"product" bson:"product"`
-	Date    time.Time `json:"data" bson:"date"`
+type SellerWithdrawRequest struct {
+	Payment     string             `json:"payment"`
+	Amount  float64   		      `json:"amount"`
 }
