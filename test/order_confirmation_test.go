@@ -40,11 +40,14 @@ func InitializeOrderConfirmationScenario(ctx *godog.ScenarioContext) {
 func aBuyerWithIDExists(buyerIDStr string) error {
 	var err error
 	buyerID, err = primitive.ObjectIDFromHex(buyerIDStr)
+	buyerName := "Test"
+
 	if err != nil {
 		return fmt.Errorf("invalid buyerID format: %v", err)
 	}
 	buyer := &dto.Buyer{
 		BuyerID: buyerID,
+		Username: buyerName,
 		Cart:    []dto.Product{},
 	}
 
@@ -115,7 +118,9 @@ func anOrderCreated(expectedStatus int) error {
 	requestBody := dto.OrderCreateRequest{
 		Products: []dto.Product{product}, // Ensure 'product' is defined in the test context
 		BuyerID:  buyerID,                // Ensure 'buyerID' is defined in the test context
-		SellerID: buyerID,                // Ensure 'sellerID' is defined in the test context
+		SellerID: sellerID,                // Ensure 'sellerID' is defined in the test context
+		SellerName: "Test",
+		BuyerName: "Test",
 	}
 
 	jsonBody, err := json.Marshal(requestBody)
@@ -125,7 +130,7 @@ func anOrderCreated(expectedStatus int) error {
 
 	if paymentSuccess {
 		mockOrderService.EXPECT().
-			CreateOrder(gomock.Any(), buyerID, buyerID).
+			CreateOrder(gomock.Any(), buyerID, sellerID, "Test", "Test").
 			Return(&dto.Order{
 				OrderID:   primitive.NewObjectID(),
 				BuyerID:   buyerID,
@@ -136,7 +141,7 @@ func anOrderCreated(expectedStatus int) error {
 	} else {
 		// Handle payment failure scenario
 		mockOrderService.EXPECT().
-			CreateOrder(gomock.Any(), buyerID, buyerID).
+			CreateOrder(gomock.Any(), buyerID, sellerID, "Test", "Test").
 			Return(nil, fmt.Errorf("payment failed")).Times(1)
 	}
 
