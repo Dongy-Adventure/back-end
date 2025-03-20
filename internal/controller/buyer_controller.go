@@ -216,16 +216,16 @@ func (s BuyerController) UpdateBuyer(c *gin.Context) {
 
 // UpdateProductInCart godoc
 // @Summary Update a product in buyer's cart
-// @Description Adds the product if not in the cart, removes it if already in the cart
+// @Description Adds the product with specified amount if not in the cart, set amount if already in the cart
 // @Tags buyer
 // @Accept json
 // @Produce json
 // @Param buyer_id path string true "Buyer ID"
-// @Param product_id body dto.UpdateCartRequest true "Product ID to add/remove"
-// @Success 200 {object} dto.SuccessResponse{data=[]primitive.ObjectID}
+// @Param orderProduct body dto.OrderProduct true "Product to update in cart"
+// @Success 200 {object} dto.SuccessResponse{data=[]dto.OrderProduct}
 // @Failure 400 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
-// @Router /buyer/{buyer_id}/cart [patch]
+// @Router /buyer/{buyer_id}/cart [post]
 func (s BuyerController) UpdateProductInCart(c *gin.Context) {
 	buyerIDStr := c.Param("buyer_id")
 	userID, exists := c.Get("userID")
@@ -251,7 +251,7 @@ func (s BuyerController) UpdateProductInCart(c *gin.Context) {
 		return
 	}
 
-	var request dto.Product
+	var request dto.OrderProduct
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Success: false,

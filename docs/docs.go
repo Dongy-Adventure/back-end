@@ -720,8 +720,8 @@ const docTemplate = `{
             }
         },
         "/buyer/{buyer_id}/cart": {
-            "patch": {
-                "description": "Adds the product if not in the cart, removes it if already in the cart",
+            "post": {
+                "description": "Adds the product with specified amount if not in the cart, set amount if already in the cart",
                 "consumes": [
                     "application/json"
                 ],
@@ -741,12 +741,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Product ID to add/remove",
-                        "name": "product_id",
+                        "description": "Product to update in cart",
+                        "name": "orderProduct",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateCartRequest"
+                            "$ref": "#/definitions/dto.OrderProduct"
                         }
                     }
                 ],
@@ -764,7 +764,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "type": "string"
+                                                "$ref": "#/definitions/dto.OrderProduct"
                                             }
                                         }
                                     }
@@ -2234,7 +2234,7 @@ const docTemplate = `{
                 "cart": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.Product"
+                        "$ref": "#/definitions/dto.OrderProduct"
                     }
                 },
                 "city": {
@@ -2734,14 +2734,6 @@ const docTemplate = `{
                 "Debit"
             ]
         },
-        "dto.UpdateCartRequest": {
-            "type": "object",
-            "properties": {
-                "product": {
-                    "$ref": "#/definitions/dto.Product"
-                }
-            }
-        },
         "model.Buyer": {
             "type": "object",
             "properties": {
@@ -2754,7 +2746,7 @@ const docTemplate = `{
                 "cart": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.Product"
+                        "$ref": "#/definitions/model.OrderProduct"
                     }
                 },
                 "city": {
@@ -2782,6 +2774,21 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "zip": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OrderProduct": {
+            "type": "object",
+            "required": [
+                "amount"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "productID": {
                     "type": "string"
                 }
             }

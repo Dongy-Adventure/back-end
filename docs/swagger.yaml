@@ -59,7 +59,7 @@ definitions:
         type: string
       cart:
         items:
-          $ref: '#/definitions/dto.Product'
+          $ref: '#/definitions/dto.OrderProduct'
         type: array
       city:
         type: string
@@ -388,11 +388,6 @@ definitions:
     x-enum-varnames:
     - Credit
     - Debit
-  dto.UpdateCartRequest:
-    properties:
-      product:
-        $ref: '#/definitions/dto.Product'
-    type: object
   model.Buyer:
     properties:
       address:
@@ -401,7 +396,7 @@ definitions:
         type: string
       cart:
         items:
-          $ref: '#/definitions/dto.Product'
+          $ref: '#/definitions/model.OrderProduct'
         type: array
       city:
         type: string
@@ -421,6 +416,16 @@ definitions:
         type: string
       zip:
         type: string
+    type: object
+  model.OrderProduct:
+    properties:
+      amount:
+        minimum: 0
+        type: integer
+      productID:
+        type: string
+    required:
+    - amount
     type: object
   model.Product:
     properties:
@@ -932,23 +937,23 @@ paths:
       tags:
       - buyer
   /buyer/{buyer_id}/cart:
-    patch:
+    post:
       consumes:
       - application/json
-      description: Adds the product if not in the cart, removes it if already in the
-        cart
+      description: Adds the product with specified amount if not in the cart, set
+        amount if already in the cart
       parameters:
       - description: Buyer ID
         in: path
         name: buyer_id
         required: true
         type: string
-      - description: Product ID to add/remove
+      - description: Product to update in cart
         in: body
-        name: product_id
+        name: orderProduct
         required: true
         schema:
-          $ref: '#/definitions/dto.UpdateCartRequest'
+          $ref: '#/definitions/dto.OrderProduct'
       produces:
       - application/json
       responses:
@@ -960,7 +965,7 @@ paths:
             - properties:
                 data:
                   items:
-                    type: string
+                    $ref: '#/definitions/dto.OrderProduct'
                   type: array
               type: object
         "400":
