@@ -4,12 +4,13 @@ import (
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 )
 
 type Order struct {
 	OrderID       primitive.ObjectID `json:"orderID,omitempty" bson:"_id,omitempty"`
 	Status        int16              `json:"status" bson:"status"`
-	Products      []OrderProduct  `json:"products" bson:"products"`
+	Products      []dto.OrderProduct  `json:"products" bson:"products"`
 	AppointmentID primitive.ObjectID `json:"appointmentID" bson:"appointmentID"`
 	SellerID      primitive.ObjectID `json:"sellerID" bson:"sellerID"`
 	SellerName    string             `json:"sellerName" bson:"sellerName"`
@@ -20,7 +21,3 @@ type Order struct {
 	Payment     string               `json:"payment" bson:"payment"`
 }
 
-type OrderProduct struct {
-	ProductID primitive.ObjectID `json:"productID"`
-	Amount  int                  `json:"amount"`  
- }
