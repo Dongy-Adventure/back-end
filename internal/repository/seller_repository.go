@@ -8,6 +8,7 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/pkg/utils/converter"
+	"github.com/Dongy-s-Advanture/back-end/internal/enum/transactiontype"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -209,7 +210,7 @@ func (r SellerRepository) DepositSellerBalance(sellerID primitive.ObjectID,order
 	defer cancel()
 
 	transaction := model.Transaction{
-		Type:    dto.Credit,
+		Type:    transactiontype.CREDIT,
 		Amount:  amount,
 		OrderID: orderID,
 		Payment: payment,
@@ -241,7 +242,7 @@ func (r SellerRepository) WithdrawSellerBalance(sellerID primitive.ObjectID ,pay
 	}
 
 	transaction := model.Transaction{
-		Type:    dto.Debit,
+		Type:    transactiontype.DEBIT,
 		Amount:  -amount,
 		Payment: payment,
 		Date:    time.Now(),
