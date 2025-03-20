@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
+	"github.com/Dongy-s-Advanture/back-end/pkg/utils/converter"
 	"github.com/Dongy-s-Advanture/back-end/internal/repository"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
@@ -13,7 +14,8 @@ type IBuyerService interface {
 	GetBuyer() ([]dto.Buyer, error)
 	CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error)
 	UpdateBuyerData(buyerID primitive.ObjectID, updatedBuyer *model.Buyer) (*dto.Buyer, error)
-	UpdateProductInCart(buyerID primitive.ObjectID, product dto.Product) ([]dto.Product, error)
+	UpdateProductInCart(buyerID primitive.ObjectID, product dto.OrderProduct) ([]dto.OrderProduct, error)
+	DeleteProductFromCart(buyerID, productID primitive.ObjectID) error
 }
 
 type BuyerService struct {
@@ -84,11 +86,26 @@ func (s BuyerService) UpdateBuyerData(buyerID primitive.ObjectID, updatedBuyer *
 	return updatedBuyerDTO, nil
 }
 
-func (s BuyerService) UpdateProductInCart(buyerID primitive.ObjectID, product dto.Product) ([]dto.Product, error) {
-	updatedCart, err := s.buyerRepository.UpdateProductInCart(buyerID, product)
+func (s BuyerService) UpdateProductInCart(buyerID primitive.ObjectID, product dto.OrderProduct) ([]dto.OrderProduct, error) {
+
+	productModel, err := converter.OrderProductDTOToModel(&product)
+	if err != nil {
+		return nil, err
+	}
+
+	updatedCart, err := s.buyerRepository.UpdateProductInCart(buyerID, productModel)
 	if err != nil {
 		return nil, err
 	}
 	return updatedCart, nil
 
+}
+
+func (s BuyerService) DeleteProductFromCart(buyerID, productID primitive.ObjectID) error {
+	err := s.buyerRepository.DeleteProductFromCart(buyerID, productID)
+	if err != nil {
+		return err 
+	}
+
+	return nil 
 }

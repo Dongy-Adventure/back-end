@@ -1,12 +1,14 @@
 package repository
 
 import (
+	"errors"
 	"context"
 	"time"
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/pkg/utils/converter"
+	"github.com/Dongy-s-Advanture/back-end/internal/enum/transactiontype"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,10 +20,11 @@ type ISellerRepository interface {
 	CreateSellerData(seller *model.Seller) (*dto.Seller, error)
 	GetSellerByUsername(req *dto.LoginRequest) (*model.Seller, error)
 	UpdateSeller(sellerID primitive.ObjectID, updatedSeller *model.Seller) (*dto.Seller, error)
-	AddTransaction(sellerID primitive.ObjectID, transaction *dto.Transaction) (*dto.Transaction, error)
-	// GetTransactions(sellerID primitive.ObjectID) ([]dto.Transaction, error)
 	UpdateSellerScore(sellerID primitive.ObjectID) error
 	GetSellerBalanceByID(sellerID primitive.ObjectID) (float64, error)
+	DepositSellerBalance(sellerID primitive.ObjectID,orderID primitive.ObjectID,payment string, amount float64) error
+	WithdrawSellerBalance(sellerID primitive.ObjectID,payment string, amount float64) error
+ 
 }
 
 type SellerRepository struct {
@@ -79,6 +82,8 @@ func (r SellerRepository) CreateSellerData(seller *model.Seller) (*dto.Seller, e
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	seller.SellerID = primitive.NewObjectID()
+	seller.Balance = 0
+	seller.Transaction = []model.Transaction{}
 	result, err := r.sellerCollection.InsertOne(ctx, seller)
 	if err != nil {
 		return nil, err
@@ -139,29 +144,6 @@ func (r SellerRepository) UpdateSeller(sellerID primitive.ObjectID, updatedSelle
 
 	return converter.SellerModelToDTO(newUpdatedSeller)
 }
-func (r SellerRepository) AddTransaction(sellerID primitive.ObjectID, transaction *dto.Transaction) (*dto.Transaction, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-	defer cancel()
-	filter := bson.M{"_id": sellerID}
-	update := bson.M{"$push": bson.M{"transaction": transaction}}
-	_, err := r.sellerCollection.UpdateOne(ctx, filter, update)
-	if err != nil {
-		return nil, err
-	}
-	return transaction, nil
-}
-
-// func (r SellerRepository) GetTransactions(sellerID primitive.ObjectID) ([]dto.Transaction, error) {
-// 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
-// 	defer cancel()
-// 	var seller model.Seller
-// 	filter := bson.M{"_id": sellerID}
-// 	err := r.sellerCollection.FindOne(ctx, filter).Decode(&seller)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-// 	return seller.Transaction, nil
-// }
 
 func (r SellerRepository) UpdateSellerScore(sellerID primitive.ObjectID) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
@@ -217,10 +199,62 @@ func (r SellerRepository) GetSellerBalanceByID(sellerID primitive.ObjectID) (flo
 		return 0, err
 	}
 
-	var totalBalance float64
-	for _, transaction := range seller.Transaction {
-		totalBalance += transaction.Amount
-	}
+	totalBalance := seller.Balance
 
 	return totalBalance, nil
 }
+
+func (r SellerRepository) DepositSellerBalance(sellerID primitive.ObjectID,orderID primitive.ObjectID,payment string, amount float64) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	transaction := model.Transaction{
+		Type:    transactiontype.CREDIT,
+		Amount:  amount,
+		OrderID: orderID,
+		Payment: payment,
+		Date:    time.Now(),
+	}
+
+	// Update Seller Balance & Add Transaction 
+	update := bson.M{
+		"$inc": bson.M{"balance": amount},          // Increase balance
+		"$push": bson.M{"transaction": transaction}, // Add transaction record
+	}
+
+	_, err := r.sellerCollection.UpdateOne(ctx, bson.M{"_id": sellerID}, update)
+	return err
+}
+
+func (r SellerRepository) WithdrawSellerBalance(sellerID primitive.ObjectID ,payment string, amount float64) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	var seller model.Seller
+	err := r.sellerCollection.FindOne(ctx, bson.M{"_id": sellerID}).Decode(&seller)
+	if err != nil {
+		return err
+	}
+
+	if seller.Balance < amount {
+		return errors.New("insufficient balance")
+	}
+
+	transaction := model.Transaction{
+		Type:    transactiontype.DEBIT,
+		Amount:  -amount,
+		Payment: payment,
+		Date:    time.Now(),
+	}
+
+	// Update balance & add transaction
+	update := bson.M{
+		"$inc": bson.M{"balance": -amount},         // Decrease balance
+		"$push": bson.M{"transaction": transaction}, // Log transaction
+	}
+
+	_, err = r.sellerCollection.UpdateOne(ctx, bson.M{"_id": sellerID}, update)
+	return err
+}
+
+

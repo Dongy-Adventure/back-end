@@ -24,7 +24,7 @@ var (
 	testResponse           *http.Response
 	buyerID                primitive.ObjectID
 	sellerID               primitive.ObjectID
-	product                dto.Product
+	product                dto.OrderProduct
 	textResponse           string
 )
 

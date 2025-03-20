@@ -36,20 +36,20 @@ func (m *MockISellerService) EXPECT() *MockISellerServiceMockRecorder {
 	return m.recorder
 }
 
-// AddTransaction mocks base method.
-func (m *MockISellerService) AddTransaction(sellerID primitive.ObjectID, transaction *dto.Transaction) (*dto.Transaction, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddTransaction", sellerID, transaction)
-	ret0, _ := ret[0].(*dto.Transaction)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
+// // AddTransaction mocks base method.
+// func (m *MockISellerService) AddTransaction(sellerID primitive.ObjectID, transaction *dto.Transaction) (*dto.Transaction, error) {
+// 	m.ctrl.T.Helper()
+// 	ret := m.ctrl.Call(m, "AddTransaction", sellerID, transaction)
+// 	ret0, _ := ret[0].(*dto.Transaction)
+// 	ret1, _ := ret[1].(error)
+// 	return ret0, ret1
+// }
 
-// AddTransaction indicates an expected call of AddTransaction.
-func (mr *MockISellerServiceMockRecorder) AddTransaction(sellerID, transaction interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTransaction", reflect.TypeOf((*MockISellerService)(nil).AddTransaction), sellerID, transaction)
-}
+// // AddTransaction indicates an expected call of AddTransaction.
+// func (mr *MockISellerServiceMockRecorder) AddTransaction(sellerID, transaction interface{}) *gomock.Call {
+// 	mr.mock.ctrl.T.Helper()
+// 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTransaction", reflect.TypeOf((*MockISellerService)(nil).AddTransaction), sellerID, transaction)
+// }
 
 // CreateSellerData mocks base method.
 func (m *MockISellerService) CreateSellerData(seller *model.Seller) (*dto.Seller, error) {
