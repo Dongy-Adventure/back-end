@@ -50,7 +50,7 @@ func (r ProductRepository) GetProductsBySellerID(sellerID primitive.ObjectID) ([
 
 	var productList []dto.Product
 
-	dataList, err := r.productCollection.Find(ctx, bson.M{"seller_id": sellerID})
+	dataList, err := r.productCollection.Find(ctx, bson.M{"sellerID": sellerID})
 	if err != nil {
 		return nil, err
 	}
