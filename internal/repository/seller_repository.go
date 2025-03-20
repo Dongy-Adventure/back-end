@@ -199,8 +199,7 @@ func (r SellerRepository) GetSellerBalanceByID(sellerID primitive.ObjectID) (flo
 		return 0, err
 	}
 
-	var totalBalance float64 
-	totalBalance = seller.Balance
+	totalBalance := seller.Balance
 
 	return totalBalance, nil
 }
