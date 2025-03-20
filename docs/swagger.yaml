@@ -979,6 +979,40 @@ paths:
       summary: Update a product in buyer's cart
       tags:
       - buyer
+  /buyer/{buyer_id}/cart/{product_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the product with the specified productID from the cart
+      parameters:
+      - description: Buyer ID
+        in: path
+        name: buyer_id
+        required: true
+        type: string
+      - description: Product ID to delete from cart
+        in: path
+        name: product_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete a product from the buyer's cart
+      tags:
+      - buyer
   /buyer/{id}:
     put:
       consumes:

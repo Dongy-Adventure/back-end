@@ -22,5 +22,6 @@ func (r Router) AddBuyerRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
 	buyerRouter.GET("/:buyer_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.GetBuyerByID)
 	buyerRouter.PUT("/:buyer_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.UpdateBuyer)
 	buyerRouter.POST("/:buyer_id/cart", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.UpdateProductInCart)
+	buyerRouter.DELETE("/:buyer_id/cart/:product_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.DeleteProductFromCart)
 
 }

@@ -3,6 +3,7 @@ package repository
 import (
 	"context"
 	"time"
+	"fmt"
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
@@ -18,7 +19,8 @@ type IBuyerRepository interface {
 	CreateBuyerData(buyer *model.Buyer) (*dto.Buyer, error)
 	GetBuyerByUsername(req *dto.LoginRequest) (*model.Buyer, error)
 	UpdateBuyerData(buyerID primitive.ObjectID, updatedBuyer *model.Buyer) (*dto.Buyer, error)
-	UpdateProductInCart(buyerID primitive.ObjectID, product dto.OrderProduct) ([]dto.OrderProduct, error)
+	UpdateProductInCart(buyerID primitive.ObjectID, product *model.OrderProduct) ([]dto.OrderProduct, error)
+	DeleteProductFromCart(buyerID, productID primitive.ObjectID) error
 }
 
 type BuyerRepository struct {
@@ -137,12 +139,12 @@ func (r *BuyerRepository) UpdateBuyerData(buyerID primitive.ObjectID, updatedBuy
 	return converter.BuyerModelToDTO(newUpdatedBuyer)
 }
 
-func (r *BuyerRepository) UpdateProductInCart(buyerID primitive.ObjectID, product dto.OrderProduct) ([]dto.OrderProduct, error) {
+func (r *BuyerRepository) UpdateProductInCart(buyerID primitive.ObjectID, product *model.OrderProduct) ([]dto.OrderProduct, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	var buyer struct {
-		Cart []dto.OrderProduct `bson:"cart"`
+		Cart []model.OrderProduct `bson:"cart"` 
 	}
 	err := r.buyerCollection.FindOne(ctx, bson.M{"_id": buyerID}).Decode(&buyer)
 	if err != nil {
@@ -159,9 +161,8 @@ func (r *BuyerRepository) UpdateProductInCart(buyerID primitive.ObjectID, produc
 		}
 	}
 
-	// If not found, add the product
 	if !found {
-		buyer.Cart = append(buyer.Cart, product)
+		buyer.Cart = append(buyer.Cart, *product) 
 	}
 
 	_, err = r.buyerCollection.UpdateOne(
@@ -173,5 +174,34 @@ func (r *BuyerRepository) UpdateProductInCart(buyerID primitive.ObjectID, produc
 		return nil, err
 	}
 
-	return buyer.Cart, nil
+	var updatedCart []dto.OrderProduct
+	for _, p := range buyer.Cart {
+		productDTO, err := converter.OrderProductModelToDTO(&p)
+		if err != nil {
+			return nil, err
+		}
+		updatedCart = append(updatedCart, *productDTO)
+	}
+
+	return updatedCart, nil
 }
+
+
+func (r *BuyerRepository) DeleteProductFromCart(buyerID, productID primitive.ObjectID) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	filter := bson.M{"_id": buyerID}
+	update := bson.M{"$pull": bson.M{"cart": bson.M{"productID": productID}}}
+
+	result, err := r.buyerCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+	if result.ModifiedCount == 0 {
+		return fmt.Errorf("product not found in cart or already removed")
+	}
+
+	return nil
+}
+

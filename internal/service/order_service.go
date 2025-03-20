@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"time"
-	"log"
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/enum/orderstatus"
@@ -88,8 +87,6 @@ func (s OrderService) CreateOrder(products []dto.OrderProduct, buyerID primitive
 			return nil, err
 		}
 	}
-
-	log.Printf("Creating order with ID: %v", orderID)
 
 
 	return s.orderRepository.CreateOrder(&model.Order{

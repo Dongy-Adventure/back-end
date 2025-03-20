@@ -21,7 +21,7 @@ type Order struct {
 }
 
 type OrderProduct struct {
-	ProductID primitive.ObjectID    `json:"productID" bson:"_id"`
+	ProductID primitive.ObjectID    `json:"productID" bson:"productID"`
 	Amount  int                     `json:"amount" bson:"amount" binding:"required,gte=0"`
 }
  
