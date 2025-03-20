@@ -6,6 +6,7 @@ package mock
 
 import (
 	reflect "reflect"
+	"fmt"
 
 	dto "github.com/Dongy-s-Advanture/back-end/internal/dto"
 	userrole "github.com/Dongy-s-Advanture/back-end/internal/enum/userrole"
@@ -41,6 +42,9 @@ func (m *MockIOrderService) EXPECT() *MockIOrderServiceMockRecorder {
 func (m *MockIOrderService) CreateOrder(products []dto.OrderProduct, buyerID, sellerID primitive.ObjectID, sellerName string, buyerName string, payment string) (*dto.Order, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CreateOrder", products, buyerID, sellerID, sellerName, buyerName, payment)
+	if len(ret) == 0 || ret[0] == nil {
+		return nil, fmt.Errorf("CreateOrder returned nil")
+	 }
 	ret0, _ := ret[0].(*dto.Order)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -82,11 +86,12 @@ func (mr *MockIOrderServiceMockRecorder) GetOrdersByUserID(userID, userType inte
 }
 
 // GetTotalPrice mocks base method.
-func (m *MockIOrderService) GetTotalPrice(products []dto.OrderProduct) float64 {
+func (m *MockIOrderService) GetTotalPrice(products []dto.OrderProduct) (float64, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetTotalPrice", products)
 	ret0, _ := ret[0].(float64)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1 // return both value and error
 }
 
 // GetTotalPrice indicates an expected call of GetTotalPrice.
