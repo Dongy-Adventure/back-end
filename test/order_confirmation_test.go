@@ -20,7 +20,7 @@ import (
 
 var paymentSuccess bool
 var productOutOfStock bool
-var cart []dto.Product
+var cart []dto.OrderProduct
 
 func InitializeOrderConfirmationScenario(ctx *godog.ScenarioContext) {
 	SetUpRouter()
@@ -48,7 +48,7 @@ func aBuyerWithIDExists(buyerIDStr string) error {
 	buyer := &dto.Buyer{
 		BuyerID: buyerID,
 		Username: buyerName,
-		Cart:    []dto.Product{},
+		Cart:    []dto.OrderProduct{},
 	}
 
 	mockBuyerService.EXPECT().
@@ -76,16 +76,13 @@ func aProductWithIDExistsInTheBuyerCart(productIDStr string) error {
 			return nil
 		}
 	}
-	newProduct := dto.Product{
+	newProduct := dto.OrderProduct{
 		ProductID:   productID,
-		ProductName: "New Product",
-		Price:       200.0,
 		Amount:      1,
-		SellerID:    buyerID,
 	}
 	mockBuyerService.EXPECT().
 		UpdateProductInCart(buyerID, newProduct).
-		Return([]dto.Product{newProduct}, nil)
+		Return([]dto.OrderProduct{newProduct}, nil) 
 	newCart, err := mockBuyerService.UpdateProductInCart(buyerID, newProduct)
 	if err != nil {
 		return fmt.Errorf("failed to update product in cart: %v", err)
@@ -116,7 +113,7 @@ func thePaymentStatusIs(status string) error {
 func anOrderCreated(expectedStatus int) error {
 	// Create a mock order request
 	requestBody := dto.OrderCreateRequest{
-		Products: []dto.Product{product}, // Ensure 'product' is defined in the test context
+		Products: []dto.OrderProduct{product}, // Ensure 'product' is defined in the test context
 		BuyerID:  buyerID,                // Ensure 'buyerID' is defined in the test context
 		SellerID: sellerID,                // Ensure 'sellerID' is defined in the test context
 		SellerName: "Test",
@@ -131,18 +128,18 @@ func anOrderCreated(expectedStatus int) error {
 
 	if paymentSuccess {
 		mockOrderService.EXPECT().
-			CreateOrder(gomock.Any(), buyerID, sellerID, "Test", "Test").
+			CreateOrder(gomock.Any(), buyerID, sellerID, "Test", "Test", "Paypal").
 			Return(&dto.Order{
 				OrderID:   primitive.NewObjectID(),
 				BuyerID:   buyerID,
-				SellerID:  buyerID,
-				Products:  []dto.Product{product},
+				SellerID:  sellerID,
+				Products:  []dto.OrderProduct{product},
 				CreatedAt: time.Now(),
 			}, nil).Times(1)
 	} else {
 		// Handle payment failure scenario
 		mockOrderService.EXPECT().
-			CreateOrder(gomock.Any(), buyerID, sellerID, "Test", "Test").
+			CreateOrder(gomock.Any(), buyerID, sellerID, "Test", "Test", "Paypal").
 			Return(nil, fmt.Errorf("payment failed")).Times(1)
 	}
 

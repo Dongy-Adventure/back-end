@@ -49,11 +49,12 @@ func anOrderWithIDIsCreated(id string) error {
 	orderID = orderIDPrimitive
 
 	requestBody := dto.OrderCreateRequest{
-		Products: []dto.Product{product}, // Ensure 'product' is defined in the test context
+		Products: []dto.OrderProduct{product}, // Ensure 'product' is defined in the test context
 		BuyerID:  buyerID,                // Ensure 'buyerID' is defined in the test context
 		SellerID: sellerID,               // Ensure 'sellerID' is defined in the test context
 		SellerName: "Test",
 		BuyerName: "Test",
+		Payment: "Test",
 	}
 
 	jsonBody, err := json.Marshal(requestBody)
@@ -62,14 +63,15 @@ func anOrderWithIDIsCreated(id string) error {
 	}
 
 	mockOrderService.EXPECT().
-		CreateOrder(gomock.Any(), buyerID, sellerID, "Test", "Test").
+		CreateOrder(gomock.Any(), buyerID, sellerID, "Test", "Test", "Test").
 		Return(&dto.Order{
 			OrderID:    primitive.NewObjectID(),
 			BuyerID:    buyerID,
 			SellerID:   sellerID,
 			SellerName: "Test",
 			BuyerName:  "Test",
-			Products:   []dto.Product{},
+			Payment: "Test",
+			Products:   []dto.OrderProduct{},
 			CreatedAt:  time.Now(),
 		}, nil).Times(1)
 
