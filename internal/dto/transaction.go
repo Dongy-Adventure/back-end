@@ -12,7 +12,7 @@ type Transaction struct {
 	Amount  float64   		   `json:"amount"`
 	OrderID  primitive.ObjectID `json:"orderID,omitempty"`
 	Payment  string             `json:"payment"`
-	Date    time.Time            `json:"data"`
+	Date    time.Time            `json:"date"`
 }
 
 
