@@ -74,7 +74,7 @@ func setUp(mongoDB *mongo.Database, redisDB *redis.Client) {
 	appointmentCont = controller.NewAppointmentController(appointmentServ)
 
 	orderRepo = repository.NewOrderRepository(mongoDB, "orders")
-	orderServ = service.NewOrderService(orderRepo, appointmentRepo, sellerRepo)
+	orderServ = service.NewOrderService(orderRepo, appointmentRepo, sellerRepo, productRepo)
 	orderCont = controller.NewOrderController(orderServ)
 }
 

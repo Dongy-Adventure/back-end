@@ -14,9 +14,9 @@ import (
 )
 
 type IOrderService interface {
-	CreateOrder(products []dto.OrderProduct, buyerID primitive.ObjectID, sellerID primitive.ObjectID, sellerName string, buyerName string,payment string) (*dto.Order, error)
+	CreateOrder(products []dto.OrderProduct, buyerID primitive.ObjectID, sellerID primitive.ObjectID, sellerName string, buyerName string, payment string) (*dto.Order, error)
 	GetOrdersByUserID(userID primitive.ObjectID, userType userrole.UserType) ([]dto.Order, error)
-	GetTotalPrice(products []dto.OrderProduct) (float64,error)
+	GetTotalPrice(products []dto.OrderProduct) (float64, error)
 	DeleteOrderByOrderID(orderID primitive.ObjectID) error
 	UpdateOrder(orderID primitive.ObjectID, updatedOrder *model.Order) (*dto.Order, error)
 	UpdateOrderStatus(orderID primitive.ObjectID, orderStatus int) (int, error)
@@ -26,6 +26,8 @@ type OrderService struct {
 	orderRepository       repository.IOrderRepository
 	appointmentRepository repository.IAppointmentRepository
 	sellerRepository      repository.ISellerRepository
+	productRepository     repository.IProductRepository
+}
 
 func NewOrderService(r repository.IOrderRepository, a repository.IAppointmentRepository, sr repository.ISellerRepository, p repository.IProductRepository) IOrderService {
 	return OrderService{orderRepository: r, appointmentRepository: a, sellerRepository: sr, productRepository: p}
@@ -39,9 +41,9 @@ func (s OrderService) CreateOrder(products []dto.OrderProduct, buyerID primitive
 	var productsModel []model.OrderProduct
 	for _, product := range products {
 		stockProduct, err := s.productRepository.GetProductByID(product.ProductID)
-			if err != nil {
-				return nil, err
-			}
+		if err != nil {
+			return nil, err
+		}
 
 		if stockProduct.Amount < product.Amount {
 			return nil, fmt.Errorf("not enough stock for product %s", stockProduct.ProductName)
@@ -64,14 +66,12 @@ func (s OrderService) CreateOrder(products []dto.OrderProduct, buyerID primitive
 	if err != nil {
 		return nil, err
 	}
-	
 
-	// Get total price 
-	totalPrice,err := s.GetTotalPrice(products)
+	// Get total price
+	totalPrice, err := s.GetTotalPrice(products)
 	if err != nil {
 		return nil, err
 	}
-
 
 	// Add transaction and update (+deposit) seller balance
 	err = s.sellerRepository.DepositSellerBalance(sellerID, orderID, payment, totalPrice)
@@ -87,7 +87,6 @@ func (s OrderService) CreateOrder(products []dto.OrderProduct, buyerID primitive
 		}
 	}
 
-
 	return s.orderRepository.CreateOrder(&model.Order{
 		OrderID:       orderID,
 		Status:        orderstatus.WAITFORLOCATION,
@@ -98,34 +97,12 @@ func (s OrderService) CreateOrder(products []dto.OrderProduct, buyerID primitive
 		SellerID:      sellerID,
 		TotalPrice:    totalPrice,
 		SellerName:    sellerName,
-		TotalPrice:    totalPrice,
 		Payment:       payment,
 		CreatedAt:     time.Now(),
 	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = s.sellerRepository.UpdateSellerBalance(sellerID, totalPrice)
-
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = s.sellerRepository.AddTransaction(sellerID, &dto.Transaction{
-		Amount:        totalPrice,
-		Product:       products,
-		Date:          time.Now(),
-		PaymentMethod: "PromptPay",
-	})
-	if err != nil {
-		return nil, err
-	}
-	return newOrder, nil
 }
 
-func (s OrderService) GetTotalPrice(products []dto.OrderProduct) (float64,error) {
+func (s OrderService) GetTotalPrice(products []dto.OrderProduct) (float64, error) {
 	var totalPrice float64
 	for _, product := range products {
 		prod, err := s.productRepository.GetProductByID(product.ProductID)
