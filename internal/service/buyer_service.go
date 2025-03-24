@@ -90,5 +90,4 @@ func (s BuyerService) UpdateProductInCart(buyerID primitive.ObjectID, product dt
 		return nil, err
 	}
 	return updatedCart, nil
-
 }

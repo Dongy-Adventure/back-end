@@ -787,6 +787,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/buyer/{buyer_id}/payment": {
+            "post": {
+                "description": "Request payment for buyer and redirect the buyer to payment",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "buyer"
+                ],
+                "summary": "Request payment for buyer",
+                "parameters": [
+                    {
+                        "description": "buyer payment request",
+                        "name": "buyerPaymentRequest",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.BuyerPaymentRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/buyer/{id}": {
             "put": {
                 "description": "Updates an existing buyer's data by their ID",
@@ -854,7 +912,7 @@ const docTemplate = `{
         },
         "/order/": {
             "post": {
-                "description": "Creates a new order in the database",
+                "description": "Creates a new order and appoinment in the database",
                 "consumes": [
                     "application/json"
                 ],
@@ -2246,7 +2304,7 @@ const docTemplate = `{
                 "cart": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/dto.Product"
                     }
                 },
                 "city": {
@@ -2270,10 +2328,39 @@ const docTemplate = `{
                 "surname": {
                     "type": "string"
                 },
+                "transaction": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dto.Transaction"
+                    }
+                },
                 "username": {
                     "type": "string"
                 },
                 "zip": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.BuyerPaymentRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "buyerID",
+                "createdAt",
+                "paymentMethod"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "buyerID": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "paymentMethod": {
                     "type": "string"
                 }
             }
@@ -2449,13 +2536,9 @@ const docTemplate = `{
         },
         "dto.Product": {
             "type": "object",
-            "required": [
-                "amount"
-            ],
             "properties": {
                 "amount": {
-                    "type": "integer",
-                    "minimum": 0
+                    "type": "integer"
                 },
                 "color": {
                     "type": "string"
@@ -2688,10 +2771,13 @@ const docTemplate = `{
                 "data": {
                     "type": "string"
                 },
+                "paymentMethod": {
+                    "type": "string"
+                },
                 "product": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/dto.Product"
                     }
                 }
             }
@@ -2699,8 +2785,8 @@ const docTemplate = `{
         "dto.UpdateCartRequest": {
             "type": "object",
             "properties": {
-                "productID": {
-                    "type": "string"
+                "product": {
+                    "$ref": "#/definitions/dto.Product"
                 }
             }
         },
@@ -2716,7 +2802,7 @@ const docTemplate = `{
                 "cart": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/dto.Product"
                     }
                 },
                 "city": {
@@ -2739,6 +2825,12 @@ const docTemplate = `{
                 },
                 "surname": {
                     "type": "string"
+                },
+                "transaction": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/model.Transaction"
+                    }
                 },
                 "username": {
                     "type": "string"
@@ -2850,10 +2942,13 @@ const docTemplate = `{
                 "data": {
                     "type": "string"
                 },
+                "paymentMethod": {
+                    "type": "string"
+                },
                 "product": {
                     "type": "array",
                     "items": {
-                        "type": "string"
+                        "$ref": "#/definitions/dto.Product"
                     }
                 }
             }

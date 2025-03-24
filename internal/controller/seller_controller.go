@@ -30,16 +30,16 @@ func NewSellerController(s service.ISellerService) ISellerController {
 }
 
 // CreateSeller godoc
-// @Summary Create a new seller
-// @Description Creates a new seller in the database
-// @Tags seller
-// @Accept json
-// @Produce json
-// @Param seller body dto.SellerRegisterRequest true "Seller to create"
-// @Success 201 {object} dto.SuccessResponse{data=dto.Seller}
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /seller/ [post]
+//	@Summary		Create a new seller
+//	@Description	Creates a new seller in the database
+//	@Tags			seller
+//	@Accept			json
+//	@Produce		json
+//	@Param			seller	body		dto.SellerRegisterRequest	true	"Seller to create"
+//	@Success		201		{object}	dto.SuccessResponse{data=dto.Seller}
+//	@Failure		400		{object}	dto.ErrorResponse
+//	@Failure		500		{object}	dto.ErrorResponse
+//	@Router			/seller/ [post]
 func (s SellerController) CreateSeller(c *gin.Context) {
 	var newSeller model.Seller
 
@@ -72,15 +72,15 @@ func (s SellerController) CreateSeller(c *gin.Context) {
 }
 
 // GetSellerByID godoc
-// @Summary Get a seller by ID
-// @Description Retrieves a seller's data by their ID
-// @Tags seller
-// @Accept json
-// @Produce json
-// @Param seller_id path string true "Seller ID"
-// @Success 200 {object} dto.SuccessResponse{data=dto.Seller}
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /seller/{seller_id} [get]
+//	@Summary		Get a seller by ID
+//	@Description	Retrieves a seller's data by their ID
+//	@Tags			seller
+//	@Accept			json
+//	@Produce		json
+//	@Param			seller_id	path		string	true	"Seller ID"
+//	@Success		200			{object}	dto.SuccessResponse{data=dto.Seller}
+//	@Failure		500			{object}	dto.ErrorResponse
+//	@Router			/seller/{seller_id} [get]
 func (s SellerController) GetSellerByID(c *gin.Context) {
 	sellerIDstr := c.Param("seller_id")
 
@@ -114,14 +114,14 @@ func (s SellerController) GetSellerByID(c *gin.Context) {
 }
 
 // GetSellers godoc
-// @Summary Get all sellers
-// @Description Retrieves all sellers
-// @Tags seller
-// @Accept json
-// @Produce json
-// @Success 200 {object} dto.SuccessResponse{data=[]dto.Seller}
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /seller/ [get]
+//	@Summary		Get all sellers
+//	@Description	Retrieves all sellers
+//	@Tags			seller
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	dto.SuccessResponse{data=[]dto.Seller}
+//	@Failure		500	{object}	dto.ErrorResponse
+//	@Router			/seller/ [get]
 func (s SellerController) GetSellers(c *gin.Context) {
 	res, err := s.sellerService.GetSellers()
 
@@ -144,17 +144,17 @@ func (s SellerController) GetSellers(c *gin.Context) {
 }
 
 // UpdateSeller godoc
-// @Summary Update a seller by ID
-// @Description Updates an existing seller's data by their ID
-// @Tags seller
-// @Accept json
-// @Produce json
-// @Param seller_id path string true "Seller ID"
-// @Param seller body model.Seller true "Seller data to update"
-// @Success 200 {object} dto.SuccessResponse{data=dto.Seller}
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /seller/{seller_id} [put]
+//	@Summary		Update a seller by ID
+//	@Description	Updates an existing seller's data by their ID
+//	@Tags			seller
+//	@Accept			json
+//	@Produce		json
+//	@Param			seller_id	path		string			true	"Seller ID"
+//	@Param			seller		body		model.Seller	true	"Seller data to update"
+//	@Success		200			{object}	dto.SuccessResponse{data=dto.Seller}
+//	@Failure		400			{object}	dto.ErrorResponse
+//	@Failure		500			{object}	dto.ErrorResponse
+//	@Router			/seller/{seller_id} [put]
 func (s SellerController) UpdateSeller(c *gin.Context) {
 	sellerIDstr := c.Param("seller_id")
 	userID, exists := c.Get("userID")
@@ -206,17 +206,17 @@ func (s SellerController) UpdateSeller(c *gin.Context) {
 }
 
 // AddTransaction godoc
-// @Summary Add a transaction by sellerID
-// @Description Append transaction to seller transactions
-// @Tags seller
-// @Accept json
-// @Produce json
-// @Param seller_id path string true "Seller ID"
-// @Param transaction body dto.Transaction true "Transaction to append"
-// @Success 201 {object} dto.SuccessResponse{data=dto.Transaction}
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /seller/{seller_id}/transaction [post]
+//	@Summary		Add a transaction by sellerID
+//	@Description	Append transaction to seller transactions
+//	@Tags			seller
+//	@Accept			json
+//	@Produce		json
+//	@Param			seller_id	path		string			true	"Seller ID"
+//	@Param			transaction	body		dto.Transaction	true	"Transaction to append"
+//	@Success		201			{object}	dto.SuccessResponse{data=dto.Transaction}
+//	@Failure		400			{object}	dto.ErrorResponse
+//	@Failure		500			{object}	dto.ErrorResponse
+//	@Router			/seller/{seller_id}/transaction [post]
 func (s SellerController) AddTransaction(c *gin.Context) {
 	sellerIDstr := c.Param("seller_id")
 	userID, exists := c.Get("userID")
@@ -267,16 +267,16 @@ func (s SellerController) AddTransaction(c *gin.Context) {
 }
 
 // GetSellerBalanceByID godoc
-// @Summary Get a seller's total balance by ID
-// @Description Retrieves a seller's total balance by their ID
-// @Tags seller
-// @Accept json
-// @Produce json
-// @Param seller_id path string true "Seller ID"
-// @Success 200 {object} dto.SuccessResponse{data=float64}
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /seller/{seller_id}/balance [get]
+//	@Summary		Get a seller's total balance by ID
+//	@Description	Retrieves a seller's total balance by their ID
+//	@Tags			seller
+//	@Accept			json
+//	@Produce		json
+//	@Param			seller_id	path		string	true	"Seller ID"
+//	@Success		200			{object}	dto.SuccessResponse{data=float64}
+//	@Failure		400			{object}	dto.ErrorResponse
+//	@Failure		500			{object}	dto.ErrorResponse
+//	@Router			/seller/{seller_id}/balance [get]
 func (s SellerController) GetSellerBalanceByID(c *gin.Context) {
 	sellerIDstr := c.Param("seller_id")
 	userID, exists := c.Get("userID")

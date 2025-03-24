@@ -22,6 +22,7 @@ type ISellerRepository interface {
 	// GetTransactions(sellerID primitive.ObjectID) ([]dto.Transaction, error)
 	UpdateSellerScore(sellerID primitive.ObjectID) error
 	GetSellerBalanceByID(sellerID primitive.ObjectID) (float64, error)
+	UpdateSellerBalance(sellerID primitive.ObjectID, updatedBalance float64) (float64, error)
 }
 
 type SellerRepository struct {
@@ -223,4 +224,20 @@ func (r SellerRepository) GetSellerBalanceByID(sellerID primitive.ObjectID) (flo
 	}
 
 	return totalBalance, nil
+}
+
+func (r SellerRepository) UpdateSellerBalance(sellerID primitive.ObjectID, newBalance float64) (float64, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+	balance, err := r.GetSellerBalanceByID(sellerID)
+	if err != nil {
+		return -1, err
+	}
+	_, err = r.sellerCollection.UpdateOne(ctx, bson.M{"_id": sellerID},
+		bson.M{"$set": bson.M{"balance": balance + newBalance}})
+
+	if err != nil {
+		return -1, err
+	}
+	return newBalance, nil
 }
