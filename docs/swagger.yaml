@@ -59,7 +59,6 @@ definitions:
         type: string
       cart:
         items:
-          $ref: '#/definitions/dto.Product'
           $ref: '#/definitions/dto.OrderProduct'
         type: array
       city:
@@ -76,30 +75,10 @@ definitions:
         type: string
       surname:
         type: string
-      transaction:
-        items:
-          $ref: '#/definitions/dto.Transaction'
-        type: array
       username:
         type: string
       zip:
         type: string
-    type: object
-  dto.BuyerPaymentRequest:
-    properties:
-      amount:
-        type: number
-      buyerID:
-        type: string
-      createdAt:
-        type: string
-      paymentMethod:
-        type: string
-    required:
-    - amount
-    - buyerID
-    - createdAt
-    - paymentMethod
     type: object
   dto.BuyerRegisterRequest:
     properties:
@@ -389,37 +368,15 @@ definitions:
     properties:
       amount:
         type: number
-      data:
+      date:
         type: string
-      paymentMethod:
-        type: string
-      product:
-        items:
-          $ref: '#/definitions/dto.Product'
-        type: array
-    type: object
-  dto.UpdateCartRequest:
-    properties:
-      product:
-        $ref: '#/definitions/dto.Product'
       orderID:
         type: string
       payment:
         type: string
       type:
-        $ref: '#/definitions/dto.TransactionType'
+        type: integer
     type: object
-  dto.TransactionType:
-    enum:
-    - credit
-    - debit
-    type: string
-    x-enum-comments:
-      Credit: Money added
-      Debit: Money withdrawn
-    x-enum-varnames:
-    - Credit
-    - Debit
   model.Buyer:
     properties:
       address:
@@ -428,7 +385,6 @@ definitions:
         type: string
       cart:
         items:
-          $ref: '#/definitions/dto.Product'
           $ref: '#/definitions/model.OrderProduct'
         type: array
       city:
@@ -445,10 +401,6 @@ definitions:
         type: string
       surname:
         type: string
-      transaction:
-        items:
-          $ref: '#/definitions/model.Transaction'
-        type: array
       username:
         type: string
       zip:
@@ -535,18 +487,12 @@ definitions:
         type: number
       data:
         type: string
-      paymentMethod:
-        type: string
-      product:
-        items:
-          $ref: '#/definitions/dto.Product'
-        type: array
       orderID:
         type: string
       payment:
         type: string
       type:
-        $ref: '#/definitions/dto.TransactionType'
+        type: integer
     type: object
 info:
   contact: {}
@@ -1022,18 +968,6 @@ paths:
       summary: Update a product in buyer's cart
       tags:
       - buyer
-  /buyer/{buyer_id}/payment:
-    post:
-      consumes:
-      - application/json
-      description: Request payment for buyer and redirect the buyer to payment
-      parameters:
-      - description: buyer payment request
-        in: body
-        name: buyerPaymentRequest
-        required: true
-        schema:
-          $ref: '#/definitions/dto.BuyerPaymentRequest'
   /buyer/{buyer_id}/cart/{product_id}:
     delete:
       consumes:
@@ -1056,12 +990,6 @@ paths:
         "200":
           description: OK
           schema:
-            allOf:
-            - $ref: '#/definitions/dto.SuccessResponse'
-            - properties:
-                data:
-                  type: string
-              type: object
             $ref: '#/definitions/dto.SuccessResponse'
         "400":
           description: Bad Request
@@ -1071,7 +999,6 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
-      summary: Request payment for buyer
       summary: Delete a product from the buyer's cart
       tags:
       - buyer

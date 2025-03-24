@@ -1,22 +1,14 @@
 package router
 
 import (
-	"github.com/Dongy-s-Advanture/back-end/internal/controller"
 	"github.com/Dongy-s-Advanture/back-end/internal/enum/tokenmode"
 	"github.com/Dongy-s-Advanture/back-end/internal/middleware"
-	"github.com/Dongy-s-Advanture/back-end/internal/repository"
-	"github.com/Dongy-s-Advanture/back-end/internal/service"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func (r Router) AddAuthRouter(rg *gin.RouterGroup, mongoDB *mongo.Database, redisDB *redis.Client) {
-	sellerRepo := repository.NewSellerRepository(mongoDB, "sellers", "reviews")
-	buyerRepo := repository.NewBuyerRepository(mongoDB, "buyers")
+func (r Router) AddAuthRouter(rg *gin.RouterGroup) {
 
-	serv := service.NewAuthService(r.conf, redisDB, sellerRepo, buyerRepo)
-	cont := controller.NewAuthController(serv, r.conf)
+	cont := r.deps.AuthController
 
 	authRouter := rg.Group("auth")
 

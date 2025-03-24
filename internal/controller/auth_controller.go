@@ -21,7 +21,7 @@ type AuthController struct {
 	config      *config.Config
 }
 
-func NewAuthController(s service.IAuthService, c *config.Config) IAuthController {
+func NewAuthController(c *config.Config, s service.IAuthService) IAuthController {
 	return AuthController{
 		authService: s,
 		config:      c,
@@ -29,6 +29,7 @@ func NewAuthController(s service.IAuthService, c *config.Config) IAuthController
 }
 
 // SellerLogin godoc
+//
 //	@Summary		Seller login
 //	@Description	Authenticate a seller and returns tokens
 //	@Tags			auth
@@ -78,6 +79,7 @@ func (a AuthController) SellerLogin(c *gin.Context) {
 }
 
 // BuyerLogin godoc
+//
 //	@Summary		Buyer login
 //	@Description	Authenticate a buyer and returns tokens
 //	@Tags			auth
@@ -126,6 +128,7 @@ func (a AuthController) BuyerLogin(c *gin.Context) {
 }
 
 // RefreshToken godoc
+//
 //	@Summary		Refresh token
 //	@Description	Refresh access token for user
 //	@Tags			auth
@@ -147,6 +150,7 @@ func (a AuthController) RefreshToken(c *gin.Context) {
 }
 
 // Logout godoc
+//
 //	@Summary		User logout
 //	@Description	Invalidate user's token
 //	@Tags			auth

@@ -4,11 +4,11 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/enum/tokenmode"
 	"github.com/Dongy-s-Advanture/back-end/internal/middleware"
 	"github.com/gin-gonic/gin"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func (r Router) AddOrderRouter(rg *gin.RouterGroup, mongoDB *mongo.Database) {
+func (r Router) AddOrderRouter(rg *gin.RouterGroup) {
 
+	orderCont := r.deps.OrderController
 	orderRouter := rg.Group("order")
 
 	orderRouter.POST("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), orderCont.CreateOrder)

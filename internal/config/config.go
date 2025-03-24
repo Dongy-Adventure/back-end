@@ -8,6 +8,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
+type PaymentConfig struct {
+	Public  string
+	Private string
+}
+
 type AppConfig struct {
 	Port string
 	Env  string
@@ -28,9 +33,10 @@ type AuthConfig struct {
 }
 
 type Config struct {
-	App  AppConfig
-	Auth AuthConfig
-	Db   DbConfig
+	App     AppConfig
+	Auth    AuthConfig
+	Db      DbConfig
+	Payment PaymentConfig
 }
 
 func LoadConfig() (*Config, error) {
@@ -76,9 +82,15 @@ func LoadConfig() (*Config, error) {
 		RedisDB:       redisDB,
 	}
 
+	paymentConfig := PaymentConfig{
+		Public:  os.Getenv("OMISE_PUBLIC_KEY"),
+		Private: os.Getenv("OMISE_PRIVATE_KEY"),
+	}
+
 	return &Config{
-		App:  appConfig,
-		Auth: authConfig,
-		Db:   dbConfig,
+		App:     appConfig,
+		Auth:    authConfig,
+		Db:      dbConfig,
+		Payment: paymentConfig,
 	}, nil
 }

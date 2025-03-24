@@ -7,9 +7,6 @@ import (
 
 	docs "github.com/Dongy-s-Advanture/back-end/docs"
 	"github.com/Dongy-s-Advanture/back-end/internal/config"
-	"github.com/Dongy-s-Advanture/back-end/internal/controller"
-	"github.com/Dongy-s-Advanture/back-end/internal/repository"
-	"github.com/Dongy-s-Advanture/back-end/internal/service"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -18,64 +15,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var buyerRepo repository.IBuyerRepository
-var buyerServ service.IBuyerService
-var buyerCont controller.IBuyerController
-
-var sellerRepo repository.ISellerRepository
-var sellerServ service.ISellerService
-var sellerCont controller.ISellerController
-
-var productRepo repository.IProductRepository
-var productServ service.IProductService
-var productCont controller.IProductController
-
-var reviewRepo repository.IReviewRepository
-var reviewServ service.IReviewService
-var reviewCont controller.IReviewController
-
-var appointmentRepo repository.IAppointmentRepository
-var appointmentServ service.IAppointmentService
-var appointmentCont controller.IAppointmentController
-
-var orderRepo repository.IOrderRepository
-var orderServ service.IOrderService
-var orderCont controller.IOrderController
-
 type Router struct {
 	g    *gin.Engine
 	conf *config.Config
+	deps *Dependencies
 }
 
 func NewRouter(g *gin.Engine, conf *config.Config) *Router {
-	return &Router{g, conf}
-}
-
-func setUp(mongoDB *mongo.Database, redisDB *redis.Client) {
-
-	buyerRepo = repository.NewBuyerRepository(mongoDB, "buyers")
-	buyerServ = service.NewBuyerService(buyerRepo)
-	buyerCont = controller.NewBuyerController(buyerServ)
-
-	sellerRepo = repository.NewSellerRepository(mongoDB, "sellers", "reviews")
-	sellerServ = service.NewSellerService(sellerRepo)
-	sellerCont = controller.NewSellerController(sellerServ)
-
-	productRepo = repository.NewProductRepository(mongoDB, "products")
-	productServ = service.NewProductService(productRepo)
-	productCont = controller.NewProductController(productServ)
-
-	reviewRepo = repository.NewReviewRepository(mongoDB, "reviews", sellerRepo)
-	reviewServ = service.NewReviewService(reviewRepo)
-	reviewCont = controller.NewReviewController(reviewServ)
-
-	appointmentRepo = repository.NewAppointmentRepository(mongoDB, "appointments")
-	appointmentServ = service.NewAppointmentService(appointmentRepo)
-	appointmentCont = controller.NewAppointmentController(appointmentServ)
-
-	orderRepo = repository.NewOrderRepository(mongoDB, "orders")
-	orderServ = service.NewOrderService(orderRepo, appointmentRepo, sellerRepo, productRepo)
-	orderCont = controller.NewOrderController(orderServ)
+	return &Router{g, conf, nil}
 }
 
 func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client) {
@@ -106,16 +53,17 @@ func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client) {
 	v1 := r.g.Group("/api/v1")
 
 	// setup
-	setUp(mongoDB, redisDB)
+	r.deps = NewDependencies(mongoDB, redisDB, r.conf)
 
 	// Add related path
-	r.AddSellerRouter(v1, mongoDB)
-	r.AddBuyerRouter(v1, mongoDB)
-	r.AddAuthRouter(v1, mongoDB, redisDB)
-	r.AddProductRouter(v1, mongoDB)
-	r.AddOrderRouter(v1, mongoDB)
-	r.AddReviewRouter(v1, mongoDB)
-	r.AddAppointmentRouter(v1, mongoDB)
+	r.AddSellerRouter(v1)
+	r.AddBuyerRouter(v1)
+	r.AddAuthRouter(v1)
+	r.AddProductRouter(v1)
+	r.AddOrderRouter(v1)
+	r.AddReviewRouter(v1)
+	r.AddAppointmentRouter(v1)
+	r.AddPaymentRouter(v1)
 
 	err := r.g.Run(":" + r.conf.App.Port)
 	if err != nil {
