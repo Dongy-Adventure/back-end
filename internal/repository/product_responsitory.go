@@ -19,6 +19,7 @@ type IProductRepository interface {
 	CreateProduct(product *model.Product) (*dto.Product, error)
 	UpdateProduct(productID primitive.ObjectID, updatedProduct *model.Product) (*dto.Product, error)
 	DeleteProduct(productID primitive.ObjectID) error
+	UpdateProductAmount(productID primitive.ObjectID, amount int) error
 }
 
 type ProductRepository struct {
@@ -50,7 +51,7 @@ func (r ProductRepository) GetProductsBySellerID(sellerID primitive.ObjectID) ([
 
 	var productList []dto.Product
 
-	dataList, err := r.productCollection.Find(ctx, bson.M{"seller_id": sellerID})
+	dataList, err := r.productCollection.Find(ctx, bson.M{"sellerID": sellerID})
 	if err != nil {
 		return nil, err
 	}
@@ -154,3 +155,23 @@ func (r *ProductRepository) DeleteProduct(productID primitive.ObjectID) error {
 	_, err := r.productCollection.DeleteOne(ctx, bson.M{"_id": productID})
 	return err
 }
+
+func (r *ProductRepository) UpdateProductAmount(productID primitive.ObjectID, amount int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+ 
+	update := bson.M{
+	    "$inc": bson.M{
+		   "amount": -amount, 
+	    },
+	}
+ 
+	filter := bson.M{"_id": productID}
+	_, err := r.productCollection.UpdateOne(ctx, filter, update)
+	if err != nil {
+	    return err
+	}
+ 
+	return nil
+ }
+ 

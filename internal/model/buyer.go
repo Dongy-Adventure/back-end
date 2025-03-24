@@ -1,7 +1,6 @@
 package model
 
 import (
-	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -17,6 +16,5 @@ type Buyer struct {
 	City        string             `json:"city" bson:"city"`
 	Province    string             `json:"province" bson:"province"`
 	Zip         string             `json:"zip" bson:"zip"`
-	Cart        []dto.Product      `json:"cart" bson:"cart"`
-	Transaction []Transaction      `json:"transaction" bson:"transaction"`
+	Cart        []OrderProduct      `json:"cart" bson:"cart"`
 }

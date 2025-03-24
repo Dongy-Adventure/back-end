@@ -720,8 +720,8 @@ const docTemplate = `{
             }
         },
         "/buyer/{buyer_id}/cart": {
-            "patch": {
-                "description": "Adds the product if not in the cart, removes it if already in the cart",
+            "post": {
+                "description": "Adds the product with specified amount if not in the cart, set amount if already in the cart",
                 "consumes": [
                     "application/json"
                 ],
@@ -741,12 +741,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Product ID to add/remove",
-                        "name": "product_id",
+                        "description": "Product to update in cart",
+                        "name": "orderProduct",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UpdateCartRequest"
+                            "$ref": "#/definitions/dto.OrderProduct"
                         }
                     }
                 ],
@@ -764,7 +764,7 @@ const docTemplate = `{
                                         "data": {
                                             "type": "array",
                                             "items": {
-                                                "type": "string"
+                                                "$ref": "#/definitions/dto.OrderProduct"
                                             }
                                         }
                                     }
@@ -790,6 +790,9 @@ const docTemplate = `{
         "/buyer/{buyer_id}/payment": {
             "post": {
                 "description": "Request payment for buyer and redirect the buyer to payment",
+        "/buyer/{buyer_id}/cart/{product_id}": {
+            "delete": {
+                "description": "Deletes the product with the specified productID from the cart",
                 "consumes": [
                     "application/json"
                 ],
@@ -809,6 +812,22 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/dto.BuyerPaymentRequest"
                         }
+
+                "summary": "Delete a product from the buyer's cart",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Buyer ID",
+                        "name": "buyer_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "Product ID to delete from cart",
+                        "name": "product_id",
+                        "in": "path",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -828,6 +847,8 @@ const docTemplate = `{
                                     }
                                 }
                             ]
+
+                            "$ref": "#/definitions/dto.SuccessResponse"
                         }
                     },
                     "400": {
@@ -2145,9 +2166,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/seller/{seller_id}/transaction": {
+        "/seller/{seller_id}/withdraw": {
             "post": {
-                "description": "Append transaction to seller transactions",
+                "description": "Deduct seller balance \u0026 add debit transaction",
                 "consumes": [
                     "application/json"
                 ],
@@ -2157,7 +2178,7 @@ const docTemplate = `{
                 "tags": [
                     "seller"
                 ],
-                "summary": "Add a transaction by sellerID",
+                "summary": "Withdraw Seller Balance by sellerID",
                 "parameters": [
                     {
                         "type": "string",
@@ -2167,12 +2188,12 @@ const docTemplate = `{
                         "required": true
                     },
                     {
-                        "description": "Transaction to append",
-                        "name": "transaction",
+                        "description": "Withdraw detail",
+                        "name": "seller",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Transaction"
+                            "$ref": "#/definitions/dto.SellerWithdrawRequest"
                         }
                     }
                 ],
@@ -2180,19 +2201,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "allOf": [
-                                {
-                                    "$ref": "#/definitions/dto.SuccessResponse"
-                                },
-                                {
-                                    "type": "object",
-                                    "properties": {
-                                        "data": {
-                                            "$ref": "#/definitions/dto.Transaction"
-                                        }
-                                    }
-                                }
-                            ]
+                            "$ref": "#/definitions/dto.SuccessResponse"
                         }
                     },
                     "400": {
@@ -2305,6 +2314,7 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.Product"
+                        "$ref": "#/definitions/dto.OrderProduct"
                     }
                 },
                 "city": {
@@ -2484,10 +2494,13 @@ const docTemplate = `{
                 "orderID": {
                     "type": "string"
                 },
+                "payment": {
+                    "type": "string"
+                },
                 "products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.Product"
+                        "$ref": "#/definitions/dto.OrderProduct"
                     }
                 },
                 "sellerID": {
@@ -2510,13 +2523,33 @@ const docTemplate = `{
                 "buyerID": {
                     "type": "string"
                 },
+                "buyerName": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "string"
+                },
                 "products": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/dto.Product"
+                        "$ref": "#/definitions/dto.OrderProduct"
                     }
                 },
                 "sellerID": {
+                    "type": "string"
+                },
+                "sellerName": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.OrderProduct": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "productID": {
                     "type": "string"
                 }
             }
@@ -2670,6 +2703,9 @@ const docTemplate = `{
                 "address": {
                     "type": "string"
                 },
+                "balance": {
+                    "type": "number"
+                },
                 "city": {
                     "type": "string"
                 },
@@ -2746,6 +2782,17 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.SellerWithdrawRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "payment": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.SuccessResponse": {
             "type": "object",
             "properties": {
@@ -2765,8 +2812,7 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "amount": {
-                    "type": "number",
-                    "minimum": 0
+                    "type": "number"
                 },
                 "data": {
                     "type": "string"
@@ -2787,8 +2833,32 @@ const docTemplate = `{
             "properties": {
                 "product": {
                     "$ref": "#/definitions/dto.Product"
+
+                "orderID": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/dto.TransactionType"
                 }
             }
+        },
+        "dto.TransactionType": {
+            "type": "string",
+            "enum": [
+                "credit",
+                "debit"
+            ],
+            "x-enum-comments": {
+                "Credit": "Money added",
+                "Debit": "Money withdrawn"
+            },
+            "x-enum-varnames": [
+                "Credit",
+                "Debit"
+            ]
         },
         "model.Buyer": {
             "type": "object",
@@ -2803,6 +2873,8 @@ const docTemplate = `{
                     "type": "array",
                     "items": {
                         "$ref": "#/definitions/dto.Product"
+
+                        "$ref": "#/definitions/model.OrderProduct"
                     }
                 },
                 "city": {
@@ -2836,6 +2908,21 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "zip": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.OrderProduct": {
+            "type": "object",
+            "required": [
+                "amount"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "productID": {
                     "type": "string"
                 }
             }
@@ -2890,6 +2977,9 @@ const docTemplate = `{
             "properties": {
                 "address": {
                     "type": "string"
+                },
+                "balance": {
+                    "type": "number"
                 },
                 "city": {
                     "type": "string"
@@ -2950,6 +3040,15 @@ const docTemplate = `{
                     "items": {
                         "$ref": "#/definitions/dto.Product"
                     }
+
+                "orderID": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/dto.TransactionType"
                 }
             }
         }

@@ -97,10 +97,10 @@ func (mr *MockIBuyerServiceMockRecorder) UpdateBuyerData(buyerID, updatedBuyer i
 }
 
 // UpdateProductInCart mocks base method.
-func (m *MockIBuyerService) UpdateProductInCart(buyerID primitive.ObjectID, product dto.Product) ([]dto.Product, error) {
+func (m *MockIBuyerService) UpdateProductInCart(buyerID primitive.ObjectID, product dto.OrderProduct) ([]dto.OrderProduct, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateProductInCart", buyerID, product)
-	ret0, _ := ret[0].([]dto.Product)
+	ret0, _ := ret[0].([]dto.OrderProduct)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

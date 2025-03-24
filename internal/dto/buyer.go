@@ -18,8 +18,7 @@ type Buyer struct {
 	City        string             `json:"city"`
 	Province    string             `json:"province"`
 	Zip         string             `json:"zip"`
-	Cart        []Product          `json:"cart"`
-	Transaction []Transaction      `json:"transaction"`
+	Cart        []OrderProduct     `json:"cart"`
 }
 
 type BuyerRegisterRequest struct {

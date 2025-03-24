@@ -18,4 +18,5 @@ type Seller struct {
 	Zip         string             `json:"zip" bson:"zip"`
 	Score       float64            `json:"score" bson:"score,omitempty"`
 	Transaction []Transaction      `json:"transaction" bson:"transaction"`
+	Balance     float64            `json:"balance" bson:"balance"`	  
 }

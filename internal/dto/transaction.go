@@ -2,11 +2,11 @@ package dto
 
 import (
 	"time"
-)
 
 type Transaction struct {
-	Amount        float64   `json:"amount" binding:"min=0"`
-	Product       []Product `json:"product"`
-	Date          time.Time `json:"data"`
-	PaymentMethod string    `json:"paymentMethod"`
+	Type    int16 	  		   `json:"type"`
+	Amount  float64   		   `json:"amount"`
+	OrderID  primitive.ObjectID `json:"orderID,omitempty"`
+	Payment  string             `json:"payment"`
+	Date    time.Time            `json:"date"`
 }
