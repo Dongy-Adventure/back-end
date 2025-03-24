@@ -24,3 +24,4 @@ go.work.sum
 # env file
 .env
 init.js
+.DS_Store

@@ -24,8 +24,7 @@ type ISellerRepository interface {
 	GetSellerBalanceByID(sellerID primitive.ObjectID) (float64, error)
 	DepositSellerBalance(sellerID primitive.ObjectID,orderID primitive.ObjectID,payment string, amount float64) error
 	WithdrawSellerBalance(sellerID primitive.ObjectID,payment string, amount float64) error
- 
-}
+ }
 
 type SellerRepository struct {
 	sellerCollection *mongo.Collection
@@ -256,5 +255,4 @@ func (r SellerRepository) WithdrawSellerBalance(sellerID primitive.ObjectID ,pay
 	_, err = r.sellerCollection.UpdateOne(ctx, bson.M{"_id": sellerID}, update)
 	return err
 }
-
 

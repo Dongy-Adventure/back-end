@@ -26,8 +26,6 @@ type OrderService struct {
 	orderRepository       repository.IOrderRepository
 	appointmentRepository repository.IAppointmentRepository
 	sellerRepository      repository.ISellerRepository
-	productRepository 	  repository.IProductRepository
-}
 
 func NewOrderService(r repository.IOrderRepository, a repository.IAppointmentRepository, sr repository.ISellerRepository, p repository.IProductRepository) IOrderService {
 	return OrderService{orderRepository: r, appointmentRepository: a, sellerRepository: sr, productRepository: p}
@@ -74,6 +72,7 @@ func (s OrderService) CreateOrder(products []dto.OrderProduct, buyerID primitive
 		return nil, err
 	}
 
+
 	// Add transaction and update (+deposit) seller balance
 	err = s.sellerRepository.DepositSellerBalance(sellerID, orderID, payment, totalPrice)
 	if err != nil {
@@ -97,11 +96,33 @@ func (s OrderService) CreateOrder(products []dto.OrderProduct, buyerID primitive
 		BuyerID:       buyerID,
 		BuyerName:     buyerName,
 		SellerID:      sellerID,
+		TotalPrice:    totalPrice,
 		SellerName:    sellerName,
 		TotalPrice:    totalPrice,
 		Payment:       payment,
 		CreatedAt:     time.Now(),
 	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.sellerRepository.UpdateSellerBalance(sellerID, totalPrice)
+
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.sellerRepository.AddTransaction(sellerID, &dto.Transaction{
+		Amount:        totalPrice,
+		Product:       products,
+		Date:          time.Now(),
+		PaymentMethod: "PromptPay",
+	})
+	if err != nil {
+		return nil, err
+	}
+	return newOrder, nil
 }
 
 func (s OrderService) GetTotalPrice(products []dto.OrderProduct) (float64,error) {

@@ -31,14 +31,14 @@ func NewAppointmentController(s service.IAppointmentService) IAppointmentControl
 }
 
 // GetAppointments godoc
-// @Summary Get all appointments
-// @Description Retrieves all appointments
-// @Tags appointment
-// @Accept json
-// @Produce json
-// @Success 200 {object} dto.SuccessResponse{data=[]dto.Appointment}
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /appointment/ [get]
+//	@Summary		Get all appointments
+//	@Description	Retrieves all appointments
+//	@Tags			appointment
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	dto.SuccessResponse{data=[]dto.Appointment}
+//	@Failure		500	{object}	dto.ErrorResponse
+//	@Router			/appointment/ [get]
 func (s AppointmentController) GetAppointments(c *gin.Context) {
 	res, err := s.appointmentService.GetAppointments()
 
@@ -61,15 +61,15 @@ func (s AppointmentController) GetAppointments(c *gin.Context) {
 }
 
 // GetAppointmentsByID godoc
-// @Summary Get a appointment by ID
-// @Description Retrieves a appointment's data by its ID
-// @Tags appointment
-// @Accept json
-// @Produce json
-// @Param appointment_id path string true "Appointment ID"
-// @Success 200 {object} dto.SuccessResponse{data=dto.Appointment}
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /appointment/{appointment_id} [get]
+//	@Summary		Get a appointment by ID
+//	@Description	Retrieves a appointment's data by its ID
+//	@Tags			appointment
+//	@Accept			json
+//	@Produce		json
+//	@Param			appointment_id	path		string	true	"Appointment ID"
+//	@Success		200				{object}	dto.SuccessResponse{data=dto.Appointment}
+//	@Failure		500				{object}	dto.ErrorResponse
+//	@Router			/appointment/{appointment_id} [get]
 func (s AppointmentController) GetAppointmentByID(c *gin.Context) {
 	appointmentIDstr := c.Param("appointment_id")
 	appointmentID, err := primitive.ObjectIDFromHex(appointmentIDstr)
@@ -102,15 +102,15 @@ func (s AppointmentController) GetAppointmentByID(c *gin.Context) {
 }
 
 // GetAppointmentsByOrderID godoc
-// @Summary Get appointments by orderID
-// @Description Retrieves each order's appointment by order ID
-// @Tags appointment
-// @Accept json
-// @Produce json
-// @Param order_id path string true "Order ID"
-// @Success 200 {object} dto.SuccessResponse{data=dto.Appointment}
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /appointment/order/{order_id} [get]
+//	@Summary		Get appointments by orderID
+//	@Description	Retrieves each order's appointment by order ID
+//	@Tags			appointment
+//	@Accept			json
+//	@Produce		json
+//	@Param			order_id	path		string	true	"Order ID"
+//	@Success		200			{object}	dto.SuccessResponse{data=dto.Appointment}
+//	@Failure		500			{object}	dto.ErrorResponse
+//	@Router			/appointment/order/{order_id} [get]
 func (s AppointmentController) GetAppointmentByOrderID(c *gin.Context) {
 	orderIDstr := c.Param("order_id")
 	orderID, err := primitive.ObjectIDFromHex(orderIDstr)
@@ -143,16 +143,16 @@ func (s AppointmentController) GetAppointmentByOrderID(c *gin.Context) {
 }
 
 // CreateAppointment godoc
-// @Summary Create a new appointment
-// @Description Creates a new appointment in the database
-// @Tags appointment
-// @Accept json
-// @Produce json
-// @Param appointment body dto.AppointmentCreateRequest true "Appointment to create"
-// @Success 201 {object} dto.SuccessResponse{data=dto.Appointment}
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /appointment/ [post]
+//	@Summary		Create a new appointment
+//	@Description	Creates a new appointment in the database
+//	@Tags			appointment
+//	@Accept			json
+//	@Produce		json
+//	@Param			appointment	body		dto.AppointmentCreateRequest	true	"Appointment to create"
+//	@Success		201			{object}	dto.SuccessResponse{data=dto.Appointment}
+//	@Failure		400			{object}	dto.ErrorResponse
+//	@Failure		500			{object}	dto.ErrorResponse
+//	@Router			/appointment/ [post]
 func (s AppointmentController) CreateAppointment(c *gin.Context) {
 	var newAppointment model.Appointment
 
@@ -186,17 +186,17 @@ func (s AppointmentController) CreateAppointment(c *gin.Context) {
 }
 
 // UpdateAppointment godoc
-// @Summary Update an appointment date by ID
-// @Description Updates an existing appointment's date by its ID
-// @Tags appointment
-// @Accept json
-// @Produce json
-// @Param appointment_id path string true "Appointment ID"
-// @Param appointment body dto.AppointmentDateRequest true "Appointment date to update"
-// @Success 200 {object} dto.SuccessResponse{data=dto.Appointment}
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /appointment/{appointment_id}/date [put]
+//	@Summary		Update an appointment date by ID
+//	@Description	Updates an existing appointment's date by its ID
+//	@Tags			appointment
+//	@Accept			json
+//	@Produce		json
+//	@Param			appointment_id	path		string						true	"Appointment ID"
+//	@Param			appointment		body		dto.AppointmentDateRequest	true	"Appointment date to update"
+//	@Success		200				{object}	dto.SuccessResponse{data=dto.Appointment}
+//	@Failure		400				{object}	dto.ErrorResponse
+//	@Failure		500				{object}	dto.ErrorResponse
+//	@Router			/appointment/{appointment_id}/date [put]
 func (s AppointmentController) UpdateAppointmentDate(c *gin.Context) {
 	appointmentIDstr := c.Param("appointment_id")
 	appointmentID, err := primitive.ObjectIDFromHex(appointmentIDstr)
@@ -259,17 +259,17 @@ func (s AppointmentController) UpdateAppointmentDate(c *gin.Context) {
 
 
 // UpdateAppointment godoc
-// @Summary Update an appointment place by ID
-// @Description Updates an existing appointment's place by its ID
-// @Tags appointment
-// @Accept json
-// @Produce json
-// @Param appointment_id path string true "Appointment ID"
-// @Param appointment body dto.AppointmentPlaceRequest true "Appointment place to update"
-// @Success 200 {object} dto.SuccessResponse{data=dto.Appointment}
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /appointment/{appointment_id}/place [put]
+//	@Summary		Update an appointment place by ID
+//	@Description	Updates an existing appointment's place by its ID
+//	@Tags			appointment
+//	@Accept			json
+//	@Produce		json
+//	@Param			appointment_id	path		string						true	"Appointment ID"
+//	@Param			appointment		body		dto.AppointmentPlaceRequest	true	"Appointment place to update"
+//	@Success		200				{object}	dto.SuccessResponse{data=dto.Appointment}
+//	@Failure		400				{object}	dto.ErrorResponse
+//	@Failure		500				{object}	dto.ErrorResponse
+//	@Router			/appointment/{appointment_id}/place [put]
 func (s AppointmentController) UpdateAppointmentPlace(c *gin.Context) {
 	appointmentIDstr := c.Param("appointment_id")
 	appointmentID, err := primitive.ObjectIDFromHex(appointmentIDstr)

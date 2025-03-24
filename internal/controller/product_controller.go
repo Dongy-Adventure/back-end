@@ -30,16 +30,16 @@ func NewProductController(s service.IProductService) IProductController {
 }
 
 // CreateProduct godoc
-// @Summary Create a new product
-// @Description Creates a new product in the database
-// @Tags product
-// @Accept json
-// @Produce json
-// @Param product body model.Product true "Product to create"
-// @Success 201 {object} dto.SuccessResponse{data=dto.Product}
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /product/ [post]
+//	@Summary		Create a new product
+//	@Description	Creates a new product in the database
+//	@Tags			product
+//	@Accept			json
+//	@Produce		json
+//	@Param			product	body		model.Product	true	"Product to create"
+//	@Success		201		{object}	dto.SuccessResponse{data=dto.Product}
+//	@Failure		400		{object}	dto.ErrorResponse
+//	@Failure		500		{object}	dto.ErrorResponse
+//	@Router			/product/ [post]
 func (s ProductController) CreateProduct(c *gin.Context) {
 	var newProduct model.Product
 
@@ -72,15 +72,15 @@ func (s ProductController) CreateProduct(c *gin.Context) {
 }
 
 // GetProductByID godoc
-// @Summary Get a product by ID
-// @Description Retrieves a product's data by their ID
-// @Tags product
-// @Accept json
-// @Produce json
-// @Param product_id path string true "Product ID"
-// @Success 200 {object} dto.SuccessResponse{data=dto.Product}
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /product/{product_id} [get]
+//	@Summary		Get a product by ID
+//	@Description	Retrieves a product's data by their ID
+//	@Tags			product
+//	@Accept			json
+//	@Produce		json
+//	@Param			product_id	path		string	true	"Product ID"
+//	@Success		200			{object}	dto.SuccessResponse{data=dto.Product}
+//	@Failure		500			{object}	dto.ErrorResponse
+//	@Router			/product/{product_id} [get]
 func (s ProductController) GetProductByID(c *gin.Context) {
 	productIDstr := c.Param("product_id")
 	productID, err := primitive.ObjectIDFromHex(productIDstr)
@@ -114,15 +114,15 @@ func (s ProductController) GetProductByID(c *gin.Context) {
 }
 
 // GetProductsBySellerID godoc
-// @Summary Get products by sellerID
-// @Description Retrieves each seller's products-on-display by seller ID
-// @Tags product
-// @Accept json
-// @Produce json
-// @Param seller_id path string true "Seller ID"
-// @Success 200 {object} dto.SuccessResponse{data=[]dto.Product}
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /product/seller/{seller_id} [get]
+//	@Summary		Get products by sellerID
+//	@Description	Retrieves each seller's products-on-display by seller ID
+//	@Tags			product
+//	@Accept			json
+//	@Produce		json
+//	@Param			seller_id	path		string	true	"Seller ID"
+//	@Success		200			{object}	dto.SuccessResponse{data=[]dto.Product}
+//	@Failure		500			{object}	dto.ErrorResponse
+//	@Router			/product/seller/{seller_id} [get]
 func (s ProductController) GetProductsBySellerID(c *gin.Context) {
 	sellerIDstr := c.Param("seller_id")
 	sellerID, err := primitive.ObjectIDFromHex(sellerIDstr)
@@ -155,14 +155,14 @@ func (s ProductController) GetProductsBySellerID(c *gin.Context) {
 }
 
 // GetProducts godoc
-// @Summary Get all products
-// @Description Retrieves all products
-// @Tags product
-// @Accept json
-// @Produce json
-// @Success 200 {object} dto.SuccessResponse{data=[]dto.Product}
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /product/ [get]
+//	@Summary		Get all products
+//	@Description	Retrieves all products
+//	@Tags			product
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	dto.SuccessResponse{data=[]dto.Product}
+//	@Failure		500	{object}	dto.ErrorResponse
+//	@Router			/product/ [get]
 func (s ProductController) GetProducts(c *gin.Context) {
 	res, err := s.productService.GetProducts()
 
@@ -185,17 +185,17 @@ func (s ProductController) GetProducts(c *gin.Context) {
 }
 
 // UpdateProduct godoc
-// @Summary Update a product by ID
-// @Description Updates an existing product's data by their ID
-// @Tags product
-// @Accept json
-// @Produce json
-// @Param product_id path string true "Product ID"
-// @Param product body model.Product true "Product data to update"
-// @Success 200 {object} dto.SuccessResponse{data=dto.Product}
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /product/{product_id} [put]
+//	@Summary		Update a product by ID
+//	@Description	Updates an existing product's data by their ID
+//	@Tags			product
+//	@Accept			json
+//	@Produce		json
+//	@Param			product_id	path		string			true	"Product ID"
+//	@Param			product		body		model.Product	true	"Product data to update"
+//	@Success		200			{object}	dto.SuccessResponse{data=dto.Product}
+//	@Failure		400			{object}	dto.ErrorResponse
+//	@Failure		500			{object}	dto.ErrorResponse
+//	@Router			/product/{product_id} [put]
 func (s ProductController) UpdateProduct(c *gin.Context) {
 	productIDstr := c.Param("product_id")
 	productID, err := primitive.ObjectIDFromHex(productIDstr)
@@ -239,15 +239,15 @@ func (s ProductController) UpdateProduct(c *gin.Context) {
 }
 
 // DeleteProduct godoc
-// @Summary Delete a product by ID
-// @Description Delete a product's data by its ID
-// @Tags product
-// @Accept json
-// @Produce json
-// @Param product_id path string true "Product ID"
-// @Success 200 {object} dto.SuccessResponse
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /product/{product_id} [delete]
+//	@Summary		Delete a product by ID
+//	@Description	Delete a product's data by its ID
+//	@Tags			product
+//	@Accept			json
+//	@Produce		json
+//	@Param			product_id	path		string	true	"Product ID"
+//	@Success		200			{object}	dto.SuccessResponse
+//	@Failure		500			{object}	dto.ErrorResponse
+//	@Router			/product/{product_id} [delete]
 func (s ProductController) DeleteProduct(c *gin.Context) {
 	productIDstr := c.Param("product_id")
 	productID, err := primitive.ObjectIDFromHex(productIDstr)

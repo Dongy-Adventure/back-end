@@ -3,10 +3,6 @@ package dto
 import (
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson/primitive"
-)
-
-
 type Transaction struct {
 	Type    int16 	  		   `json:"type"`
 	Amount  float64   		   `json:"amount"`
@@ -14,6 +10,3 @@ type Transaction struct {
 	Payment  string             `json:"payment"`
 	Date    time.Time            `json:"date"`
 }
-
-
-

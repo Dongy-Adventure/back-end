@@ -1,7 +1,6 @@
 package model
 
 import (
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -21,5 +20,3 @@ type Seller struct {
 	Transaction []Transaction      `json:"transaction" bson:"transaction"`
 	Balance     float64            `json:"balance" bson:"balance"`	  
 }
-
-

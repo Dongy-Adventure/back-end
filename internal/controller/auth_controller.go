@@ -29,17 +29,17 @@ func NewAuthController(s service.IAuthService, c *config.Config) IAuthController
 }
 
 // SellerLogin godoc
-// @Summary Seller login
-// @Description Authenticate a seller and returns tokens
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param loginRequest body dto.LoginRequest true "Seller login credential"
-// @Success 200 {object} dto.LoginResponse{data=dto.Seller}
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /auth/seller/ [post]
+//	@Summary		Seller login
+//	@Description	Authenticate a seller and returns tokens
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			loginRequest	body		dto.LoginRequest	true	"Seller login credential"
+//	@Success		200				{object}	dto.LoginResponse{data=dto.Seller}
+//	@Failure		400				{object}	dto.ErrorResponse
+//	@Failure		401				{object}	dto.ErrorResponse
+//	@Failure		500				{object}	dto.ErrorResponse
+//	@Router			/auth/seller/ [post]
 func (a AuthController) SellerLogin(c *gin.Context) {
 	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -78,17 +78,17 @@ func (a AuthController) SellerLogin(c *gin.Context) {
 }
 
 // BuyerLogin godoc
-// @Summary Buyer login
-// @Description Authenticate a buyer and returns tokens
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param loginRequest body dto.LoginRequest true "Buyer login credential"
-// @Success 200 {object} dto.LoginResponse{data=dto.Buyer}
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /auth/buyer/ [post]
+//	@Summary		Buyer login
+//	@Description	Authenticate a buyer and returns tokens
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			loginRequest	body		dto.LoginRequest	true	"Buyer login credential"
+//	@Success		200				{object}	dto.LoginResponse{data=dto.Buyer}
+//	@Failure		400				{object}	dto.ErrorResponse
+//	@Failure		401				{object}	dto.ErrorResponse
+//	@Failure		500				{object}	dto.ErrorResponse
+//	@Router			/auth/buyer/ [post]
 func (a AuthController) BuyerLogin(c *gin.Context) {
 	var req dto.LoginRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -126,15 +126,15 @@ func (a AuthController) BuyerLogin(c *gin.Context) {
 }
 
 // RefreshToken godoc
-// @Summary Refresh token
-// @Description Refresh access token for user
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param refreshToken header string true "Bearer {refreshToken}"
-// @Success 200 {object} dto.RefreshTokenResponse
-// @Failure 401 {object} dto.ErrorResponse
-// @Router /auth/refresh/ [post]
+//	@Summary		Refresh token
+//	@Description	Refresh access token for user
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			refreshToken	header		string	true	"Bearer {refreshToken}"
+//	@Success		200				{object}	dto.RefreshTokenResponse
+//	@Failure		401				{object}	dto.ErrorResponse
+//	@Router			/auth/refresh/ [post]
 func (a AuthController) RefreshToken(c *gin.Context) {
 	accessToken, err := a.authService.RefreshToken(c)
 
@@ -147,16 +147,16 @@ func (a AuthController) RefreshToken(c *gin.Context) {
 }
 
 // Logout godoc
-// @Summary User logout
-// @Description Invalidate user's token
-// @Tags auth
-// @Accept json
-// @Produce json
-// @Param logoutRequest body dto.LogoutRequest true "User's tokens"
-// @Success 200 {object} dto.SuccessResponse{data=string}
-// @Failure 400 {object} dto.ErrorResponse
-// @Failure 500 {object} dto.ErrorResponse
-// @Router /auth/logout/ [post]
+//	@Summary		User logout
+//	@Description	Invalidate user's token
+//	@Tags			auth
+//	@Accept			json
+//	@Produce		json
+//	@Param			logoutRequest	body		dto.LogoutRequest	true	"User's tokens"
+//	@Success		200				{object}	dto.SuccessResponse{data=string}
+//	@Failure		400				{object}	dto.ErrorResponse
+//	@Failure		500				{object}	dto.ErrorResponse
+//	@Router			/auth/logout/ [post]
 func (a AuthController) Logout(c *gin.Context) {
 	var req dto.LogoutRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

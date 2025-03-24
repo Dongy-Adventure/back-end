@@ -98,7 +98,6 @@ func (s BuyerService) UpdateProductInCart(buyerID primitive.ObjectID, product dt
 		return nil, err
 	}
 	return updatedCart, nil
-
 }
 
 func (s BuyerService) DeleteProductFromCart(buyerID, productID primitive.ObjectID) error {
