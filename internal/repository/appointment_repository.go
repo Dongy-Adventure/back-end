@@ -87,7 +87,6 @@ func (r AppointmentRepository) CreateAppointment(appointment *model.Appointment)
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	appointment.AppointmentID = primitive.NewObjectID()
-	appointment.CreatedAt = time.Now()
 	result, err := r.appointmentCollection.InsertOne(ctx, appointment)
 	if err != nil {
 		return nil, err
