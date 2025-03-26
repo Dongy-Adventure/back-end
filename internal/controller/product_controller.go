@@ -30,6 +30,7 @@ func NewProductController(s service.IProductService) IProductController {
 }
 
 // CreateProduct godoc
+//
 //	@Summary		Create a new product
 //	@Description	Creates a new product in the database
 //	@Tags			product
@@ -72,6 +73,7 @@ func (s ProductController) CreateProduct(c *gin.Context) {
 }
 
 // GetProductByID godoc
+//
 //	@Summary		Get a product by ID
 //	@Description	Retrieves a product's data by their ID
 //	@Tags			product
@@ -114,6 +116,7 @@ func (s ProductController) GetProductByID(c *gin.Context) {
 }
 
 // GetProductsBySellerID godoc
+//
 //	@Summary		Get products by sellerID
 //	@Description	Retrieves each seller's products-on-display by seller ID
 //	@Tags			product
@@ -155,6 +158,7 @@ func (s ProductController) GetProductsBySellerID(c *gin.Context) {
 }
 
 // GetProducts godoc
+//
 //	@Summary		Get all products
 //	@Description	Retrieves all products
 //	@Tags			product
@@ -185,13 +189,14 @@ func (s ProductController) GetProducts(c *gin.Context) {
 }
 
 // UpdateProduct godoc
+//
 //	@Summary		Update a product by ID
 //	@Description	Updates an existing product's data by their ID
 //	@Tags			product
 //	@Accept			json
 //	@Produce		json
 //	@Param			product_id	path		string			true	"Product ID"
-//	@Param			product		body		model.Product	true	"Product data to update"
+//	@Param			updatedProduct		body		dto.UpdateProductRequest	true	"Product data to update"
 //	@Success		200			{object}	dto.SuccessResponse{data=dto.Product}
 //	@Failure		400			{object}	dto.ErrorResponse
 //	@Failure		500			{object}	dto.ErrorResponse
@@ -208,7 +213,7 @@ func (s ProductController) UpdateProduct(c *gin.Context) {
 		})
 		return
 	}
-	var updatedProduct model.Product
+	var updatedProduct dto.UpdateProductRequest
 	if err := c.BindJSON(&updatedProduct); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Success: false,
@@ -218,8 +223,28 @@ func (s ProductController) UpdateProduct(c *gin.Context) {
 		})
 		return
 	}
-
-	res, err := s.productService.UpdateProduct(productID, &updatedProduct)
+	sellerID, err := primitive.ObjectIDFromHex(updatedProduct.SellerID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Invalid productID format",
+			Message: err.Error(),
+		})
+		return
+	}
+	res, err := s.productService.UpdateProduct(productID, &model.Product{
+		ProductID:   productID,
+		ProductName: updatedProduct.ProductName,
+		Price:       updatedProduct.Price,
+		Description: updatedProduct.Description,
+		ImageURL:    updatedProduct.ImageURL,
+		Tag:         updatedProduct.Tag,
+		Color:       updatedProduct.Color,
+		SellerID:    sellerID,
+		Amount:      updatedProduct.Amount,
+		CreatedAt:   updatedProduct.CreatedAt,
+	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
@@ -239,6 +264,7 @@ func (s ProductController) UpdateProduct(c *gin.Context) {
 }
 
 // DeleteProduct godoc
+//
 //	@Summary		Delete a product by ID
 //	@Description	Delete a product's data by its ID
 //	@Tags			product
