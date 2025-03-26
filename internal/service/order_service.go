@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"fmt"
-	"time"
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/enum/orderstatus"
@@ -14,7 +13,7 @@ import (
 )
 
 type IOrderService interface {
-	CreateOrder(products []dto.OrderProduct, buyerID primitive.ObjectID, sellerID primitive.ObjectID, sellerName string, buyerName string, payment string) (*dto.Order, error)
+	CreateOrder(orderCreateRequest *dto.OrderCreateRequest) (*dto.Order, error)
 	GetOrdersByUserID(userID primitive.ObjectID, userType userrole.UserType) ([]dto.Order, error)
 	GetTotalPrice(products []dto.OrderProduct) (float64, error)
 	DeleteOrderByOrderID(orderID primitive.ObjectID) error
@@ -33,11 +32,11 @@ func NewOrderService(r repository.IOrderRepository, a repository.IAppointmentRep
 	return OrderService{orderRepository: r, appointmentRepository: a, sellerRepository: sr, productRepository: p}
 }
 
-func (s OrderService) CreateOrder(products []dto.OrderProduct, buyerID primitive.ObjectID, sellerID primitive.ObjectID, sellerName string, buyerName string, payment string) (*dto.Order, error) {
-	if len(products) == 0 {
+func (s OrderService) CreateOrder(orderCreateRequest *dto.OrderCreateRequest) (*dto.Order, error) {
+	if len(orderCreateRequest.Products) == 0 {
 		return nil, errors.New("no product")
 	}
-
+	buyerID, sellerID, products := orderCreateRequest.BuyerID, orderCreateRequest.SellerID, orderCreateRequest.Products
 	var productsModel []model.OrderProduct
 	for _, product := range products {
 		stockProduct, err := s.productRepository.GetProductByID(product.ProductID)
@@ -61,7 +60,7 @@ func (s OrderService) CreateOrder(products []dto.OrderProduct, buyerID primitive
 		OrderID:       orderID,
 		BuyerID:       buyerID,
 		SellerID:      sellerID,
-		CreatedAt:     time.Now(),
+		// CreatedAt:     orderCreateRequest.PaymentRequest.CreatedAt,
 	})
 	if err != nil {
 		return nil, err
@@ -74,7 +73,8 @@ func (s OrderService) CreateOrder(products []dto.OrderProduct, buyerID primitive
 	}
 
 	// Add transaction and update (+deposit) seller balance
-	err = s.sellerRepository.DepositSellerBalance(sellerID, orderID, payment, totalPrice)
+	err = s.sellerRepository.DepositSellerBalance(sellerID, orderID, "", totalPrice)
+	// err = s.sellerRepository.DepositSellerBalance(sellerID, orderID, orderCreateRequest.PaymentRequest.PaymentMethod, totalPrice)
 	if err != nil {
 		return nil, err
 	}
@@ -93,12 +93,12 @@ func (s OrderService) CreateOrder(products []dto.OrderProduct, buyerID primitive
 		Products:      productsModel,
 		AppointmentID: app.AppointmentID,
 		BuyerID:       buyerID,
-		BuyerName:     buyerName,
+		BuyerName:     orderCreateRequest.BuyerName,
 		SellerID:      sellerID,
 		TotalPrice:    totalPrice,
-		SellerName:    sellerName,
-		Payment:       payment,
-		CreatedAt:     time.Now(),
+		SellerName:    orderCreateRequest.SellerName,
+		// Payment:       orderCreateRequest.PaymentRequest.PaymentMethod,
+		// CreatedAt:     orderCreateRequest.PaymentRequest.CreatedAt,
 	})
 }
 

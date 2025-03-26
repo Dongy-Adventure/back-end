@@ -35,7 +35,7 @@ func (m *MockIPaymentService) EXPECT() *MockIPaymentServiceMockRecorder {
 }
 
 // HandlePayment mocks base method.
-func (m *MockIPaymentService) HandlePayment(paymentRequest *dto.BuyerPaymentRequest) error {
+func (m *MockIPaymentService) HandlePayment(paymentRequest *dto.PaymentRequest) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HandlePayment", paymentRequest)
 	ret0, _ := ret[0].(error)

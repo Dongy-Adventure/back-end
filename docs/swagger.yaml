@@ -80,6 +80,22 @@ definitions:
       zip:
         type: string
     type: object
+  dto.BuyerPaymentRequest:
+    properties:
+      amount:
+        type: number
+      buyerID:
+        type: string
+      createdAt:
+        type: string
+      paymentMethod:
+        type: string
+    required:
+    - amount
+    - buyerID
+    - createdAt
+    - paymentMethod
+    type: object
   dto.BuyerRegisterRequest:
     properties:
       address:
@@ -1236,6 +1252,36 @@ paths:
       summary: Get orders by userID and userType
       tags:
       - order
+  /payment:
+    post:
+      consumes:
+      - application/json
+      description: Handles payment processing through Omise.
+      parameters:
+      - description: Payment request payload
+        in: body
+        name: paymentRequest
+        required: true
+        schema:
+          $ref: '#/definitions/dto.BuyerPaymentRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Payment successful
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "502":
+          description: Payment failed
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Process payment
+      tags:
+      - Payment
   /product/:
     get:
       consumes:

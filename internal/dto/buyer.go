@@ -1,8 +1,6 @@
 package dto
 
 import (
-	"time"
-
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -36,11 +34,4 @@ type BuyerRegisterRequest struct {
 
 type UpdateCartRequest struct {
 	Product Product `json:"product"`
-}
-
-type BuyerPaymentRequest struct {
-	BuyerID       string    `json:"buyerID" binding:"required"`
-	PaymentMethod string    `json:"paymentMethod" binding:"required"`
-	Amount        float64   `json:"amount" binding:"required"`
-	CreatedAt     time.Time `json:"createdAt" binding:"required"`
 }
