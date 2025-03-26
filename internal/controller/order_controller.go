@@ -19,14 +19,16 @@ type IOrderController interface {
 	UpdateOrderStatusByOrderID(c *gin.Context)
 }
 type OrderController struct {
-	orderService service.IOrderService
+	orderService   service.IOrderService
+	paymentService service.IPaymentService
 }
 
-func NewOrderController(orderService service.IOrderService) IOrderController {
-	return OrderController{orderService: orderService}
+func NewOrderController(orderService service.IOrderService, paymentService service.IPaymentService) IOrderController {
+	return OrderController{orderService: orderService, paymentService: paymentService}
 }
 
 // CreateOrder godoc
+//
 //	@Summary		Create a new order
 //	@Description	Creates a new order and appoinment in the database
 //	@Tags			order
@@ -48,8 +50,7 @@ func (o OrderController) CreateOrder(c *gin.Context) {
 		})
 		return
 	}
-
-	newOrder, err := o.orderService.CreateOrder(req.Products, req.BuyerID, req.SellerID, req.SellerName, req.BuyerName, req.Payment)
+	newOrder, err := o.orderService.CreateOrder(&req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
@@ -69,6 +70,7 @@ func (o OrderController) CreateOrder(c *gin.Context) {
 }
 
 // GetOrdersByUserID godoc
+//
 //	@Summary		Get orders by userID and userType
 //	@Description	Get all orders by userID and userType
 //	@Tags			order
@@ -129,6 +131,7 @@ func (o OrderController) GetOrdersByUserID(c *gin.Context) {
 }
 
 // DeleteOrderByOrderID godoc
+//
 //	@Summary		Delete order by orderID
 //	@Description	Delete an order based on the provied orderID
 //	@Tags			order
@@ -176,6 +179,7 @@ func (o OrderController) DeleteOrderByOrderID(c *gin.Context) {
 }
 
 // UpdateOrderByOrderID godoc
+//
 //	@Summary		Update order details
 //	@Description	Updates the details of an order based on the provided orderID
 //	@Tags			order
@@ -241,6 +245,7 @@ func (o OrderController) UpdateOrderByOrderID(c *gin.Context) {
 }
 
 // UpdateOrderStatusByOrderID godoc
+//
 //	@Summary		Update the status of an order
 //	@Description	Updates the status of an order based on the provided orderID and status
 //	@Tags			order

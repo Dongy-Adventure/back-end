@@ -1,6 +1,9 @@
 package transactiontype
 
 const (
-	CREDIT = iota 
-	DEBIT                       
+	CHARGE = iota
+	TRANSFER
+	REFUND
+	DISPUTE
+	BALANCE
 )

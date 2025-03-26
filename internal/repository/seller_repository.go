@@ -1,14 +1,14 @@
 package repository
 
 import (
-	"errors"
 	"context"
+	"errors"
 	"time"
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
+	"github.com/Dongy-s-Advanture/back-end/internal/enum/paymenttype"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/pkg/utils/converter"
-	"github.com/Dongy-s-Advanture/back-end/internal/enum/transactiontype"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -22,9 +22,9 @@ type ISellerRepository interface {
 	UpdateSeller(sellerID primitive.ObjectID, updatedSeller *model.Seller) (*dto.Seller, error)
 	UpdateSellerScore(sellerID primitive.ObjectID) error
 	GetSellerBalanceByID(sellerID primitive.ObjectID) (float64, error)
-	DepositSellerBalance(sellerID primitive.ObjectID,orderID primitive.ObjectID,payment string, amount float64) error
-	WithdrawSellerBalance(sellerID primitive.ObjectID,payment string, amount float64) error
- }
+	DepositSellerBalance(sellerID primitive.ObjectID, orderID primitive.ObjectID, payment string, amount float64) error
+	WithdrawSellerBalance(sellerID primitive.ObjectID, payment string, amount float64) error
+}
 
 type SellerRepository struct {
 	sellerCollection *mongo.Collection
@@ -203,21 +203,21 @@ func (r SellerRepository) GetSellerBalanceByID(sellerID primitive.ObjectID) (flo
 	return totalBalance, nil
 }
 
-func (r SellerRepository) DepositSellerBalance(sellerID primitive.ObjectID,orderID primitive.ObjectID,payment string, amount float64) error {
+func (r SellerRepository) DepositSellerBalance(sellerID primitive.ObjectID, orderID primitive.ObjectID, payment string, amount float64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
 	transaction := model.Transaction{
-		Type:    transactiontype.CREDIT,
+		Type:    paymenttype.CREDIT,
 		Amount:  amount,
 		OrderID: orderID,
 		Payment: payment,
 		Date:    time.Now(),
 	}
 
-	// Update Seller Balance & Add Transaction 
+	// Update Seller Balance & Add Transaction
 	update := bson.M{
-		"$inc": bson.M{"balance": amount},          // Increase balance
+		"$inc":  bson.M{"balance": amount},          // Increase balance
 		"$push": bson.M{"transaction": transaction}, // Add transaction record
 	}
 
@@ -225,7 +225,7 @@ func (r SellerRepository) DepositSellerBalance(sellerID primitive.ObjectID,order
 	return err
 }
 
-func (r SellerRepository) WithdrawSellerBalance(sellerID primitive.ObjectID ,payment string, amount float64) error {
+func (r SellerRepository) WithdrawSellerBalance(sellerID primitive.ObjectID, payment string, amount float64) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
@@ -240,7 +240,7 @@ func (r SellerRepository) WithdrawSellerBalance(sellerID primitive.ObjectID ,pay
 	}
 
 	transaction := model.Transaction{
-		Type:    transactiontype.DEBIT,
+		Type:    paymenttype.DEBIT,
 		Amount:  -amount,
 		Payment: payment,
 		Date:    time.Now(),
@@ -248,11 +248,10 @@ func (r SellerRepository) WithdrawSellerBalance(sellerID primitive.ObjectID ,pay
 
 	// Update balance & add transaction
 	update := bson.M{
-		"$inc": bson.M{"balance": -amount},         // Decrease balance
+		"$inc":  bson.M{"balance": -amount},         // Decrease balance
 		"$push": bson.M{"transaction": transaction}, // Log transaction
 	}
 
 	_, err = r.sellerCollection.UpdateOne(ctx, bson.M{"_id": sellerID}, update)
 	return err
 }
-

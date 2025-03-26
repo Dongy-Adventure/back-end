@@ -1,8 +1,6 @@
 package router
 
 import (
-	"github.com/Dongy-s-Advanture/back-end/internal/enum/tokenmode"
-	"github.com/Dongy-s-Advanture/back-end/internal/middleware"
 	"github.com/gin-gonic/gin"
 )
 
@@ -10,7 +8,11 @@ func (r Router) AddPaymentRouter(rg *gin.RouterGroup) {
 
 	cont := r.deps.PaymentController
 
-	authRouter := rg.Group("payment")
+	paymentRouter := rg.Group("payment")
 
-	authRouter.POST("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.HandlePayment)
+	paymentRouter.POST("/", cont.HandlePayment)
+	// paymentRouter.POST("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), cont.HandlePayment)
+	paymentRouter.GET("/sse/:charge_id", cont.SSEHandler)
+	paymentRouter.POST("/webhooks/omise", cont.OmiseWebhookHandler)
+
 }

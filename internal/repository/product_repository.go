@@ -120,20 +120,20 @@ func (r *ProductRepository) UpdateProduct(productID primitive.ObjectID, updatedP
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 
-	update := bson.M{
-		"$set": bson.M{
-			"productName": updatedProduct.ProductName,
-			"description": updatedProduct.Description,
-			"price":       updatedProduct.Price,
-			"tag":         updatedProduct.Tag,
-			"imageURL":    updatedProduct.ImageURL,
-			"color":       updatedProduct.Color,
-			"sellerID":    updatedProduct.SellerID,
-		},
+	updateData, err := bson.Marshal(updatedProduct)
+	if err != nil {
+		return nil, err
 	}
 
+	var update bson.M
+	if err := bson.Unmarshal(updateData, &update); err != nil {
+		return nil, err
+	}
+
+	update = bson.M{"$set": update}
+
 	filter := bson.M{"_id": productID}
-	_, err := r.productCollection.UpdateOne(ctx, filter, update)
+	_, err = r.productCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
 		return nil, err
 	}
@@ -159,19 +159,18 @@ func (r *ProductRepository) DeleteProduct(productID primitive.ObjectID) error {
 func (r *ProductRepository) UpdateProductAmount(productID primitive.ObjectID, amount int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
- 
+
 	update := bson.M{
-	    "$inc": bson.M{
-		   "amount": -amount, 
-	    },
+		"$inc": bson.M{
+			"amount": -amount,
+		},
 	}
- 
+
 	filter := bson.M{"_id": productID}
 	_, err := r.productCollection.UpdateOne(ctx, filter, update)
 	if err != nil {
-	    return err
+		return err
 	}
- 
+
 	return nil
- }
- 
+}

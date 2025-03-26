@@ -26,7 +26,7 @@ func InitializeOrderConfirmationScenario(ctx *godog.ScenarioContext) {
 	SetUpRouter()
 	router = gin.New()
 
-	orderController := controller.NewOrderController(mockOrderService)
+	orderController := controller.NewOrderController(mockOrderService, mockPaymentService)
 	router.POST("/order/", orderController.CreateOrder)
 	ctx.Step(`^a buyer with ID "([^"]*)"$`, aBuyerWithIDExists)
 	ctx.Step(`^an order should be created with respone status (\d+)`, anOrderCreated)
@@ -46,9 +46,9 @@ func aBuyerWithIDExists(buyerIDStr string) error {
 		return fmt.Errorf("invalid buyerID format: %v", err)
 	}
 	buyer := &dto.Buyer{
-		BuyerID: buyerID,
+		BuyerID:  buyerID,
 		Username: buyerName,
-		Cart:    []dto.OrderProduct{},
+		Cart:     []dto.OrderProduct{},
 	}
 
 	mockBuyerService.EXPECT().
@@ -77,12 +77,12 @@ func aProductWithIDExistsInTheBuyerCart(productIDStr string) error {
 		}
 	}
 	newProduct := dto.OrderProduct{
-		ProductID:   productID,
-		Amount:      1,
+		ProductID: productID,
+		Amount:    1,
 	}
 	mockBuyerService.EXPECT().
 		UpdateProductInCart(buyerID, newProduct).
-		Return([]dto.OrderProduct{newProduct}, nil) 
+		Return([]dto.OrderProduct{newProduct}, nil)
 	newCart, err := mockBuyerService.UpdateProductInCart(buyerID, newProduct)
 	if err != nil {
 		return fmt.Errorf("failed to update product in cart: %v", err)
@@ -113,12 +113,12 @@ func thePaymentStatusIs(status string) error {
 func anOrderCreated(expectedStatus int) error {
 	// Create a mock order request
 	requestBody := dto.OrderCreateRequest{
-		Products: []dto.OrderProduct{product}, // Ensure 'product' is defined in the test context
-		BuyerID:  buyerID,                // Ensure 'buyerID' is defined in the test context
-		SellerID: sellerID,                // Ensure 'sellerID' is defined in the test context
+		Products:   []dto.OrderProduct{product}, // Ensure 'product' is defined in the test context
+		BuyerID:    buyerID,                     // Ensure 'buyerID' is defined in the test context
+		SellerID:   sellerID,                    // Ensure 'sellerID' is defined in the test context
 		SellerName: "Test",
-		BuyerName: "Test",
-		Payment: "Paypal",
+		BuyerName:  "Test",
+		// Payment:    "Paypal",
 	}
 
 	jsonBody, err := json.Marshal(requestBody)
@@ -128,7 +128,7 @@ func anOrderCreated(expectedStatus int) error {
 
 	if paymentSuccess {
 		mockOrderService.EXPECT().
-			CreateOrder(gomock.Any(), buyerID, sellerID, "Test", "Test", "Paypal").
+			CreateOrder(gomock.Any()).
 			Return(&dto.Order{
 				OrderID:   primitive.NewObjectID(),
 				BuyerID:   buyerID,
@@ -139,7 +139,7 @@ func anOrderCreated(expectedStatus int) error {
 	} else {
 		// Handle payment failure scenario
 		mockOrderService.EXPECT().
-			CreateOrder(gomock.Any(), buyerID, sellerID, "Test", "Test", "Paypal").
+			CreateOrder(gomock.Any()).
 			Return(nil, fmt.Errorf("payment failed")).Times(1)
 	}
 
@@ -150,7 +150,7 @@ func anOrderCreated(expectedStatus int) error {
 
 	c, _ := gin.CreateTestContext(recorder)
 	c.Request = req
-	controller := controller.NewOrderController(mockOrderService)
+	controller := controller.NewOrderController(mockOrderService, mockPaymentService)
 	handler := controller.CreateOrder
 	handler(c)
 
