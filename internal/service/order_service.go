@@ -97,8 +97,8 @@ func (s OrderService) CreateOrder(orderCreateRequest *dto.OrderCreateRequest) (*
 		SellerID:      sellerID,
 		TotalPrice:    totalPrice,
 		SellerName:    orderCreateRequest.SellerName,
-		Payment:       orderCreateRequest.Payment,
-		CreatedAt:     createdAt,
+		Payment: 	   orderCreateRequest.Payment,	
+		CreatedAt:     orderCreateRequest.CreatedAt,	
 	})
 }
 

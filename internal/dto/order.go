@@ -20,12 +20,13 @@ type Order struct {
 	Payment       string             `json:"payment"`
 }
 type OrderCreateRequest struct {
-	Products   []OrderProduct     `json:"products"`
-	Payment    string             `json:"payment"`
-	BuyerID    primitive.ObjectID `json:"buyerID"`
-	SellerID   primitive.ObjectID `json:"sellerID"`
-	BuyerName  string             `json:"buyerName"`
-	SellerName string             `json:"sellerName"`
+	Products    []OrderProduct     `json:"products"`
+	BuyerID     primitive.ObjectID `json:"buyerID"`
+	SellerID    primitive.ObjectID `json:"sellerID"`
+	BuyerName   string             `json:"buyerName"`
+	SellerName  string             `json:"sellerName"`
+	Payment		string			   `json:"payment"`
+	CreatedAt	time.Time          `json:"createdAt"`				
 }
 
 type OrderStatusRequest struct {
