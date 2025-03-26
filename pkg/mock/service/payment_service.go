@@ -9,6 +9,7 @@ import (
 
 	dto "github.com/Dongy-s-Advanture/back-end/internal/dto"
 	gomock "github.com/golang/mock/gomock"
+	omise "github.com/omise/omise-go"
 )
 
 // MockIPaymentService is a mock of IPaymentService interface.
@@ -34,16 +35,67 @@ func (m *MockIPaymentService) EXPECT() *MockIPaymentServiceMockRecorder {
 	return m.recorder
 }
 
+// AddClient mocks base method.
+func (m *MockIPaymentService) AddClient(chargeID string, clientChan chan string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "AddClient", chargeID, clientChan)
+}
+
+// AddClient indicates an expected call of AddClient.
+func (mr *MockIPaymentServiceMockRecorder) AddClient(chargeID, clientChan interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddClient", reflect.TypeOf((*MockIPaymentService)(nil).AddClient), chargeID, clientChan)
+}
+
+// BroadcastChargeStatus mocks base method.
+func (m *MockIPaymentService) BroadcastChargeStatus(chargeID, status string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "BroadcastChargeStatus", chargeID, status)
+}
+
+// BroadcastChargeStatus indicates an expected call of BroadcastChargeStatus.
+func (mr *MockIPaymentServiceMockRecorder) BroadcastChargeStatus(chargeID, status interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BroadcastChargeStatus", reflect.TypeOf((*MockIPaymentService)(nil).BroadcastChargeStatus), chargeID, status)
+}
+
 // HandlePayment mocks base method.
-func (m *MockIPaymentService) HandlePayment(paymentRequest *dto.PaymentRequest) error {
+func (m *MockIPaymentService) HandlePayment(paymentRequest *dto.PaymentRequest) (*omise.Charge, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "HandlePayment", paymentRequest)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(*omise.Charge)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // HandlePayment indicates an expected call of HandlePayment.
 func (mr *MockIPaymentServiceMockRecorder) HandlePayment(paymentRequest interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "HandlePayment", reflect.TypeOf((*MockIPaymentService)(nil).HandlePayment), paymentRequest)
+}
+
+// RemoveClient mocks base method.
+func (m *MockIPaymentService) RemoveClient(chargeID string, client chan string) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "RemoveClient", chargeID, client)
+}
+
+// RemoveClient indicates an expected call of RemoveClient.
+func (mr *MockIPaymentServiceMockRecorder) RemoveClient(chargeID, client interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveClient", reflect.TypeOf((*MockIPaymentService)(nil).RemoveClient), chargeID, client)
+}
+
+// UpdatePaymentStatus mocks base method.
+func (m *MockIPaymentService) UpdatePaymentStatus(chargeID, status string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdatePaymentStatus", chargeID, status)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdatePaymentStatus indicates an expected call of UpdatePaymentStatus.
+func (mr *MockIPaymentServiceMockRecorder) UpdatePaymentStatus(chargeID, status interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdatePaymentStatus", reflect.TypeOf((*MockIPaymentService)(nil).UpdatePaymentStatus), chargeID, status)
 }
