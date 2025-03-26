@@ -32,7 +32,8 @@ func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client) {
 	corsConfig.AllowOrigins = []string{"http://localhost:3000"}
 	corsConfig.AllowMethods = []string{"OPTIONS", "PATCH", "PUT", "GET", "POST", "DELETE"}
 	corsConfig.AllowHeaders = []string{"Content-Type", "Authorization"} // Allow Authorization header
-	corsConfig.AllowCredentials = true                                  // If you are using cookies or Authorization header
+	corsConfig.ExposeHeaders = []string{"Content-Length"}
+	corsConfig.AllowCredentials = true // If you are using cookies or Authorization header
 
 	// Optional: Handle preflight cache
 	corsConfig.MaxAge = 12 * time.Hour

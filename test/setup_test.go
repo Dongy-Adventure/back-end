@@ -21,6 +21,7 @@ var (
 	mockSellerService      *mock.MockISellerService
 	mockProductService     *mock.MockIProductService
 	mockAppointmentService *mock.MockIAppointmentService
+	mockPaymentService     *mock.MockIPaymentService
 	testResponse           *http.Response
 	buyerID                primitive.ObjectID
 	sellerID               primitive.ObjectID
@@ -43,6 +44,7 @@ func TestMain(m *testing.M) {
 	mockBuyerService = mock.NewMockIBuyerService(ctrl)
 	mockSellerService = mock.NewMockISellerService(ctrl)
 	mockProductService = mock.NewMockIProductService(ctrl)
+	mockPaymentService = mock.NewMockIPaymentService(ctrl)
 	mockAppointmentService = mock.NewMockIAppointmentService(ctrl)
 	exitCode := m.Run()
 	os.Exit(exitCode)

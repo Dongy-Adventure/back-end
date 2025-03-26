@@ -76,7 +76,7 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, conf *confi
 	productController := controller.NewProductController(productService)
 	reviewController := controller.NewReviewController(reviewService)
 	appointmentController := controller.NewAppointmentController(appointmentService)
-	orderController := controller.NewOrderController(orderService)
+	orderController := controller.NewOrderController(orderService, paymentService)
 	paymentController := controller.NewPaymentController(paymentService)
 
 	return &Dependencies{

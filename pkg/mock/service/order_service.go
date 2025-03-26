@@ -6,7 +6,6 @@ package mock
 
 import (
 	reflect "reflect"
-	"fmt"
 
 	dto "github.com/Dongy-s-Advanture/back-end/internal/dto"
 	userrole "github.com/Dongy-s-Advanture/back-end/internal/enum/userrole"
@@ -39,21 +38,18 @@ func (m *MockIOrderService) EXPECT() *MockIOrderServiceMockRecorder {
 }
 
 // CreateOrder mocks base method.
-func (m *MockIOrderService) CreateOrder(products []dto.OrderProduct, buyerID, sellerID primitive.ObjectID, sellerName string, buyerName string, payment string) (*dto.Order, error) {
+func (m *MockIOrderService) CreateOrder(orderCreateRequest *dto.OrderCreateRequest) (*dto.Order, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateOrder", products, buyerID, sellerID, sellerName, buyerName, payment)
-	if len(ret) == 0 || ret[0] == nil {
-		return nil, fmt.Errorf("CreateOrder returned nil")
-	 }
+	ret := m.ctrl.Call(m, "CreateOrder", orderCreateRequest)
 	ret0, _ := ret[0].(*dto.Order)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateOrder indicates an expected call of CreateOrder.
-func (mr *MockIOrderServiceMockRecorder) CreateOrder(products, buyerID, sellerID interface{}, sellerName string, buyerName string, payment string) *gomock.Call {
+func (mr *MockIOrderServiceMockRecorder) CreateOrder(orderCreateRequest interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrder", reflect.TypeOf((*MockIOrderService)(nil).CreateOrder), products, buyerID, sellerID, sellerName, buyerName, payment)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrder", reflect.TypeOf((*MockIOrderService)(nil).CreateOrder), orderCreateRequest)
 }
 
 // DeleteOrderByOrderID mocks base method.
@@ -91,7 +87,7 @@ func (m *MockIOrderService) GetTotalPrice(products []dto.OrderProduct) (float64,
 	ret := m.ctrl.Call(m, "GetTotalPrice", products)
 	ret0, _ := ret[0].(float64)
 	ret1, _ := ret[1].(error)
-	return ret0, ret1 // return both value and error
+	return ret0, ret1
 }
 
 // GetTotalPrice indicates an expected call of GetTotalPrice.

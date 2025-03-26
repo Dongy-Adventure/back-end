@@ -25,7 +25,7 @@ var orderStatus int16
 
 func InitializeSellerAppointmentScenario(ctx *godog.ScenarioContext) {
 	router = gin.New()
-	orderController := controller.NewOrderController(mockOrderService)
+	orderController := controller.NewOrderController(mockOrderService, mockPaymentService)
 	appointmentController := controller.NewAppointmentController(mockAppointmentService)
 	router.POST("/order", orderController.CreateOrder)
 	router.PUT("/appointment/:appointment_id", appointmentController.UpdateAppointmentPlace)
@@ -49,12 +49,12 @@ func anOrderWithIDIsCreated(id string) error {
 	orderID = orderIDPrimitive
 
 	requestBody := dto.OrderCreateRequest{
-		Products: []dto.OrderProduct{product}, // Ensure 'product' is defined in the test context
-		BuyerID:  buyerID,                // Ensure 'buyerID' is defined in the test context
-		SellerID: sellerID,               // Ensure 'sellerID' is defined in the test context
+		Products:   []dto.OrderProduct{product}, // Ensure 'product' is defined in the test context
+		BuyerID:    buyerID,                     // Ensure 'buyerID' is defined in the test context
+		SellerID:   sellerID,                    // Ensure 'sellerID' is defined in the test context
 		SellerName: "Test",
-		BuyerName: "Test",
-		Payment: "Test",
+		BuyerName:  "Test",
+		// Payment:    "Test",
 	}
 
 	jsonBody, err := json.Marshal(requestBody)
@@ -63,14 +63,14 @@ func anOrderWithIDIsCreated(id string) error {
 	}
 
 	mockOrderService.EXPECT().
-		CreateOrder(gomock.Any(), buyerID, sellerID, "Test", "Test", "Test").
+		CreateOrder(gomock.Any()).
 		Return(&dto.Order{
 			OrderID:    primitive.NewObjectID(),
 			BuyerID:    buyerID,
 			SellerID:   sellerID,
 			SellerName: "Test",
 			BuyerName:  "Test",
-			Payment: "Test",
+			Payment:    "Test",
 			Products:   []dto.OrderProduct{},
 			CreatedAt:  time.Now(),
 		}, nil).Times(1)
