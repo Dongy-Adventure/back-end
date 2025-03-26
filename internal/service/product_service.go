@@ -71,8 +71,8 @@ func (s ProductService) DeleteProduct(productID primitive.ObjectID) error {
 
 	err := s.productRepository.DeleteProduct(productID)
 	if err != nil {
-		return err 
+		return err
 	}
 
-	return nil 
+	return nil
 }

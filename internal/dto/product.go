@@ -30,12 +30,13 @@ type ProductCreateRequest struct {
 	Amount      int                `json:"amount" binding:"required,gte=0"`
 }
 type UpdateProductRequest struct {
-	ProductName string             `json:"productName" binding:"required"`
-	Price       float64            `json:"price,omitempty" binding:"required,gte=1"`
-	Description string             `json:"description,omitempty"`
-	ImageURL    string             `json:"imageURL,omitempty"`
-	Tag         []string           `json:"tag,omitempty"`
-	Color       string             `json:"color,omitempty"`
-	SellerID    primitive.ObjectID `json:"sellerID,omitempty"`
-	Amount      int                `json:"amount" binding:"required,gte=0"`
+	ProductName string    `json:"productName" binding:"required"`
+	Price       float64   `json:"price,omitempty" binding:"required,gte=1"`
+	Description string    `json:"description,omitempty"`
+	ImageURL    string    `json:"imageURL,omitempty"`
+	Tag         []string  `json:"tag,omitempty"`
+	Color       string    `json:"color,omitempty"`
+	SellerID    string    `json:"sellerID,omitempty"`
+	Amount      int       `json:"amount" binding:"required,gte=0"`
+	CreatedAt   time.Time `json:"createdAt,omitempty"`
 }
