@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/enum/orderstatus"
@@ -53,14 +54,14 @@ func (s OrderService) CreateOrder(orderCreateRequest *dto.OrderCreateRequest) (*
 			Amount:    product.Amount,
 		})
 	}
+	createdAt := time.Now()
 
 	orderID := primitive.NewObjectID()
 	app, err := s.appointmentRepository.CreateAppointment(&model.Appointment{
-		AppointmentID: primitive.NewObjectID(),
-		OrderID:       orderID,
-		BuyerID:       buyerID,
-		SellerID:      sellerID,
-		// CreatedAt:     orderCreateRequest.PaymentRequest.CreatedAt,
+		OrderID:   orderID,
+		BuyerID:   buyerID,
+		SellerID:  sellerID,
+		CreatedAt: createdAt,
 	})
 	if err != nil {
 		return nil, err
@@ -73,7 +74,7 @@ func (s OrderService) CreateOrder(orderCreateRequest *dto.OrderCreateRequest) (*
 	}
 
 	// Add transaction and update (+deposit) seller balance
-	err = s.sellerRepository.DepositSellerBalance(sellerID, orderID, "", totalPrice)
+	err = s.sellerRepository.DepositSellerBalance(sellerID, orderID, orderCreateRequest.Payment, totalPrice)
 	// err = s.sellerRepository.DepositSellerBalance(sellerID, orderID, orderCreateRequest.PaymentRequest.PaymentMethod, totalPrice)
 	if err != nil {
 		return nil, err
@@ -86,7 +87,6 @@ func (s OrderService) CreateOrder(orderCreateRequest *dto.OrderCreateRequest) (*
 			return nil, err
 		}
 	}
-
 	return s.orderRepository.CreateOrder(&model.Order{
 		OrderID:       orderID,
 		Status:        orderstatus.WAITFORLOCATION,
