@@ -65,6 +65,7 @@ func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client) {
 	r.AddReviewRouter(v1)
 	r.AddAppointmentRouter(v1)
 	r.AddPaymentRouter(v1)
+	r.AddAdvertisementRouter(v1)
 
 	err := r.g.Run(":" + r.conf.App.Port)
 	if err != nil {

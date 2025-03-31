@@ -42,6 +42,10 @@ type Dependencies struct {
 
 	PaymentService    service.IPaymentService
 	PaymentController controller.IPaymentController
+
+	AdvertisementRepo       repository.IAdvertisementRepository
+	AdvertisementService    service.IAdvertisementService
+	AdvertisementController controller.IAdvertisementController
 }
 
 func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, conf *config.Config) *Dependencies {
@@ -58,6 +62,7 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, conf *confi
 	reviewRepo := repository.NewReviewRepository(mongoDB, "reviews", sellerRepo)
 	appointmentRepo := repository.NewAppointmentRepository(mongoDB, "appointments")
 	orderRepo := repository.NewOrderRepository(mongoDB, "orders")
+	advertisementRepo := repository.NewAdvertisementRepository(mongoDB, "advertisements")
 
 	// Initialize services
 	buyerService := service.NewBuyerService(buyerRepo)
@@ -68,6 +73,7 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, conf *confi
 	appointmentService := service.NewAppointmentService(appointmentRepo)
 	orderService := service.NewOrderService(orderRepo, appointmentRepo, sellerRepo, productRepo)
 	paymentService := service.NewPaymentService(omiseClient)
+	advertisementService := service.NewAdvertisementService(advertisementRepo)
 
 	// Initialize controllers
 	buyerController := controller.NewBuyerController(buyerService)
@@ -78,6 +84,7 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, conf *confi
 	appointmentController := controller.NewAppointmentController(appointmentService)
 	orderController := controller.NewOrderController(orderService, paymentService)
 	paymentController := controller.NewPaymentController(paymentService)
+	advertisementController := controller.NewAdvertisementController(advertisementService)
 
 	return &Dependencies{
 		BuyerRepo:       buyerRepo,
@@ -109,5 +116,9 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, conf *confi
 
 		PaymentService:    paymentService,
 		PaymentController: paymentController,
+
+		AdvertisementRepo: advertisementRepo,
+		AdvertisementService: advertisementService,
+		AdvertisementController: advertisementController,
 	}
 }
