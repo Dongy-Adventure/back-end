@@ -12,6 +12,7 @@ import (
 
 type IAdvertisementController interface {
 	GetAdvertisements(c *gin.Context)
+	GetWeightedRandomAdvertisements(c *gin.Context)
 	GetAdvertisementByID(c *gin.Context)
 	GetAdvertisementsBySellerID(c *gin.Context)
 	GetAdvertisementsByProductID(c *gin.Context)
@@ -57,6 +58,37 @@ func (s AdvertisementController) GetAdvertisements(c *gin.Context) {
 		Success: true,
 		Status:  http.StatusOK,
 		Message: "Get Advertisements success",
+		Data:    res,
+	})
+}
+
+// GetWeightedRandomAdvertisement godoc
+//
+//	@Summary		Get all advertisements
+//	@Description	Retrieves all advertisements
+//	@Tags			advertisement
+//	@Accept			json
+//	@Produce		json
+//	@Success		200	{object}	dto.SuccessResponse{data=[]dto.Advertisement}
+//	@Failure		500	{object}	dto.ErrorResponse
+//	@Router			/advertisement/random/ [get]
+func (s AdvertisementController) GetWeightedRandomAdvertisements(c *gin.Context) {
+	res, err := s.advertisementService.GetWeightedRandomAdvertisements()
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "No random advertisements",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, dto.SuccessResponse{
+		Success: true,
+		Status:  http.StatusOK,
+		Message: "Get Random Advertisements success",
 		Data:    res,
 	})
 }
