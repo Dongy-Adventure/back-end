@@ -72,13 +72,13 @@ jobs:
           echo "OMISE_PRIVATE_KEY=${{ secrets.OMISE_PRIVATE_KEY }}" >> .env
 
       - name: Pull latest Docker images
-        run: docker-compose pull
+        run: sudo docker-compose pull
 
       - name: Stop and remove old containers
-        run: docker-compose down -v || true 
+        run: sudo docker-compose down -v || true 
 
       - name: Start new containers
-        run: docker-compose up --build -d
+        run: sudo docker-compose up --build -d
 
       - name: Verify Deployment
-        run: docker ps -a
+        run: sudo docker ps -a
