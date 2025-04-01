@@ -23,7 +23,7 @@ jobs:
         run: echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
 
       - name: Build the Docker image
-        run: docker build -t d33102/se_backend:latest .
+        run: docker build --no-cache -t d33102/se_backend:latest .
 
       - name: Push to DockerHub
         run: docker push d33102/se_backend:latest
@@ -36,17 +36,49 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Ensure Docker & Docker Compose are installed
+        run: |
+          if ! [ -x "$(command -v docker)" ]; then
+            echo "Error: Docker is not installed." >&2
+            exit 1
+          fi
+          if ! [ -x "$(command -v docker-compose)" ]; then
+            echo "Installing Docker Compose..."
+            sudo apt update && sudo apt install -y docker-compose
+          fi
+
       - name: Login to DockerHub
         env:
           DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
           DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
         run: echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
 
+      - name: Create .env file
+        run: |
+          echo "APP_PORT=${{ secrets.APP_PORT }}" > .env
+          echo "APP_ENV=${{ secrets.APP_ENV }}" >> .env
+          echo "MONGODB_URL=${{ secrets.MONGODB_URL }}" >> .env
+          echo "MONGO_INITDB_ROOT_USERNAME=${{ secrets.MONGO_INITDB_ROOT_USERNAME }}" >> .env
+          echo "MONGO_INITDB_ROOT_PASSWORD=${{ secrets.MONGO_INITDB_ROOT_PASSWORD }}" >> .env
+          echo "MONGO_INITDB_CONNECT_TIMEOUT=${{ secrets.MONGO_INITDB_CONNECT_TIMEOUT }}" >> .env
+          echo "REDIS_ADDRESS=${{ secrets.REDIS_ADDRESS }}" >> .env
+          echo "REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}" >> .env
+          echo "REDIS_DB=${{ secrets.REDIS_DB }}" >> .env
+          echo "ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}" >> .env
+          echo "REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}" >> .env
+          echo "ACCESS_TOKEN_MINUTE_LIFESPAN=${{ secrets.ACCESS_TOKEN_MINUTE_LIFESPAN }}" >> .env
+          echo "REFRESH_TOKEN_MINUTE_LIFESPAN=${{ secrets.REFRESH_TOKEN_MINUTE_LIFESPAN }}" >> .env
+          echo "OMISE_PUBLIC_KEY=${{ secrets.OMISE_PUBLIC_KEY }}" >> .env
+          echo "OMISE_PRIVATE_KEY=${{ secrets.OMISE_PRIVATE_KEY }}" >> .env
+
       - name: Pull latest Docker images
-        run: sudo docker-compose pull
+        run: docker-compose pull
 
       - name: Stop and remove old containers
-        run: sudo docker-compose down -v
+        run: docker-compose down -v || true 
 
       - name: Start new containers
-        run: sudo docker-compose up --build -d
+        run: docker-compose up --build -d
+
+      - name: Verify Deployment
+        run: docker ps -a
