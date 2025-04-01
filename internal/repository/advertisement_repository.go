@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/mroth/weightedrand/v2"
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/pkg/utils/converter"
@@ -14,6 +15,7 @@ import (
 
 type IAdvertisementRepository interface {
 	GetAdvertisements() ([]dto.Advertisement, error)
+	GetWeightedRandomAdvertisements() ([]dto.Advertisement, error)
 	GetAdvertisementByID(advertisementID primitive.ObjectID) (*dto.Advertisement, error)
 	GetAdvertisementsBySellerID(sellerID primitive.ObjectID) ([]dto.Advertisement, error)
 	GetAdvertisementsByProductID(productID primitive.ObjectID) ([]dto.Advertisement, error)
@@ -31,6 +33,66 @@ func NewAdvertisementRepository(db *mongo.Database, advertisementcollectionName 
 		advertisementCollection: db.Collection(advertisementcollectionName),
 	}
 }
+
+func (r AdvertisementRepository) GetWeightedRandomAdvertisements() ([]dto.Advertisement, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+	defer cancel()
+
+	// Fetch all advertisements from MongoDB
+	cursor, err := r.advertisementCollection.Find(ctx, bson.M{})
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+
+	var advertisementModels []model.Advertisement
+	if err = cursor.All(ctx, &advertisementModels); err != nil {
+		return nil, err
+	}
+
+	// If no advertisements, return empty slice
+	if len(advertisementModels) == 0 {
+		return []dto.Advertisement{}, nil
+	}
+
+	// Map ads by ID to avoid repetition
+	selectedAds := make(map[primitive.ObjectID]bool)
+	finalAds := []dto.Advertisement{}
+
+	for len(finalAds) < 5 && len(selectedAds) < len(advertisementModels) {
+		// Build weighted choices
+		var choices []weightedrand.Choice[model.Advertisement, uint]
+		for _, ad := range advertisementModels {
+			if !selectedAds[ad.AdvertisementID] { // Skip already selected ads
+				choices = append(choices, weightedrand.NewChoice(ad, uint(ad.Amount*100)))
+			}
+		}
+
+		// If no choices left, break
+		if len(choices) == 0 {
+			break
+		}
+
+		// Initialize weighted random chooser
+		chooser, err := weightedrand.NewChooser(choices...)
+		if err != nil {
+			return nil, err
+		}
+
+		// Pick one ad
+		selectedAd := chooser.Pick()
+		selectedAds[selectedAd.AdvertisementID] = true // Mark as selected
+
+		advertisementDTO, err := converter.AdvertisementModelToDTO(&selectedAd)
+		if err != nil {
+			return nil, err
+		}
+		finalAds = append(finalAds, *advertisementDTO)
+	}
+
+	return finalAds, nil
+}
+
 
 func (r AdvertisementRepository) GetAdvertisements() ([]dto.Advertisement, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)

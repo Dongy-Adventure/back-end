@@ -9,6 +9,7 @@ import (
 
 type IAdvertisementService interface {
 	GetAdvertisements() ([]dto.Advertisement, error)
+	GetWeightedRandomAdvertisements() ([]dto.Advertisement, error)
 	GetAdvertisementByID(advertisementID primitive.ObjectID) (*dto.Advertisement, error)
 	GetAdvertisementsBySellerID(sellerID primitive.ObjectID) ([]dto.Advertisement, error)
 	GetAdvertisementsByProductID(productID primitive.ObjectID) ([]dto.Advertisement, error)
@@ -29,6 +30,14 @@ func NewAdvertisementService(r repository.IAdvertisementRepository) IAdvertiseme
 
 func (s AdvertisementService) GetAdvertisements() ([]dto.Advertisement, error) {
 	advertisements, err := s.advertisementRepository.GetAdvertisements()
+	if err != nil {
+		return nil, err
+	}
+	return advertisements, nil
+}
+
+func (s AdvertisementService) GetWeightedRandomAdvertisements() ([]dto.Advertisement, error) {
+	advertisements, err := s.advertisementRepository.GetWeightedRandomAdvertisements()
 	if err != nil {
 		return nil, err
 	}
