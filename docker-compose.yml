@@ -1,6 +1,21 @@
-version: '3.8'
+version: "3.8"
 
 services:
+  app:
+    build: .
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - dongy
+    restart: always
+    environment:
+      MONGO_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongo:27017
+      REDIS_URL: redis:6379
+    command: ["go", "run", "./cmd/main.go"]
+
   mongo:
     image: mongo:latest
     ports:
@@ -22,14 +37,12 @@ services:
       - "6379:6379"
     volumes:
       - "redis_data:/data"
-    environment:
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
     networks:
       - dongy
     restart: always
 
 volumes:
-  mongo_data: 
+  mongo_data:
   redis_data:
 
 networks:
