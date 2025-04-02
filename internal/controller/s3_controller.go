@@ -22,6 +22,17 @@ func NewS3Controller(s service.IS3Service) IS3Controller {
 	}
 }
 
+// UploadFile godoc
+// @Summary      Upload an image file
+// @Description  Uploads an image file to the server and stores it on S3
+// @Tags         review
+// @Accept       multipart/form-data
+// @Produce      json
+// @Param        file  formData  file  true  "Image file to upload"
+// @Success      200   {object}  dto.SuccessResponse{data=string}  "URL of the uploaded file"
+// @Failure      400   {object}  dto.ErrorResponse  "Invalid file"
+// @Failure      500   {object}  dto.ErrorResponse  "Internal server error"
+// @Router       /upload [post]
 func (uc *S3Controller) UploadFile(c *gin.Context) {
 	file, fileHeader, err := c.Request.FormFile("file")
 	if err != nil {
@@ -35,7 +46,6 @@ func (uc *S3Controller) UploadFile(c *gin.Context) {
 	}
 	defer file.Close()
 
-	// Upload the file using the service
 	fileURL, err := uc.s3Service.UploadFile(file, fileHeader)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{

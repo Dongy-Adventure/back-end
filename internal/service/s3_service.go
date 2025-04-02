@@ -62,7 +62,6 @@ func (s *S3Service) UploadFile(file multipart.File, fileHeader *multipart.FileHe
 		Bucket: aws.String(s.BucketName),
 		Key:    aws.String(uniqueFileName),
 		Body:   bytes.NewReader(buffer.Bytes()),
-		ACL:    "public-read",
 	})
 	if err != nil {
 		return "", fmt.Errorf("failed to upload file: %v", err)
