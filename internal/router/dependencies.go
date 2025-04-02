@@ -7,6 +7,7 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/controller"
 	"github.com/Dongy-s-Advanture/back-end/internal/repository"
 	"github.com/Dongy-s-Advanture/back-end/internal/service"
+	"github.com/Dongy-s-Advanture/back-end/pkg/utils"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/omise/omise-go"
 	"github.com/redis/go-redis/v9"
@@ -47,9 +48,6 @@ type Dependencies struct {
 	AdvertisementRepo       repository.IAdvertisementRepository
 	AdvertisementService    service.IAdvertisementService
 	AdvertisementController controller.IAdvertisementController
-
-	S3Service       service.IS3Service
-	S3Controller    controller.IS3Controller
 }
 
 func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s3.Client, conf *config.Config) *Dependencies {
@@ -59,14 +57,17 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s
 	if e != nil {
 		log.Fatal(e)
 	}
+
+	s3Service := utils.NewS3Service(s3Client, &conf.AWS)
+
 	// Initialize repositories
 	buyerRepo := repository.NewBuyerRepository(mongoDB, "buyers")
 	sellerRepo := repository.NewSellerRepository(mongoDB, "sellers", "reviews")
-	productRepo := repository.NewProductRepository(mongoDB, "products")
+	productRepo := repository.NewProductRepository(mongoDB, *s3Service, "products")
 	reviewRepo := repository.NewReviewRepository(mongoDB, "reviews", sellerRepo)
 	appointmentRepo := repository.NewAppointmentRepository(mongoDB, "appointments")
 	orderRepo := repository.NewOrderRepository(mongoDB, "orders")
-	advertisementRepo := repository.NewAdvertisementRepository(mongoDB, "advertisements")
+	advertisementRepo := repository.NewAdvertisementRepository(mongoDB, *s3Service, "advertisements")
 
 	// Initialize services
 	buyerService := service.NewBuyerService(buyerRepo)
@@ -78,7 +79,6 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s
 	orderService := service.NewOrderService(orderRepo, appointmentRepo, sellerRepo, productRepo)
 	paymentService := service.NewPaymentService(omiseClient)
 	advertisementService := service.NewAdvertisementService(advertisementRepo)
-	s3Service := service.NewS3Service(s3Client, &conf.AWS)
 
 	// Initialize controllers
 	buyerController := controller.NewBuyerController(buyerService)
@@ -90,7 +90,6 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s
 	orderController := controller.NewOrderController(orderService, paymentService)
 	paymentController := controller.NewPaymentController(paymentService)
 	advertisementController := controller.NewAdvertisementController(advertisementService)
-	s3Controller := controller.NewS3Controller(s3Service)
 
 	return &Dependencies{
 		BuyerRepo:       buyerRepo,
@@ -127,7 +126,5 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s
 		AdvertisementService: advertisementService,
 		AdvertisementController: advertisementController,
 
-		S3Service:    s3Service,
-		S3Controller: s3Controller,
 	}
 }

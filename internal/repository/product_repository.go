@@ -6,6 +6,7 @@ import (
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
+	"github.com/Dongy-s-Advanture/back-end/pkg/utils"
 	"github.com/Dongy-s-Advanture/back-end/pkg/utils/converter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -24,11 +25,13 @@ type IProductRepository interface {
 
 type ProductRepository struct {
 	productCollection *mongo.Collection
+	s3Service         utils.S3Service
 }
 
-func NewProductRepository(db *mongo.Database, collectionName string) IProductRepository {
+func NewProductRepository(db *mongo.Database, s3Service utils.S3Service, collectionName string) IProductRepository {
 	return &ProductRepository{
 		productCollection: db.Collection(collectionName),
+		s3Service:         s3Service,
 	}
 }
 
@@ -99,22 +102,34 @@ func (r *ProductRepository) GetProducts() ([]dto.Product, error) {
 }
 
 func (r *ProductRepository) CreateProduct(product *model.Product) (*dto.Product, error) {
+
+	// Upload image to S3 using S3Service
+	imageURL, err := r.s3Service.UploadImage(product.ImageURL)
+	if err != nil {
+		return nil, err
+	}
+
+	// Set image URL and insert product
+	product.ProductID = primitive.NewObjectID()
+	product.ImageURL = imageURL
+
+	// Insert product into database
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
-	product.ProductID = primitive.NewObjectID()
 	result, err := r.productCollection.InsertOne(ctx, product)
 	if err != nil {
 		return nil, err
 	}
+
 	var newProduct *model.Product
 	err = r.productCollection.FindOne(ctx, bson.M{"_id": result.InsertedID}).Decode(&newProduct)
-
 	if err != nil {
 		return nil, err
 	}
 
 	return converter.ProductModelToDTO(newProduct)
 }
+
 
 func (r *ProductRepository) UpdateProduct(productID primitive.ObjectID, updatedProduct *model.Product) (*dto.Product, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)

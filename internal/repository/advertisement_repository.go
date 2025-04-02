@@ -4,10 +4,11 @@ import (
 	"context"
 	"time"
 
-	"github.com/mroth/weightedrand/v2"
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
+	"github.com/Dongy-s-Advanture/back-end/pkg/utils"
 	"github.com/Dongy-s-Advanture/back-end/pkg/utils/converter"
+	"github.com/mroth/weightedrand/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -26,11 +27,13 @@ type IAdvertisementRepository interface {
 
 type AdvertisementRepository struct {
 	advertisementCollection *mongo.Collection
+	s3Service         utils.S3Service
 }
 
-func NewAdvertisementRepository(db *mongo.Database, advertisementcollectionName string) IAdvertisementRepository {
+func NewAdvertisementRepository(db *mongo.Database, s3Service utils.S3Service, advertisementcollectionName string) IAdvertisementRepository {
 	return AdvertisementRepository{
 		advertisementCollection: db.Collection(advertisementcollectionName),
+		s3Service:         s3Service,
 	}
 }
 
@@ -190,6 +193,14 @@ func (r AdvertisementRepository) CreateAdvertisement(advertisement *model.Advert
 	defer cancel()
 	advertisement.AdvertisementID = primitive.NewObjectID()
 	advertisement.CreatedAt = time.Now()
+
+	imageURL, err := r.s3Service.UploadImage(advertisement.ImageURL)
+	if err != nil {
+		return nil, err
+	}
+
+	advertisement.ImageURL = imageURL
+
 	result, err := r.advertisementCollection.InsertOne(ctx, advertisement)
 	if err != nil {
 		return nil, err
