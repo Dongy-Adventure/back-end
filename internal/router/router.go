@@ -7,6 +7,7 @@ import (
 
 	docs "github.com/Dongy-s-Advanture/back-end/docs"
 	"github.com/Dongy-s-Advanture/back-end/internal/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -25,7 +26,7 @@ func NewRouter(g *gin.Engine, conf *config.Config) *Router {
 	return &Router{g, conf, nil}
 }
 
-func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client) {
+func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s3.Client) {
 
 	// CORS setting
 	corsConfig := cors.DefaultConfig()

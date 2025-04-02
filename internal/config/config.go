@@ -25,6 +25,13 @@ type DbConfig struct {
 	RedisDB       int
 }
 
+type AWSConfig struct {
+	Region     string
+	AccessKey  string
+	SecretKey  string
+	BucketName string
+}
+
 type AuthConfig struct {
 	AccessTokenSecret           string
 	RefreshTokenSecret          string
@@ -36,6 +43,7 @@ type Config struct {
 	App     AppConfig
 	Auth    AuthConfig
 	Db      DbConfig
+	AWS     AWSConfig
 	Payment PaymentConfig
 }
 
@@ -65,6 +73,13 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
+	awsConfig := AWSConfig{
+		Region:  os.Getenv("AWS_REGION"),
+		AccessKey: os.Getenv("AWS_ACCESS_KEY_ID"),
+		SecretKey: os.Getenv("AWS_SECRET_ACCESS_KEY"),
+		BucketName: os.Getenv("AWS_BUCKET_NAME"),
+	}
+
 	authConfig := AuthConfig{
 		AccessTokenSecret:           os.Getenv("ACCESS_TOKEN_SECRET"),
 		RefreshTokenSecret:          os.Getenv("REFRESH_TOKEN_SECRET"),
@@ -91,6 +106,7 @@ func LoadConfig() (*Config, error) {
 		App:     appConfig,
 		Auth:    authConfig,
 		Db:      dbConfig,
+		AWS: 	 awsConfig,
 		Payment: paymentConfig,
 	}, nil
 }
