@@ -12,7 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	swaggerfiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -55,7 +55,7 @@ func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s
 	v1 := r.g.Group("/api/v1")
 
 	// setup
-	r.deps = NewDependencies(mongoDB, redisDB, r.conf)
+	r.deps = NewDependencies(mongoDB, redisDB, s3Client, r.conf)
 
 	// Add related path
 	r.AddSellerRouter(v1)
@@ -67,6 +67,7 @@ func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s
 	r.AddAppointmentRouter(v1)
 	r.AddPaymentRouter(v1)
 	r.AddAdvertisementRouter(v1)
+	r.AddUploadRoute(v1)
 
 	err := r.g.Run(":" + r.conf.App.Port)
 	if err != nil {
