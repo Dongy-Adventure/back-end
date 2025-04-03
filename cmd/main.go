@@ -28,7 +28,12 @@ func main() {
 		panic(fmt.Sprintf("Error connecting redis: %v", err))
 	}
 
+	s3Client, err := database.InitS3Client(&conf.AWS)
+	if err != nil {
+		panic(fmt.Sprintf("Error initializing S3 client: %v", err))
+	}
+
 	r := routes.NewRouter(gin.Default(), conf)
 
-	r.Run(mongoDB, redisDB)
+	r.Run(mongoDB, redisDB, s3Client)
 }

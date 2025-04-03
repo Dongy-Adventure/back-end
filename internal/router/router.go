@@ -7,11 +7,12 @@ import (
 
 	docs "github.com/Dongy-s-Advanture/back-end/docs"
 	"github.com/Dongy-s-Advanture/back-end/internal/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	swaggerfiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger" // gin-swagger middleware
+	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -25,7 +26,7 @@ func NewRouter(g *gin.Engine, conf *config.Config) *Router {
 	return &Router{g, conf, nil}
 }
 
-func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client) {
+func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s3.Client) {
 
 	// CORS setting
 	corsConfig := cors.DefaultConfig()
@@ -54,7 +55,7 @@ func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client) {
 	v1 := r.g.Group("/api/v1")
 
 	// setup
-	r.deps = NewDependencies(mongoDB, redisDB, r.conf)
+	r.deps = NewDependencies(mongoDB, redisDB, s3Client, r.conf)
 
 	// Add related path
 	r.AddSellerRouter(v1)
@@ -66,6 +67,7 @@ func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client) {
 	r.AddAppointmentRouter(v1)
 	r.AddPaymentRouter(v1)
 	r.AddAdvertisementRouter(v1)
+	r.AddUploadRoute(v1)
 
 	err := r.g.Run(":" + r.conf.App.Port)
 	if err != nil {
