@@ -1,38 +1,38 @@
 version: "3.8"
 
 services:
-  # app:
-  #   build: .
-  #   ports:
-  #     - "3001:3001"
-  #   depends_on:
-  #     - mongo
-  #     - redis
-  #   networks:
-  #     - dongy
-  #   restart: always
-  #   environment:
-  #     APP_PORT: 3001
-  #     APP_ENV: development
+  app:
+    build: .
+    ports:
+      - "3001:3001"
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - dongy
+    restart: always
+    environment:
+      APP_PORT: 3001
+      APP_ENV: development
 
-  #     MONGODB_URL: ${MONGODB_URL}
-  #     MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
-  #     MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
-  #     MONGO_INITDB_CONNECT_TIMEOUT: ${MONGO_INITDB_CONNECT_TIMEOUT}
+      MONGODB_URL: ${MONGODB_URL}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+      MONGO_INITDB_CONNECT_TIMEOUT: ${MONGO_INITDB_CONNECT_TIMEOUT}
 
-  #     REDIS_ADDRESS: ${REDIS_ADDRESS}
-  #     REDIS_URL: redis:6379
-  #     REDIS_PASSWORD: ""
-  #     REDIS_DB: 0
+      REDIS_ADDRESS: ${REDIS_ADDRESS}
+      REDIS_URL: redis:6379
+      REDIS_PASSWORD: ""
+      REDIS_DB: 0
 
-  #     ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET}
-  #     REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET}
-  #     ACCESS_TOKEN_MINUTE_LIFESPAN: ${ACCESS_TOKEN_MINUTE_LIFESPAN}
-  #     REFRESH_TOKEN_MINUTE_LIFESPAN: ${REFRESH_TOKEN_MINUTE_LIFESPAN}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET}
+      REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET}
+      ACCESS_TOKEN_MINUTE_LIFESPAN: ${ACCESS_TOKEN_MINUTE_LIFESPAN}
+      REFRESH_TOKEN_MINUTE_LIFESPAN: ${REFRESH_TOKEN_MINUTE_LIFESPAN}
 
-  #     OMISE_PUBLIC_KEY: ${OMISE_PUBLIC_KEY}
-  #     OMISE_PRIVATE_KEY: ${OMISE_PRIVATE_KEY}
-  #   command: ["go", "run", "./cmd/main.go"]
+      OMISE_PUBLIC_KEY: ${OMISE_PUBLIC_KEY}
+      OMISE_PRIVATE_KEY: ${OMISE_PRIVATE_KEY}
+    command: ["go", "run", "./cmd/main.go"]
 
   mongo:
     image: mongo:latest
