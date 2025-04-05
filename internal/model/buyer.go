@@ -16,5 +16,6 @@ type Buyer struct {
 	City        string             `json:"city" bson:"city"`
 	Province    string             `json:"province" bson:"province"`
 	Zip         string             `json:"zip" bson:"zip"`
-	Cart        []OrderProduct      `json:"cart" bson:"cart"`
+	Cart        []OrderProduct     `json:"cart" bson:"cart"`
+	ProfilePic  string             `json:"profilePic" bson:"profilePic"`
 }

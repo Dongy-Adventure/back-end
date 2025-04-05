@@ -80,9 +80,14 @@ func (r SellerRepository) GetSellers() ([]dto.Seller, error) {
 func (r SellerRepository) CreateSellerData(seller *model.Seller) (*dto.Seller, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
+
+	// var existingSeller model.Seller
+	// err := r.sellerCollection.FindOne(ctx, bson.M{"username": seller.Username}).Decode(&existingSeller)
+
+	// if err == nil {
+	// 	return nil, fmt.Errorf("this username is already exists")
+	// }
 	seller.SellerID = primitive.NewObjectID()
-	seller.Balance = 0
-	seller.Transaction = []model.Transaction{}
 	result, err := r.sellerCollection.InsertOne(ctx, seller)
 	if err != nil {
 		return nil, err

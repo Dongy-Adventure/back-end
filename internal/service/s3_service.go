@@ -25,7 +25,7 @@ var allowedExtensions = map[string]bool{
 }
 
 type IS3Service interface {
-	UploadFile(file multipart.File, fileHeader *multipart.FileHeader) (string, error)
+	UploadFile(file *multipart.FileHeader, folderName string) (string, error)
 }
 
 type S3Service struct {
@@ -40,11 +40,18 @@ func NewS3Service(s3Client *s3.Client, cfg *config.AWSConfig) IS3Service {
 	}
 }
 
-func (s *S3Service) UploadFile(file multipart.File, fileHeader *multipart.FileHeader) (string, error) {
+func (s *S3Service) UploadFile(fileHeader *multipart.FileHeader, folderName string) (string, error) {
+	// Get the file extension
 	ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
 	if !allowedExtensions[ext] {
 		return "", fmt.Errorf("invalid file type: only images are allowed")
 	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		return "", fmt.Errorf("failed to open file: %v", err)
+	}
+	defer file.Close()
 
 	buffer := bytes.NewBuffer(nil)
 	if _, err := buffer.ReadFrom(file); err != nil {
@@ -56,9 +63,9 @@ func (s *S3Service) UploadFile(file multipart.File, fileHeader *multipart.FileHe
 		return "", fmt.Errorf("invalid file type: only image files are allowed")
 	}
 
-	uniqueFileName := fmt.Sprintf("%d%s", time.Now().Unix(), ext)
+	uniqueFileName := fmt.Sprintf("%s/%d%s", folderName, time.Now().Unix(), ext)
 
-	_, err := s.Client.PutObject(context.TODO(), &s3.PutObjectInput{
+	_, err = s.Client.PutObject(context.TODO(), &s3.PutObjectInput{
 		Bucket: aws.String(s.BucketName),
 		Key:    aws.String(uniqueFileName),
 		Body:   bytes.NewReader(buffer.Bytes()),

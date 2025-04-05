@@ -7,6 +7,7 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -21,15 +22,18 @@ type IBuyerController interface {
 
 type BuyerController struct {
 	buyerService service.IBuyerService
+	s3Service    service.IS3Service
 }
 
-func NewBuyerController(s service.IBuyerService) IBuyerController {
+func NewBuyerController(s service.IBuyerService, s3 service.IS3Service) IBuyerController {
 	return BuyerController{
 		buyerService: s,
+		s3Service:    s3,
 	}
 }
 
 // CreateBuyer godoc
+//
 //	@Summary		Create a new buyer
 //	@Description	Creates a new buyer in the database
 //	@Tags			buyer
@@ -41,9 +45,9 @@ func NewBuyerController(s service.IBuyerService) IBuyerController {
 //	@Failure		500		{object}	dto.ErrorResponse
 //	@Router			/buyer/ [post]
 func (s BuyerController) CreateBuyer(c *gin.Context) {
-	var newBuyer model.Buyer
+	var newBuyer dto.BuyerRegisterRequest
 
-	if err := c.BindJSON(&newBuyer); err != nil {
+	if err := c.ShouldBind(&newBuyer); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Success: false,
 			Status:  http.StatusBadRequest,
@@ -52,7 +56,35 @@ func (s BuyerController) CreateBuyer(c *gin.Context) {
 		})
 		return
 	}
-	res, err := s.buyerService.CreateBuyerData(&newBuyer)
+	var profilePicUrl string
+	if newBuyer.ProfilePic != nil {
+		fileUrl, err := s.s3Service.UploadFile(newBuyer.ProfilePic, "buyers")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Success: false,
+				Status:  http.StatusInternalServerError,
+				Error:   "Failed to upload image to S3",
+				Message: err.Error(),
+			})
+			return
+		}
+		profilePicUrl = fileUrl
+	}
+	var newBuyerData model.Buyer
+	if err := copier.Copy(&newBuyerData, &newBuyer); err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Failed to copy seller data",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	newBuyerData.Password = newBuyer.Password
+	newBuyerData.ProfilePic = profilePicUrl
+
+	res, err := s.buyerService.CreateBuyerData(&newBuyerData)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
@@ -72,6 +104,7 @@ func (s BuyerController) CreateBuyer(c *gin.Context) {
 }
 
 // GetBuyerByID godoc
+//
 //	@Summary		Get a buyer by ID
 //	@Description	Retrieves a buyer's data by their ID
 //	@Tags			buyer
@@ -83,15 +116,6 @@ func (s BuyerController) CreateBuyer(c *gin.Context) {
 //	@Router			/buyer/{buyer_id} [get]
 func (s BuyerController) GetBuyerByID(c *gin.Context) {
 	buyerIDstr := c.Param("buyer_id")
-	// userID, exists := c.Get("userID")
-	// if userID != buyerIDstr || !exists {
-	// 	c.JSON(http.StatusUnauthorized, dto.ErrorResponse{
-	// 		Success: false,
-	// 		Status:  http.StatusUnauthorized,
-	// 		Error:   "ID not match or not exists",
-	// 		Message: "param ID doesn't match with callerID"})
-	// 	return
-	// }
 	buyerID, err := primitive.ObjectIDFromHex(buyerIDstr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
@@ -123,6 +147,7 @@ func (s BuyerController) GetBuyerByID(c *gin.Context) {
 }
 
 // GetBuyer godoc
+//
 //	@Summary		Get all buyers
 //	@Description	Retrieves all buyers
 //	@Tags			buyer
@@ -153,6 +178,7 @@ func (s BuyerController) GetBuyers(c *gin.Context) {
 }
 
 // UpdateBuyer godoc
+//
 //	@Summary		Update a buyer by ID
 //	@Description	Updates an existing buyer's data by their ID
 //	@Tags			buyer
@@ -214,7 +240,6 @@ func (s BuyerController) UpdateBuyer(c *gin.Context) {
 		Data:    res,
 	})
 }
-
 
 // @Summary Update a product in buyer's cart
 // @Description Adds the product with specified amount if not in the cart, set amount if already in the cart
@@ -281,6 +306,7 @@ func (s BuyerController) UpdateProductInCart(c *gin.Context) {
 		Data:    updatedCart,
 	})
 }
+
 // DeleteProductFromCart godoc
 // @Summary Delete a product from the buyer's cart
 // @Description Deletes the product with the specified productID from the cart

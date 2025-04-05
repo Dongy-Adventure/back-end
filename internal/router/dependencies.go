@@ -48,8 +48,7 @@ type Dependencies struct {
 	AdvertisementService    service.IAdvertisementService
 	AdvertisementController controller.IAdvertisementController
 
-	S3Service       service.IS3Service
-	S3Controller    controller.IS3Controller
+	S3Service service.IS3Service
 }
 
 func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s3.Client, conf *config.Config) *Dependencies {
@@ -81,16 +80,15 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s
 	s3Service := service.NewS3Service(s3Client, &conf.AWS)
 
 	// Initialize controllers
-	buyerController := controller.NewBuyerController(buyerService)
-	sellerController := controller.NewSellerController(sellerService)
+	buyerController := controller.NewBuyerController(buyerService, s3Service)
+	sellerController := controller.NewSellerController(sellerService, s3Service)
 	authController := controller.NewAuthController(conf, authService)
-	productController := controller.NewProductController(productService)
+	productController := controller.NewProductController(productService, s3Service)
 	reviewController := controller.NewReviewController(reviewService)
 	appointmentController := controller.NewAppointmentController(appointmentService)
 	orderController := controller.NewOrderController(orderService, paymentService)
 	paymentController := controller.NewPaymentController(paymentService)
 	advertisementController := controller.NewAdvertisementController(advertisementService)
-	s3Controller := controller.NewS3Controller(s3Service)
 
 	return &Dependencies{
 		BuyerRepo:       buyerRepo,
@@ -123,11 +121,10 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s
 		PaymentService:    paymentService,
 		PaymentController: paymentController,
 
-		AdvertisementRepo: advertisementRepo,
-		AdvertisementService: advertisementService,
+		AdvertisementRepo:       advertisementRepo,
+		AdvertisementService:    advertisementService,
 		AdvertisementController: advertisementController,
 
-		S3Service:    s3Service,
-		S3Controller: s3Controller,
+		S3Service: s3Service,
 	}
 }

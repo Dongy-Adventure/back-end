@@ -7,6 +7,7 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -21,11 +22,13 @@ type IProductController interface {
 
 type ProductController struct {
 	productService service.IProductService
+	s3Service      service.IS3Service
 }
 
-func NewProductController(s service.IProductService) IProductController {
+func NewProductController(s service.IProductService, s3 service.IS3Service) IProductController {
 	return ProductController{
 		productService: s,
+		s3Service:      s3,
 	}
 }
 
@@ -36,15 +39,15 @@ func NewProductController(s service.IProductService) IProductController {
 //	@Tags			product
 //	@Accept			json
 //	@Produce		json
-//	@Param			product	body		model.Product	true	"Product to create"
+//	@Param			product	body		dto.ProductCreateRequest	true	"Product to create"
 //	@Success		201		{object}	dto.SuccessResponse{data=dto.Product}
 //	@Failure		400		{object}	dto.ErrorResponse
 //	@Failure		500		{object}	dto.ErrorResponse
 //	@Router			/product/ [post]
 func (s ProductController) CreateProduct(c *gin.Context) {
-	var newProduct model.Product
+	var newProduct dto.ProductCreateRequest
 
-	if err := c.BindJSON(&newProduct); err != nil {
+	if err := c.ShouldBind(&newProduct); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Success: false,
 			Status:  http.StatusBadRequest,
@@ -53,7 +56,46 @@ func (s ProductController) CreateProduct(c *gin.Context) {
 		})
 		return
 	}
-	res, err := s.productService.CreateProduct(&newProduct)
+	var imageURL string
+	if newProduct.Image != nil {
+		fileUrl, err := s.s3Service.UploadFile(newProduct.Image, "products")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Success: false,
+				Status:  http.StatusInternalServerError,
+				Error:   "Failed to upload image to S3",
+				Message: err.Error(),
+			})
+			return
+		}
+		imageURL = fileUrl
+	}
+
+	var newProductData model.Product
+	if err := copier.Copy(&newProductData, &newProduct); err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Failed to copy seller data",
+			Message: err.Error(),
+		})
+		return
+	}
+	sellerID, err := primitive.ObjectIDFromHex(newProduct.SellerID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusBadRequest,
+			Error:   "Invalid Seller ID",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	newProductData.Image = imageURL
+	newProductData.SellerID = sellerID
+
+	res, err := s.productService.CreateProduct(&newProductData)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
@@ -238,7 +280,7 @@ func (s ProductController) UpdateProduct(c *gin.Context) {
 		ProductName: updatedProduct.ProductName,
 		Price:       updatedProduct.Price,
 		Description: updatedProduct.Description,
-		ImageURL:    updatedProduct.ImageURL,
+		Image:       updatedProduct.Image,
 		Tag:         updatedProduct.Tag,
 		Color:       updatedProduct.Color,
 		SellerID:    sellerID,
