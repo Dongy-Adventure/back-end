@@ -13,10 +13,10 @@ func (r Router) AddBuyerRouter(rg *gin.RouterGroup) {
 	buyerRouter := rg.Group("buyer")
 
 	buyerRouter.POST("/", buyerCont.CreateBuyer)
-	buyerRouter.GET("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), buyerCont.GetBuyers)
-	buyerRouter.GET("/:buyer_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), buyerCont.GetBuyerByID)
-	buyerRouter.PUT("/:buyer_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), buyerCont.UpdateBuyer)
-	buyerRouter.POST("/:buyer_id/cart", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), buyerCont.UpdateProductInCart)
-	buyerRouter.DELETE("/:buyer_id/cart/:product_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), buyerCont.DeleteProductFromCart)
+	buyerRouter.GET("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), buyerCont.GetBuyers)
+	buyerRouter.GET("/:buyer_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), buyerCont.GetBuyerByID)
+	buyerRouter.PUT("/:buyer_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), buyerCont.UpdateBuyer)
+	buyerRouter.POST("/:buyer_id/cart", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), buyerCont.UpdateProductInCart)
+	buyerRouter.DELETE("/:buyer_id/cart/:product_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), buyerCont.DeleteProductFromCart)
 
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -23,11 +24,13 @@ type IAdvertisementController interface {
 
 type AdvertisementController struct {
 	advertisementService service.IAdvertisementService
+	s3Service            service.IS3Service
 }
 
-func NewAdvertisementController(s service.IAdvertisementService) IAdvertisementController {
+func NewAdvertisementController(s service.IAdvertisementService, s3 service.IS3Service) IAdvertisementController {
 	return AdvertisementController{
 		advertisementService: s,
+		s3Service:            s3,
 	}
 }
 
@@ -220,8 +223,6 @@ func (s AdvertisementController) GetAdvertisementsByProductID(c *gin.Context) {
 }
 
 // CreateAdvertisement godoc
-
-// CreateAdvertisement godoc
 //
 //	@Summary		Create a new advertisement
 //	@Description	Creates a new advertisement in the database
@@ -234,9 +235,9 @@ func (s AdvertisementController) GetAdvertisementsByProductID(c *gin.Context) {
 //	@Failure		500		{object}	dto.ErrorResponse
 //	@Router			/advertisement/ [post]
 func (s AdvertisementController) CreateAdvertisement(c *gin.Context) {
-	var newAdvertisement model.Advertisement
+	var newAdvertisement dto.AdvertisementCreateRequest
 
-	if err := c.BindJSON(&newAdvertisement); err != nil {
+	if err := c.ShouldBind(&newAdvertisement); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Success: false,
 			Status:  http.StatusBadRequest,
@@ -245,8 +246,33 @@ func (s AdvertisementController) CreateAdvertisement(c *gin.Context) {
 		})
 		return
 	}
+	var imageURL string
+	if newAdvertisement.ImageURL != nil {
+		fileUrl, err := s.s3Service.UploadFile(newAdvertisement.ImageURL, "advertisements")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Success: false,
+				Status:  http.StatusInternalServerError,
+				Error:   "Failed to upload image to S3",
+				Message: err.Error(),
+			})
+			return
+		}
+		imageURL = fileUrl
+	}
 
-	res, err := s.advertisementService.CreateAdvertisement(&newAdvertisement)
+	var newAdvertisementData model.Advertisement
+	if err := copier.Copy(&newAdvertisementData, &newAdvertisement); err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Failed to copy seller data",
+			Message: err.Error(),
+		})
+		return
+	}
+	newAdvertisementData.ImageURL = imageURL
+	res, err := s.advertisementService.CreateAdvertisement(&newAdvertisementData)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
@@ -290,8 +316,9 @@ func (s AdvertisementController) UpdateAdvertisement(c *gin.Context) {
 		})
 		return
 	}
-	var updatedAdvertisement model.Advertisement
-	if err := c.BindJSON(&updatedAdvertisement); err != nil {
+
+	var updatedAdvertisement dto.AdvertisementUpdateRequest
+	if err := c.ShouldBind(&updatedAdvertisement); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Success: false,
 			Status:  http.StatusBadRequest,
@@ -301,7 +328,34 @@ func (s AdvertisementController) UpdateAdvertisement(c *gin.Context) {
 		return
 	}
 
-	res, err := s.advertisementService.UpdateAdvertisement(advertisementID, &updatedAdvertisement)
+	var imageURL string
+	if updatedAdvertisement.ImageURL != nil {
+		fileUrl, err := s.s3Service.UploadFile(updatedAdvertisement.ImageURL, "advertisements")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Success: false,
+				Status:  http.StatusInternalServerError,
+				Error:   "Failed to upload image to S3",
+				Message: err.Error(),
+			})
+			return
+		}
+		imageURL = fileUrl
+	}
+
+	var updatedAdvertisementData model.Advertisement
+	if err := copier.Copy(&updatedAdvertisementData, &updatedAdvertisement); err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Failed to copy seller data",
+			Message: err.Error(),
+		})
+		return
+	}
+	updatedAdvertisementData.ImageURL = imageURL
+
+	res, err := s.advertisementService.UpdateAdvertisement(advertisementID, &updatedAdvertisementData)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,

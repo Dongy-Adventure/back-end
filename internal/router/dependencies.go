@@ -49,6 +49,10 @@ type Dependencies struct {
 	AdvertisementController controller.IAdvertisementController
 
 	S3Service service.IS3Service
+
+	redis    *redis.Client
+	mongo    *mongo.Database
+	s3Client *s3.Client
 }
 
 func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s3.Client, conf *config.Config) *Dependencies {
@@ -88,7 +92,7 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s
 	appointmentController := controller.NewAppointmentController(appointmentService)
 	orderController := controller.NewOrderController(orderService, paymentService)
 	paymentController := controller.NewPaymentController(paymentService)
-	advertisementController := controller.NewAdvertisementController(advertisementService)
+	advertisementController := controller.NewAdvertisementController(advertisementService, s3Service)
 
 	return &Dependencies{
 		BuyerRepo:       buyerRepo,
@@ -126,5 +130,8 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s
 		AdvertisementController: advertisementController,
 
 		S3Service: s3Service,
+		redis:     redisDB,
+		s3Client:  s3Client,
+		mongo:     mongoDB,
 	}
 }

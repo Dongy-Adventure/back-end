@@ -1,6 +1,7 @@
 package token
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -11,6 +12,7 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/enum/tokenmode"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/redis/go-redis/v9"
 )
 
 func extractToken(c *gin.Context) string {
@@ -52,7 +54,7 @@ func GenerateToken(conf *config.Config, userID string, tokenType int) (string, e
 	}
 }
 
-func ValidateToken(c *gin.Context, tokenType int) (*jwt.Token, error) {
+func ValidateToken(c *gin.Context, redisClient *redis.Client, tokenType int) (*jwt.Token, error) {
 
 	conf, err := config.LoadConfig()
 	if err != nil {
@@ -80,6 +82,16 @@ func ValidateToken(c *gin.Context, tokenType int) (*jwt.Token, error) {
 
 	if err != nil {
 		return nil, err
+	}
+	ctx := context.Background()
+	key := "blacklist:" + tokenString
+
+	exists, err := redisClient.Exists(ctx, key).Result()
+	if err != nil {
+		return nil, err
+	}
+	if exists == 1 {
+		return nil, errors.New("token is blacklisted")
 	}
 
 	return token, err
