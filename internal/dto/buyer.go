@@ -33,7 +33,7 @@ type BuyerRegisterRequest struct {
 	Province    string                `json:"province" form:"province"`
 	City        string                `json:"city" form:"city"`
 	Zip         string                `json:"zip" form:"zip"`
-	ProfilePic  *multipart.FileHeader `json:"profilePic" form:"profilePic"`
+	ProfilePic  *multipart.FileHeader `json:"profilePic" form:"profilePic" swaggerignore:"true"`
 }
 
 type UpdateCartRequest struct {

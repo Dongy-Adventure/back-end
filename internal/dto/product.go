@@ -28,7 +28,7 @@ type ProductCreateRequest struct {
 	SellerID    string                `json:"sellerID,omitempty" form:"sellerID"`
 	CreatedAt   time.Time             `json:"createdAt,omitempty" form:"createdAt"`
 	Amount      int                   `json:"amount" binding:"required,gte=0" form:"amount"`
-	Image       *multipart.FileHeader `json:"image,omitempty" form:"image"`
+	Image       *multipart.FileHeader `json:"image,omitempty" form:"image" swaggerignore:"true"`
 }
 
 type UpdateProductRequest struct {
