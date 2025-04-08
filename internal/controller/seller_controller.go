@@ -7,6 +7,7 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/service"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -21,15 +22,18 @@ type ISellerController interface {
 
 type SellerController struct {
 	sellerService service.ISellerService
+	s3Service     service.IS3Service
 }
 
-func NewSellerController(s service.ISellerService) ISellerController {
+func NewSellerController(s service.ISellerService, s3 service.IS3Service) ISellerController {
 	return SellerController{
 		sellerService: s,
+		s3Service:     s3,
 	}
 }
 
 // CreateSeller godoc
+//
 //	@Summary		Create a new seller
 //	@Description	Creates a new seller in the database
 //	@Tags			seller
@@ -41,9 +45,9 @@ func NewSellerController(s service.ISellerService) ISellerController {
 //	@Failure		500		{object}	dto.ErrorResponse
 //	@Router			/seller/ [post]
 func (s SellerController) CreateSeller(c *gin.Context) {
-	var newSeller model.Seller
+	var newSeller dto.SellerRegisterRequest
 
-	if err := c.BindJSON(&newSeller); err != nil {
+	if err := c.ShouldBind(&newSeller); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Success: false,
 			Status:  http.StatusBadRequest,
@@ -52,7 +56,35 @@ func (s SellerController) CreateSeller(c *gin.Context) {
 		})
 		return
 	}
-	res, err := s.sellerService.CreateSellerData(&newSeller)
+
+	var profilePicUrl string
+	if newSeller.ProfilePic != nil {
+		fileUrl, err := s.s3Service.UploadFile(newSeller.ProfilePic, "sellers")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+				Success: false,
+				Status:  http.StatusInternalServerError,
+				Error:   "Failed to upload image to S3",
+				Message: err.Error(),
+			})
+			return
+		}
+		profilePicUrl = fileUrl
+	}
+	var newSellerData model.Seller
+	if err := copier.Copy(&newSellerData, &newSeller); err != nil {
+		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusInternalServerError,
+			Error:   "Failed to copy seller data",
+			Message: err.Error(),
+		})
+		return
+	}
+	newSellerData.Password = newSeller.Password
+	newSellerData.ProfilePic = profilePicUrl
+
+	res, err := s.sellerService.CreateSellerData(&newSellerData)
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, dto.ErrorResponse{
@@ -72,6 +104,7 @@ func (s SellerController) CreateSeller(c *gin.Context) {
 }
 
 // GetSellerByID godoc
+//
 //	@Summary		Get a seller by ID
 //	@Description	Retrieves a seller's data by their ID
 //	@Tags			seller
@@ -114,6 +147,7 @@ func (s SellerController) GetSellerByID(c *gin.Context) {
 }
 
 // GetSellers godoc
+//
 //	@Summary		Get all sellers
 //	@Description	Retrieves all sellers
 //	@Tags			seller
@@ -144,6 +178,7 @@ func (s SellerController) GetSellers(c *gin.Context) {
 }
 
 // UpdateSeller godoc
+//
 //	@Summary		Update a seller by ID
 //	@Description	Updates an existing seller's data by their ID
 //	@Tags			seller
@@ -204,7 +239,6 @@ func (s SellerController) UpdateSeller(c *gin.Context) {
 		Data:    res,
 	})
 }
-
 
 // WithdrawSellerBalance godoc
 // @Summary Withdraw Seller Balance by sellerID
@@ -267,6 +301,7 @@ func (s SellerController) WithdrawSellerBalance(c *gin.Context) {
 }
 
 // GetSellerBalanceByID godoc
+//
 //	@Summary		Get a seller's total balance by ID
 //	@Description	Retrieves a seller's total balance by their ID
 //	@Tags			seller
