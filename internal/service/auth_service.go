@@ -91,7 +91,7 @@ func (s AuthService) BuyerLogin(req *dto.LoginRequest) (*dto.Buyer, string, stri
 }
 
 func (s AuthService) RefreshToken(c *gin.Context) (string, error) {
-	tkn, err := token.ValidateToken(c, tokenmode.REFRESH_TOKEN)
+	tkn, err := token.ValidateToken(c, s.redisDB, tokenmode.REFRESH_TOKEN)
 	if err != nil {
 		return "", fmt.Errorf("invalid refresh token: %w", err)
 	}
@@ -119,10 +119,10 @@ func (s AuthService) Logout(accessToken string, refreshToken string) error {
 	accessTokenExpiredIn := s.conf.Auth.AccessTokenLifespanMinutes
 	refreshTokenExpiredIn := s.conf.Auth.RefreshTokenLifespanMinutes
 
-	if err := s.invalidateToken(accessToken, time.Duration(accessTokenExpiredIn)); err != nil {
+	if err := s.invalidateToken(accessToken, time.Minute*time.Duration(accessTokenExpiredIn)); err != nil {
 		return err
 	}
-	if err := s.invalidateToken(refreshToken, time.Duration(refreshTokenExpiredIn)); err != nil {
+	if err := s.invalidateToken(refreshToken, time.Minute*time.Duration(refreshTokenExpiredIn)); err != nil {
 		return err
 	}
 	return nil

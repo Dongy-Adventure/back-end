@@ -11,11 +11,11 @@ func (r Router) AddProductRouter(rg *gin.RouterGroup) {
 	productCont := r.deps.ProductController
 	productRouter := rg.Group("product")
 
-	productRouter.POST("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), productCont.CreateProduct)
+	productRouter.POST("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), productCont.CreateProduct)
 	productRouter.GET("/", productCont.GetProducts)
 	productRouter.GET("/:product_id", productCont.GetProductByID)
 	productRouter.GET("/seller/:seller_id", productCont.GetProductsBySellerID)
-	productRouter.PUT("/:product_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), productCont.UpdateProduct)
+	productRouter.PUT("/:product_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), productCont.UpdateProduct)
 	productRouter.DELETE("/:product_id", productCont.DeleteProduct)
 
 	//test

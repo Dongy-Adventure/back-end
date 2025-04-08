@@ -3,12 +3,10 @@ package router
 import (
 	"fmt"
 
-	"time"
-
 	docs "github.com/Dongy-s-Advanture/back-end/docs"
 	"github.com/Dongy-s-Advanture/back-end/internal/config"
+	"github.com/Dongy-s-Advanture/back-end/internal/middleware"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	swaggerfiles "github.com/swaggo/files"
@@ -28,18 +26,10 @@ func NewRouter(g *gin.Engine, conf *config.Config) *Router {
 
 func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s3.Client) {
 
-	// CORS setting
-	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"*"}
-	corsConfig.AllowMethods = []string{"OPTIONS", "PATCH", "PUT", "GET", "POST", "DELETE"}
-	corsConfig.AllowHeaders = []string{"Content-Type", "Authorization"} // Allow Authorization header
-	corsConfig.ExposeHeaders = []string{"Content-Length"}
-	corsConfig.AllowCredentials = true // If you are using cookies or Authorization header
-
-	// Optional: Handle preflight cache
-	corsConfig.MaxAge = 12 * time.Hour
-
-	r.g.Use(cors.New(corsConfig))
+	r.g.Use(middleware.CORS())
+	if r.conf.App.Env == "production" {
+		r.g.Use(middleware.RateLimiter())
+	}
 
 	r.g.GET("/", func(ctx *gin.Context) {
 		ctx.JSON(200, gin.H{

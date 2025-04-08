@@ -11,11 +11,11 @@ func (r Router) AddAppointmentRouter(rg *gin.RouterGroup) {
 	appointmentCont := r.deps.AppointmentController
 	appointmentRouter := rg.Group("appointment")
 
-	appointmentRouter.POST("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), appointmentCont.CreateAppointment)
-	appointmentRouter.GET("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), appointmentCont.GetAppointments)
-	appointmentRouter.GET("/:appointment_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), appointmentCont.GetAppointmentByID)
-	appointmentRouter.GET("/order/:order_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), appointmentCont.GetAppointmentByOrderID)
-	appointmentRouter.PUT("/:appointment_id/date", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), appointmentCont.UpdateAppointmentDate)
-	appointmentRouter.PUT("/:appointment_id/place", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN), appointmentCont.UpdateAppointmentPlace)
+	appointmentRouter.POST("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), appointmentCont.CreateAppointment)
+	appointmentRouter.GET("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), appointmentCont.GetAppointments)
+	appointmentRouter.GET("/:appointment_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), appointmentCont.GetAppointmentByID)
+	appointmentRouter.GET("/order/:order_id", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), appointmentCont.GetAppointmentByOrderID)
+	appointmentRouter.PUT("/:appointment_id/date", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), appointmentCont.UpdateAppointmentDate)
+	appointmentRouter.PUT("/:appointment_id/place", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), appointmentCont.UpdateAppointmentPlace)
 
 }
