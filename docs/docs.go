@@ -15,6 +15,405 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/advertisement/": {
+            "get": {
+                "description": "Retrieves all advertisements",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "advertisement"
+                ],
+                "summary": "Get all advertisements",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.Advertisement"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Creates a new advertisement in the database",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "advertisement"
+                ],
+                "summary": "Create a new advertisement",
+                "parameters": [
+                    {
+                        "description": "Advertisement to create",
+                        "name": "advertisement",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AdvertisementCreateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Advertisement"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/advertisement/product/{product_id}": {
+            "get": {
+                "description": "Retrieves each product's advertisements by product ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "advertisement"
+                ],
+                "summary": "Get advertisements by productID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Product ID",
+                        "name": "product_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.Advertisement"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/advertisement/random/": {
+            "get": {
+                "description": "Retrieves all advertisements",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "advertisement"
+                ],
+                "summary": "Get all advertisements",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.Advertisement"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/advertisement/seller/{seller_id}": {
+            "get": {
+                "description": "Retrieves each seller's advertisements by seller ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "advertisement"
+                ],
+                "summary": "Get advertisements by sellerID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Seller ID",
+                        "name": "seller_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/definitions/dto.Advertisement"
+                                            }
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/advertisement/{advertisement_id}": {
+            "get": {
+                "description": "Retrieves a advertisement's data by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "advertisement"
+                ],
+                "summary": "Get a advertisement by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Advertisement ID",
+                        "name": "advertisement_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Advertisement"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Updates an existing advertisement's data by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "advertisement"
+                ],
+                "summary": "Update a advertisement by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Advertisement ID",
+                        "name": "advertisement_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Advertisement data to update",
+                        "name": "advertisement",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.AdvertisementUpdateRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/dto.Advertisement"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete a advertisement's data by its ID",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "advertisement"
+                ],
+                "summary": "Delete a advertisement by ID",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Advertisement ID",
+                        "name": "advertisement_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.SuccessResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/appointment/": {
             "get": {
                 "description": "Retrieves all appointments",
@@ -1232,7 +1631,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.BuyerPaymentRequest"
+                            "$ref": "#/definitions/dto.PaymentRequest"
                         }
                     }
                 ],
@@ -1240,7 +1639,19 @@ const docTemplate = `{
                     "200": {
                         "description": "Payment successful",
                         "schema": {
-                            "$ref": "#/definitions/dto.SuccessResponse"
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/dto.SuccessResponse"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            ]
                         }
                     },
                     "400": {
@@ -1251,6 +1662,44 @@ const docTemplate = `{
                     },
                     "502": {
                         "description": "Payment failed",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/payment/charge/:charge_id/sse": {
+            "get": {
+                "description": "Opens an SSE connection to track charge status updates.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/event-stream"
+                ],
+                "tags": [
+                    "Payment"
+                ],
+                "summary": "SSE for Charge Status",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Charge ID",
+                        "name": "charge_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "SSE connection established for charge status updates",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -1320,7 +1769,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Product"
+                            "$ref": "#/definitions/dto.ProductCreateRequest"
                         }
                     }
                 ],
@@ -1482,11 +1931,11 @@ const docTemplate = `{
                     },
                     {
                         "description": "Product data to update",
-                        "name": "product",
+                        "name": "updatedProduct",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/model.Product"
+                            "$ref": "#/definitions/dto.UpdateProductRequest"
                         }
                     }
                 ],
@@ -2236,9 +2685,113 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/webhook/omise": {
+            "post": {
+                "description": "Handles webhook events from Omise, such as payment success or failure.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Payment"
+                ],
+                "summary": "Omise Webhook Handler",
+                "parameters": [
+                    {
+                        "description": "Webhook payload from Omise",
+                        "name": "webhookPayload",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Webhook processed successfully",
+                        "schema": {
+                            "$ref": "#/definitions/dto.SuccessResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "dto.Advertisement": {
+            "type": "object",
+            "properties": {
+                "advertisementID": {
+                    "type": "string"
+                },
+                "amount": {
+                    "type": "number"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "imageURL": {
+                    "type": "string"
+                },
+                "payment": {
+                    "type": "string"
+                },
+                "productID": {
+                    "type": "string"
+                },
+                "sellerID": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AdvertisementCreateRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "payment": {
+                    "type": "string"
+                },
+                "productID": {
+                    "type": "string"
+                },
+                "sellerID": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AdvertisementUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "payment": {
+                    "type": "string"
+                },
+                "productID": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.Appointment": {
             "type": "object",
             "properties": {
@@ -2349,6 +2902,9 @@ const docTemplate = `{
                 "phoneNumber": {
                     "type": "string"
                 },
+                "profilePic": {
+                    "type": "string"
+                },
                 "province": {
                     "type": "string"
                 },
@@ -2359,29 +2915,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "zip": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.BuyerPaymentRequest": {
-            "type": "object",
-            "required": [
-                "amount",
-                "buyerID",
-                "createdAt",
-                "paymentMethod"
-            ],
-            "properties": {
-                "amount": {
-                    "type": "number"
-                },
-                "buyerID": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "paymentMethod": {
                     "type": "string"
                 }
             }
@@ -2537,6 +3070,9 @@ const docTemplate = `{
                 "buyerName": {
                     "type": "string"
                 },
+                "createdAt": {
+                    "type": "string"
+                },
                 "payment": {
                     "type": "string"
                 },
@@ -2578,6 +3114,45 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.PaymentRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "buyerID",
+                "createdAt",
+                "paymentMethod",
+                "token"
+            ],
+            "properties": {
+                "address": {
+                    "type": "string"
+                },
+                "amount": {
+                    "type": "integer"
+                },
+                "buyerID": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "paymentMethod": {
+                    "type": "string"
+                },
+                "province": {
+                    "type": "string"
+                },
+                "token": {
+                    "type": "string"
+                },
+                "zip": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.Product": {
             "type": "object",
             "properties": {
@@ -2593,7 +3168,7 @@ const docTemplate = `{
                 "description": {
                     "type": "string"
                 },
-                "imageURL": {
+                "image": {
                     "type": "string"
                 },
                 "price": {
@@ -2601,6 +3176,45 @@ const docTemplate = `{
                 },
                 "productID": {
                     "type": "string"
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "sellerID": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "dto.ProductCreateRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "price",
+                "productName"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "color": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number",
+                    "minimum": 1
                 },
                 "productName": {
                     "type": "string"
@@ -2729,6 +3343,9 @@ const docTemplate = `{
                 "phoneNumber": {
                     "type": "string"
                 },
+                "profilePic": {
+                    "type": "string"
+                },
                 "province": {
                     "type": "string"
                 },
@@ -2839,6 +3456,48 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.UpdateProductRequest": {
+            "type": "object",
+            "required": [
+                "amount",
+                "price",
+                "productName"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "color": {
+                    "type": "string"
+                },
+                "createdAt": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "image": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number",
+                    "minimum": 1
+                },
+                "productName": {
+                    "type": "string"
+                },
+                "sellerID": {
+                    "type": "string"
+                },
+                "tag": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
         "model.Buyer": {
             "type": "object",
             "properties": {
@@ -2867,6 +3526,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "phoneNumber": {
+                    "type": "string"
+                },
+                "profilePic": {
                     "type": "string"
                 },
                 "province": {
@@ -2898,51 +3560,6 @@ const docTemplate = `{
                 }
             }
         },
-        "model.Product": {
-            "type": "object",
-            "required": [
-                "amount",
-                "price",
-                "productName"
-            ],
-            "properties": {
-                "amount": {
-                    "type": "integer",
-                    "minimum": 0
-                },
-                "color": {
-                    "type": "string"
-                },
-                "createdAt": {
-                    "type": "string"
-                },
-                "description": {
-                    "type": "string"
-                },
-                "imageURL": {
-                    "type": "string"
-                },
-                "price": {
-                    "type": "number",
-                    "minimum": 1
-                },
-                "productID": {
-                    "type": "string"
-                },
-                "productName": {
-                    "type": "string"
-                },
-                "sellerID": {
-                    "type": "string"
-                },
-                "tag": {
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                }
-            }
-        },
         "model.Seller": {
             "type": "object",
             "properties": {
@@ -2965,6 +3582,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "phoneNumber": {
+                    "type": "string"
+                },
+                "profilePic": {
                     "type": "string"
                 },
                 "province": {

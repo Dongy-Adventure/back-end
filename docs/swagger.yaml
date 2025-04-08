@@ -1,4 +1,41 @@
 definitions:
+  dto.Advertisement:
+    properties:
+      advertisementID:
+        type: string
+      amount:
+        type: number
+      createdAt:
+        type: string
+      imageURL:
+        type: string
+      payment:
+        type: string
+      productID:
+        type: string
+      sellerID:
+        type: string
+    type: object
+  dto.AdvertisementCreateRequest:
+    properties:
+      amount:
+        type: number
+      payment:
+        type: string
+      productID:
+        type: string
+      sellerID:
+        type: string
+    type: object
+  dto.AdvertisementUpdateRequest:
+    properties:
+      amount:
+        type: number
+      payment:
+        type: string
+      productID:
+        type: string
+    type: object
   dto.Appointment:
     properties:
       address:
@@ -71,6 +108,8 @@ definitions:
         type: string
       phoneNumber:
         type: string
+      profilePic:
+        type: string
       province:
         type: string
       surname:
@@ -79,22 +118,6 @@ definitions:
         type: string
       zip:
         type: string
-    type: object
-  dto.BuyerPaymentRequest:
-    properties:
-      amount:
-        type: number
-      buyerID:
-        type: string
-      createdAt:
-        type: string
-      paymentMethod:
-        type: string
-    required:
-    - amount
-    - buyerID
-    - createdAt
-    - paymentMethod
     type: object
   dto.BuyerRegisterRequest:
     properties:
@@ -195,6 +218,8 @@ definitions:
         type: string
       buyerName:
         type: string
+      createdAt:
+        type: string
       payment:
         type: string
       products:
@@ -222,6 +247,33 @@ definitions:
     required:
     - orderStatus
     type: object
+  dto.PaymentRequest:
+    properties:
+      address:
+        type: string
+      amount:
+        type: integer
+      buyerID:
+        type: string
+      city:
+        type: string
+      createdAt:
+        type: string
+      paymentMethod:
+        type: string
+      province:
+        type: string
+      token:
+        type: string
+      zip:
+        type: string
+    required:
+    - amount
+    - buyerID
+    - createdAt
+    - paymentMethod
+    - token
+    type: object
   dto.Product:
     properties:
       amount:
@@ -232,7 +284,7 @@ definitions:
         type: string
       description:
         type: string
-      imageURL:
+      image:
         type: string
       price:
         type: number
@@ -246,6 +298,33 @@ definitions:
         items:
           type: string
         type: array
+    type: object
+  dto.ProductCreateRequest:
+    properties:
+      amount:
+        minimum: 0
+        type: integer
+      color:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      price:
+        minimum: 1
+        type: number
+      productName:
+        type: string
+      sellerID:
+        type: string
+      tag:
+        items:
+          type: string
+        type: array
+    required:
+    - amount
+    - price
+    - productName
     type: object
   dto.RefreshTokenResponse:
     properties:
@@ -321,6 +400,8 @@ definitions:
         type: string
       phoneNumber:
         type: string
+      profilePic:
+        type: string
       province:
         type: string
       score:
@@ -393,6 +474,35 @@ definitions:
       type:
         type: integer
     type: object
+  dto.UpdateProductRequest:
+    properties:
+      amount:
+        minimum: 0
+        type: integer
+      color:
+        type: string
+      createdAt:
+        type: string
+      description:
+        type: string
+      image:
+        type: string
+      price:
+        minimum: 1
+        type: number
+      productName:
+        type: string
+      sellerID:
+        type: string
+      tag:
+        items:
+          type: string
+        type: array
+    required:
+    - amount
+    - price
+    - productName
+    type: object
   model.Buyer:
     properties:
       address:
@@ -413,6 +523,8 @@ definitions:
         type: string
       phoneNumber:
         type: string
+      profilePic:
+        type: string
       province:
         type: string
       surname:
@@ -432,37 +544,6 @@ definitions:
     required:
     - amount
     type: object
-  model.Product:
-    properties:
-      amount:
-        minimum: 0
-        type: integer
-      color:
-        type: string
-      createdAt:
-        type: string
-      description:
-        type: string
-      imageURL:
-        type: string
-      price:
-        minimum: 1
-        type: number
-      productID:
-        type: string
-      productName:
-        type: string
-      sellerID:
-        type: string
-      tag:
-        items:
-          type: string
-        type: array
-    required:
-    - amount
-    - price
-    - productName
-    type: object
   model.Seller:
     properties:
       address:
@@ -478,6 +559,8 @@ definitions:
       payment:
         type: string
       phoneNumber:
+        type: string
+      profilePic:
         type: string
       province:
         type: string
@@ -513,6 +596,249 @@ definitions:
 info:
   contact: {}
 paths:
+  /advertisement/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all advertisements
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Advertisement'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all advertisements
+      tags:
+      - advertisement
+    post:
+      consumes:
+      - application/json
+      description: Creates a new advertisement in the database
+      parameters:
+      - description: Advertisement to create
+        in: body
+        name: advertisement
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AdvertisementCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Advertisement'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Create a new advertisement
+      tags:
+      - advertisement
+  /advertisement/{advertisement_id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a advertisement's data by its ID
+      parameters:
+      - description: Advertisement ID
+        in: path
+        name: advertisement_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Delete a advertisement by ID
+      tags:
+      - advertisement
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a advertisement's data by its ID
+      parameters:
+      - description: Advertisement ID
+        in: path
+        name: advertisement_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Advertisement'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get a advertisement by ID
+      tags:
+      - advertisement
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing advertisement's data by its ID
+      parameters:
+      - description: Advertisement ID
+        in: path
+        name: advertisement_id
+        required: true
+        type: string
+      - description: Advertisement data to update
+        in: body
+        name: advertisement
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AdvertisementUpdateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/dto.Advertisement'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Update a advertisement by ID
+      tags:
+      - advertisement
+  /advertisement/product/{product_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves each product's advertisements by product ID
+      parameters:
+      - description: Product ID
+        in: path
+        name: product_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Advertisement'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get advertisements by productID
+      tags:
+      - advertisement
+  /advertisement/random/:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves all advertisements
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Advertisement'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get all advertisements
+      tags:
+      - advertisement
+  /advertisement/seller/{seller_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves each seller's advertisements by seller ID
+      parameters:
+      - description: Seller ID
+        in: path
+        name: seller_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/dto.Advertisement'
+                  type: array
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Get advertisements by sellerID
+      tags:
+      - advertisement
   /appointment/:
     get:
       consumes:
@@ -1263,14 +1589,19 @@ paths:
         name: paymentRequest
         required: true
         schema:
-          $ref: '#/definitions/dto.BuyerPaymentRequest'
+          $ref: '#/definitions/dto.PaymentRequest'
       produces:
       - application/json
       responses:
         "200":
           description: Payment successful
           schema:
-            $ref: '#/definitions/dto.SuccessResponse'
+            allOf:
+            - $ref: '#/definitions/dto.SuccessResponse'
+            - properties:
+                data:
+                  type: string
+              type: object
         "400":
           description: Bad request
           schema:
@@ -1280,6 +1611,31 @@ paths:
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: Process payment
+      tags:
+      - Payment
+  /payment/charge/:charge_id/sse:
+    get:
+      consumes:
+      - application/json
+      description: Opens an SSE connection to track charge status updates.
+      parameters:
+      - description: Charge ID
+        in: path
+        name: charge_id
+        required: true
+        type: string
+      produces:
+      - text/event-stream
+      responses:
+        "200":
+          description: SSE connection established for charge status updates
+          schema:
+            type: string
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: SSE for Charge Status
       tags:
       - Payment
   /product/:
@@ -1318,7 +1674,7 @@ paths:
         name: product
         required: true
         schema:
-          $ref: '#/definitions/model.Product'
+          $ref: '#/definitions/dto.ProductCreateRequest'
       produces:
       - application/json
       responses:
@@ -1408,10 +1764,10 @@ paths:
         type: string
       - description: Product data to update
         in: body
-        name: product
+        name: updatedProduct
         required: true
         schema:
-          $ref: '#/definitions/model.Product'
+          $ref: '#/definitions/dto.UpdateProductRequest'
       produces:
       - application/json
       responses:
@@ -1882,4 +2238,35 @@ paths:
       summary: Withdraw Seller Balance by sellerID
       tags:
       - seller
+  /webhook/omise:
+    post:
+      consumes:
+      - application/json
+      description: Handles webhook events from Omise, such as payment success or failure.
+      parameters:
+      - description: Webhook payload from Omise
+        in: body
+        name: webhookPayload
+        required: true
+        schema:
+          additionalProperties: true
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Webhook processed successfully
+          schema:
+            $ref: '#/definitions/dto.SuccessResponse'
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Omise Webhook Handler
+      tags:
+      - Payment
 swagger: "2.0"

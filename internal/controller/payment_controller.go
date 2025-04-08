@@ -30,7 +30,7 @@ func NewPaymentController(paymentService service.IPaymentService) IPaymentContro
 // @Accept json
 // @Produce json
 // @Param paymentRequest body dto.PaymentRequest true "Payment request payload"
-// @Success 200 {object} dto.SuccessResponse{data=*omise.Charge} "Payment successful"
+// @Success 200 {object} dto.SuccessResponse{data=string} "Payment successful"
 // @Failure 400 {object} dto.ErrorResponse "Bad request"
 // @Failure 502 {object} dto.ErrorResponse "Payment failed"
 // @Router /payment [post]
