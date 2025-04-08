@@ -4,10 +4,10 @@ import (
 	"context"
 	"time"
 
-	"github.com/mroth/weightedrand/v2"
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/pkg/utils/converter"
+	"github.com/mroth/weightedrand/v2"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -92,7 +92,6 @@ func (r AdvertisementRepository) GetWeightedRandomAdvertisements() ([]dto.Advert
 
 	return finalAds, nil
 }
-
 
 func (r AdvertisementRepository) GetAdvertisements() ([]dto.Advertisement, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
@@ -186,6 +185,7 @@ func (r AdvertisementRepository) GetAdvertisementsByProductID(productID primitiv
 }
 
 func (r AdvertisementRepository) CreateAdvertisement(advertisement *model.Advertisement) (*dto.Advertisement, error) {
+	// fmt.Println(advertisement)
 	ctx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 	defer cancel()
 	advertisement.AdvertisementID = primitive.NewObjectID()
