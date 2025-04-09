@@ -18,8 +18,8 @@ type Advertisement struct {
 }
 
 type AdvertisementCreateRequest struct {
-	SellerID  primitive.ObjectID    `json:"sellerID" form:"sellerID"`
-	ProductID primitive.ObjectID    `json:"productID" form:"productID"`
+	SellerID  string                `json:"sellerID" form:"sellerID"`
+	ProductID string                `json:"productID" form:"productID"`
 	ImageURL  *multipart.FileHeader `json:"imageURL,omitempty" form:"imageURL" swaggerignore:"true"`
 	Amount    float64               `json:"amount" form:"amount"`
 	Payment   string                `json:"payment" form:"payment"`

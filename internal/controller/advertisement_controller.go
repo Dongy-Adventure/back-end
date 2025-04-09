@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
@@ -246,6 +247,9 @@ func (s AdvertisementController) CreateAdvertisement(c *gin.Context) {
 		})
 		return
 	}
+
+	fmt.Printf("newAdvertisement: %#v\n", newAdvertisement)
+
 	var imageURL string
 	if newAdvertisement.ImageURL != nil {
 		fileUrl, err := s.s3Service.UploadFile(newAdvertisement.ImageURL, "advertisements")
@@ -271,6 +275,32 @@ func (s AdvertisementController) CreateAdvertisement(c *gin.Context) {
 		})
 		return
 	}
+
+	sellerID, err := primitive.ObjectIDFromHex(newAdvertisement.SellerID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusBadRequest,
+			Error:   "Invalid Seller ID",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	productID, err := primitive.ObjectIDFromHex(newAdvertisement.ProductID)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Status:  http.StatusBadRequest,
+			Error:   "Invalid Product ID",
+			Message: err.Error(),
+		})
+		return
+	}
+
+	newAdvertisementData.SellerID = sellerID
+	newAdvertisementData.ProductID = productID
+
 	newAdvertisementData.ImageURL = imageURL
 	res, err := s.advertisementService.CreateAdvertisement(&newAdvertisementData)
 
