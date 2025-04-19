@@ -88,6 +88,7 @@ func (r SellerRepository) CreateSellerData(seller *model.Seller) (*dto.Seller, e
 	// 	return nil, fmt.Errorf("this username is already exists")
 	// }
 	seller.SellerID = primitive.NewObjectID()
+	seller.Transaction = []model.Transaction{}
 	result, err := r.sellerCollection.InsertOne(ctx, seller)
 	if err != nil {
 		return nil, err
