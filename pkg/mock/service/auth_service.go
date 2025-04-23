@@ -59,6 +59,20 @@ func (mr *MockIAuthServiceMockRecorder) BuyerLogin(req any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BuyerLogin", reflect.TypeOf((*MockIAuthService)(nil).BuyerLogin), req)
 }
 
+// InvalidateToken mocks base method.
+func (m *MockIAuthService) InvalidateToken(token string, expirationTime time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InvalidateToken", token, expirationTime)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InvalidateToken indicates an expected call of InvalidateToken.
+func (mr *MockIAuthServiceMockRecorder) InvalidateToken(token, expirationTime any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InvalidateToken", reflect.TypeOf((*MockIAuthService)(nil).InvalidateToken), token, expirationTime)
+}
+
 // Logout mocks base method.
 func (m *MockIAuthService) Logout(accessToken, refreshToken string) error {
 	m.ctrl.T.Helper()
@@ -103,18 +117,4 @@ func (m *MockIAuthService) SellerLogin(req *dto.LoginRequest) (*dto.Seller, stri
 func (mr *MockIAuthServiceMockRecorder) SellerLogin(req any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SellerLogin", reflect.TypeOf((*MockIAuthService)(nil).SellerLogin), req)
-}
-
-// invalidateToken mocks base method.
-func (m *MockIAuthService) invalidateToken(token string, expirationTime time.Duration) error {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "invalidateToken", token, expirationTime)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// invalidateToken indicates an expected call of invalidateToken.
-func (mr *MockIAuthServiceMockRecorder) invalidateToken(token, expirationTime any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "invalidateToken", reflect.TypeOf((*MockIAuthService)(nil).invalidateToken), token, expirationTime)
 }

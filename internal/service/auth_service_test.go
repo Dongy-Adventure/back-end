@@ -1,7 +1,9 @@
 package service_test
 
 import (
-	"net/http/httptest"
+	"context"
+	"errors"
+	"net/http"
 	"testing"
 	"time"
 
@@ -10,159 +12,448 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/enum/tokenmode"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
 	"github.com/Dongy-s-Advanture/back-end/internal/service"
-	mock "github.com/Dongy-s-Advanture/back-end/pkg/mock/repository"
+	mocks "github.com/Dongy-s-Advanture/back-end/pkg/mock/repository"
 	"github.com/Dongy-s-Advanture/back-end/pkg/utils/token"
 	"github.com/gin-gonic/gin"
-	redismock "github.com/go-redis/redismock/v9"
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/mock/gomock"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func TestSellerLogin_Success(t *testing.T) {
+func TestAuthService_SellerLogin(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockSellerRepo := mock.NewMockISellerRepository(ctrl)
+	mockSellerRepo := mocks.NewMockISellerRepository(ctrl)
+	mockBuyerRepo := mocks.NewMockIBuyerRepository(ctrl)
+	mockRedis := mocks.NewMockIRedisClient(ctrl)
 
-	// mock Redis (not used in login, but needed for constructor)
-	db, _ := redismock.NewClientMock()
-
-	// config
-	cfg := &config.Config{
+	conf := &config.Config{
 		Auth: config.AuthConfig{
 			AccessTokenLifespanMinutes:  15,
-			RefreshTokenLifespanMinutes: 60,
-			AccessTokenSecret:           "testaccesssecret",
-			RefreshTokenSecret:          "testrefreshsecret",
+			RefreshTokenLifespanMinutes: 1440,
+			AccessTokenSecret:           "test-secret",
+			RefreshTokenSecret:          "test-secret",
 		},
 	}
 
-	authService := service.NewAuthService(cfg, db, mockSellerRepo, nil)
+	authService := service.NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
 
-	// Prepare test data
-	sellerID := primitive.NewObjectID()
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("password"), bcrypt.DefaultCost)
+	t.Run("successful seller login", func(t *testing.T) {
+		req := &dto.LoginRequest{
+			Username: "test-seller",
+			Password: "password123",
+		}
 
-	mockModel := &model.Seller{
-		SellerID: sellerID,
-		Username: "seller",
-		Password: string(hashedPassword),
-	}
+		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		sellerModel := &model.Seller{
+			SellerID: primitive.NewObjectID(),
+			Username: req.Username,
+			Password: string(hashedPassword),
+		}
 
-	req := &dto.LoginRequest{
-		Username: "seller",
-		Password: "password",
-	}
+		mockSellerRepo.EXPECT().GetSellerByUsername(req).Return(sellerModel, nil)
 
-	mockSellerRepo.EXPECT().
-		GetSellerByUsername(req).
-		Return(mockModel, nil).
-		Times(1)
+		sellerDTO, accessToken, refreshToken, err := authService.SellerLogin(req)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, accessToken)
+		assert.NotEmpty(t, refreshToken)
+		assert.Equal(t, sellerModel.Username, sellerDTO.Username)
+	})
 
-	sellerDTO, accessToken, refreshToken, err := authService.SellerLogin(req)
+	t.Run("invalid username or password", func(t *testing.T) {
+		req := &dto.LoginRequest{
+			Username: "test-seller",
+			Password: "wrong-password",
+		}
 
-	assert.NoError(t, err)
-	assert.NotEmpty(t, accessToken)
-	assert.NotEmpty(t, refreshToken)
-	assert.Equal(t, mockModel.Username, sellerDTO.Username)
-	assert.Equal(t, mockModel.SellerID, sellerDTO.SellerID)
+		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("correct-password"), bcrypt.DefaultCost)
+		sellerModel := &model.Seller{
+			SellerID: primitive.NewObjectID(),
+			Username: req.Username,
+			Password: string(hashedPassword),
+		}
+
+		mockSellerRepo.EXPECT().GetSellerByUsername(req).Return(sellerModel, nil)
+
+		_, _, _, err := authService.SellerLogin(req)
+		assert.Error(t, err)
+		assert.Equal(t, "invalid username or password", err.Error())
+	})
+
+	t.Run("seller not found", func(t *testing.T) {
+		req := &dto.LoginRequest{
+			Username: "nonexistent-seller",
+			Password: "password123",
+		}
+
+		mockSellerRepo.EXPECT().GetSellerByUsername(req).Return(nil, errors.New("seller not found"))
+
+		_, _, _, err := authService.SellerLogin(req)
+		assert.Error(t, err)
+		assert.Equal(t, "seller not found", err.Error())
+	})
+
+	t.Run("access token lifespan is not set", func(t *testing.T) {
+		// Config with zero access token lifespan
+		invalidConf := &config.Config{
+			Auth: config.AuthConfig{
+				AccessTokenLifespanMinutes:  0, // This should trigger the error
+				RefreshTokenLifespanMinutes: 1440,
+				AccessTokenSecret:           "test-secret",
+			},
+		}
+
+		// Create service with invalid config
+		authService := service.NewAuthService(invalidConf, mockRedis, mockSellerRepo, mockBuyerRepo)
+
+		req := &dto.LoginRequest{
+			Username: "test-seller",
+			Password: "password123",
+		}
+
+		// Mock a successful seller lookup first
+		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		sellerModel := &model.Seller{
+			SellerID: primitive.NewObjectID(),
+			Username: req.Username,
+			Password: string(hashedPassword),
+		}
+		mockSellerRepo.EXPECT().GetSellerByUsername(req).Return(sellerModel, nil)
+
+		// Execute
+		_, _, _, err := authService.SellerLogin(req)
+
+		// Verify
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "error generating access token")
+	})
+
+	t.Run("refresh token generation error", func(t *testing.T) {
+
+		invalidConf := &config.Config{
+			Auth: config.AuthConfig{
+				AccessTokenLifespanMinutes:  15,
+				RefreshTokenLifespanMinutes: 0,
+				AccessTokenSecret:           "test-secret",
+			},
+		}
+		authService := service.NewAuthService(invalidConf, mockRedis, mockSellerRepo, mockBuyerRepo)
+
+		req := &dto.LoginRequest{
+			Username: "test-seller",
+			Password: "password123",
+		}
+
+		// Mock a successful seller lookup first
+		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		sellerModel := &model.Seller{
+			SellerID: primitive.NewObjectID(),
+			Username: req.Username,
+			Password: string(hashedPassword),
+		}
+		mockSellerRepo.EXPECT().GetSellerByUsername(req).Return(sellerModel, nil)
+
+		// Execute
+		_, _, _, err := authService.SellerLogin(req)
+
+		// Verify
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "error generating refresh token")
+	})
 }
-func TestBuyerLogin_Success(t *testing.T) {
+
+func TestAuthService_BuyerLogin(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	mockBuyerRepo := mock.NewMockIBuyerRepository(ctrl)
-	db, _ := redismock.NewClientMock()
+	mockSellerRepo := mocks.NewMockISellerRepository(ctrl)
+	mockBuyerRepo := mocks.NewMockIBuyerRepository(ctrl)
+	mockRedis := mocks.NewMockIRedisClient(ctrl)
 
-	cfg := &config.Config{
+	conf := &config.Config{
 		Auth: config.AuthConfig{
 			AccessTokenLifespanMinutes:  15,
-			RefreshTokenLifespanMinutes: 60,
-			AccessTokenSecret:           "testaccesssecret",
-			RefreshTokenSecret:          "testrefreshsecret",
+			RefreshTokenLifespanMinutes: 1440,
+			AccessTokenSecret:           "test-secret",
+			RefreshTokenSecret:          "test-secret",
 		},
 	}
 
-	authService := service.NewAuthService(cfg, db, nil, mockBuyerRepo)
+	authService := service.NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
 
-	buyerID := primitive.NewObjectID()
+	t.Run("successful buyer login", func(t *testing.T) {
+		req := &dto.LoginRequest{
+			Username: "test-buyer",
+			Password: "password123",
+		}
 
-	buyerModel := &model.Buyer{
-		BuyerID:  buyerID,
-		Username: "buyer",
-		Password: "$2a$10$saltrandomizedhashpassword",
-	}
+		buyerModel := &model.Buyer{
+			BuyerID:  primitive.NewObjectID(),
+			Username: req.Username,
+			Password: "hashed-password", // Password validation is not implemented in buyer login
+		}
 
-	req := &dto.LoginRequest{
-		Username: "buyer",
-		Password: "any-password",
-	}
+		mockBuyerRepo.EXPECT().GetBuyerByUsername(req).Return(buyerModel, nil)
 
-	mockBuyerRepo.EXPECT().GetBuyerByUsername(req).Return(buyerModel, nil).Times(1)
+		buyerDTO, accessToken, refreshToken, err := authService.BuyerLogin(req)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, accessToken)
+		assert.NotEmpty(t, refreshToken)
+		assert.Equal(t, buyerModel.Username, buyerDTO.Username)
+	})
 
-	// override bcrypt to avoid error (or use hash like above)
-	authService = service.NewAuthService(cfg, db, nil, mockBuyerRepo)
+	t.Run("buyer not found", func(t *testing.T) {
+		req := &dto.LoginRequest{
+			Username: "nonexistent-buyer",
+			Password: "password123",
+		}
 
-	buyerDTO, accessToken, refreshToken, err := authService.BuyerLogin(req)
+		mockBuyerRepo.EXPECT().GetBuyerByUsername(req).Return(nil, errors.New("buyer not found"))
 
-	assert.NoError(t, err)
-	assert.NotEmpty(t, accessToken)
-	assert.NotEmpty(t, refreshToken)
-	assert.Equal(t, buyerModel.BuyerID, buyerDTO.BuyerID)
+		_, _, _, err := authService.BuyerLogin(req)
+		assert.Error(t, err)
+		assert.Equal(t, "buyer not found", err.Error())
+	})
+
+	t.Run("access token lifespan is not set", func(t *testing.T) {
+		// Config with zero access token lifespan
+		invalidConf := &config.Config{
+			Auth: config.AuthConfig{
+				AccessTokenLifespanMinutes:  0, // This should trigger the error
+				RefreshTokenLifespanMinutes: 1440,
+				AccessTokenSecret:           "test-secret",
+			},
+		}
+
+		// Create service with invalid config
+		authService := service.NewAuthService(invalidConf, mockRedis, mockSellerRepo, mockBuyerRepo)
+
+		req := &dto.LoginRequest{
+			Username: "test-seller",
+			Password: "password123",
+		}
+
+		// Mock a successful seller lookup first
+		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		buyerModel := &model.Buyer{
+			BuyerID:  primitive.NewObjectID(),
+			Username: req.Username,
+			Password: string(hashedPassword),
+		}
+		mockBuyerRepo.EXPECT().GetBuyerByUsername(req).Return(buyerModel, nil)
+
+		// Execute
+		_, _, _, err := authService.BuyerLogin(req)
+
+		// Verify
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "error generating access token")
+	})
+
+	t.Run("refresh token generation error", func(t *testing.T) {
+
+		invalidConf := &config.Config{
+			Auth: config.AuthConfig{
+				AccessTokenLifespanMinutes:  15,
+				RefreshTokenLifespanMinutes: 0,
+				AccessTokenSecret:           "test-secret",
+			},
+		}
+		authService := service.NewAuthService(invalidConf, mockRedis, mockSellerRepo, mockBuyerRepo)
+
+		req := &dto.LoginRequest{
+			Username: "test-seller",
+			Password: "password123",
+		}
+
+		// Mock a successful seller lookup first
+		hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+		buyerModel := &model.Buyer{
+			BuyerID:  primitive.NewObjectID(),
+			Username: req.Username,
+			Password: string(hashedPassword),
+		}
+		mockBuyerRepo.EXPECT().GetBuyerByUsername(req).Return(buyerModel, nil)
+
+		// Execute
+		_, _, _, err := authService.BuyerLogin(req)
+
+		// Verify
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "error generating refresh token")
+	})
 }
 
-func TestLogout_Success(t *testing.T) {
-	db, mock := redismock.NewClientMock()
-	cfg := &config.Config{
+func TestAuthService_RefreshToken(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockSellerRepo := mocks.NewMockISellerRepository(ctrl)
+	mockBuyerRepo := mocks.NewMockIBuyerRepository(ctrl)
+	mockRedis := mocks.NewMockIRedisClient(ctrl)
+
+	conf := &config.Config{
 		Auth: config.AuthConfig{
-			AccessTokenLifespanMinutes:  10,
-			RefreshTokenLifespanMinutes: 20,
+			AccessTokenLifespanMinutes:  15,
+			RefreshTokenLifespanMinutes: 1440,
+			AccessTokenSecret:           "test-secret",
+			RefreshTokenSecret:          "test-secret",
 		},
 	}
 
-	authService := service.NewAuthService(cfg, db, nil, nil)
+	authService := service.NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
 
-	mock.ExpectSetEx("blacklist:access-token", "invalid", 10*time.Minute).SetVal("OK")
-	mock.ExpectSetEx("blacklist:refresh-token", "invalid", 20*time.Minute).SetVal("OK")
+	t.Run("successful token refresh", func(t *testing.T) {
+		userID := primitive.NewObjectID()
+		refreshToken, _ := token.GenerateToken(conf, userID.String(), tokenmode.REFRESH_TOKEN)
+		mockRedis.
+			EXPECT().
+			Exists(gomock.Any(), gomock.Any()).
+			Return(redis.NewIntCmd(context.Background())).
+			Times(2)
 
-	err := authService.Logout("access-token", "refresh-token")
-	assert.NoError(t, err)
-	assert.NoError(t, mock.ExpectationsWereMet())
+		c := &gin.Context{}
+		c.Request = &http.Request{
+			Header: http.Header{
+				"Authorization": []string{"Bearer " + refreshToken},
+			},
+		}
+
+		newAccessToken, err := authService.RefreshToken(c)
+		assert.NoError(t, err)
+		assert.NotEmpty(t, newAccessToken)
+	})
+
+	t.Run("invalid refresh token", func(t *testing.T) {
+		c := &gin.Context{}
+		c.Request = &http.Request{
+			Header: http.Header{
+				"Authorization": []string{"Bearer invalid-token"},
+			},
+		}
+
+		_, err := authService.RefreshToken(c)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "invalid refresh token")
+	})
+
+	t.Run("missing userID in token", func(t *testing.T) {
+		// Create a valid token WITHOUT userID
+		claims := jwt.MapClaims{
+			"exp": time.Now().Add(time.Minute * 15).Unix(),
+		}
+		tokenObj := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenStr, _ := tokenObj.SignedString([]byte(conf.Auth.RefreshTokenSecret))
+
+		c := &gin.Context{}
+		c.Request = &http.Request{
+			Header: http.Header{
+				"Authorization": []string{"Bearer " + tokenStr},
+			},
+		}
+
+		_, err := authService.RefreshToken(c)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "no userID in token")
+	})
+
 }
 
-func TestRefreshToken_Success(t *testing.T) {
-	db, rdmock := redismock.NewClientMock()
+func TestAuthService_Logout(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
-	cfg := &config.Config{
+	mockSellerRepo := mocks.NewMockISellerRepository(ctrl)
+	mockBuyerRepo := mocks.NewMockIBuyerRepository(ctrl)
+	mockRedis := mocks.NewMockIRedisClient(ctrl)
+
+	conf := &config.Config{
 		Auth: config.AuthConfig{
-			AccessTokenLifespanMinutes:  10,
-			RefreshTokenLifespanMinutes: 20,
-			AccessTokenSecret:           "testaccess",
-			RefreshTokenSecret:          "testrefresh",
+			AccessTokenLifespanMinutes:  15,
+			RefreshTokenLifespanMinutes: 1440,
+			AccessTokenSecret:           "test-secret",
+			RefreshTokenSecret:          "test-secret",
 		},
 	}
 
-	authService := service.NewAuthService(cfg, db, nil, nil)
+	authService := service.NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
 
-	// simulate a user ID
-	userID := primitive.NewObjectID().Hex()
+	t.Run("successful logout", func(t *testing.T) {
+		accessToken := "test-access-token"
+		refreshToken := "test-refresh-token"
 
-	// manually generate a valid refresh token
-	refreshToken, _ := token.GenerateToken(cfg, userID, tokenmode.REFRESH_TOKEN)
-	rdmock.ExpectExists("blacklist:" + refreshToken).SetVal(0)
+		mockRedis.EXPECT().SetEx(context.Background(), "blacklist:"+accessToken, "invalid", time.Minute*15).Return(redis.NewStatusResult("OK", nil))
+		mockRedis.EXPECT().SetEx(context.Background(), "blacklist:"+refreshToken, "invalid", time.Minute*1440).Return(redis.NewStatusResult("OK", nil))
 
-	// use gin context with header set
-	c, _ := gin.CreateTestContext(nil)
-	c.Request = httptest.NewRequest("GET", "/", nil)
-	c.Request.Header.Set("Authorization", "Bearer "+refreshToken)
+		err := authService.Logout(accessToken, refreshToken)
+		assert.NoError(t, err)
+	})
 
-	accessToken, err := authService.RefreshToken(c)
+	t.Run("failed to invalidate access token", func(t *testing.T) {
+		accessToken := "test-access-token"
+		refreshToken := "test-refresh-token"
 
-	assert.NoError(t, err)
-	assert.NotEmpty(t, accessToken)
+		mockRedis.EXPECT().SetEx(context.Background(), "blacklist:"+accessToken, "invalid", time.Minute*15).Return(redis.NewStatusResult("", errors.New("redis error")))
 
-	assert.NoError(t, rdmock.ExpectationsWereMet())
+		err := authService.Logout(accessToken, refreshToken)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "could not invalidate token")
+	})
 
+	t.Run("failed to invalidate refresh token", func(t *testing.T) {
+		accessToken := "test-access-token"
+		refreshToken := "test-refresh-token"
+
+		mockRedis.EXPECT().SetEx(context.Background(), "blacklist:"+accessToken, "invalid", time.Minute*15).Return(redis.NewStatusResult("OK", nil))
+		mockRedis.EXPECT().SetEx(context.Background(), "blacklist:"+refreshToken, "invalid", time.Minute*1440).Return(redis.NewStatusResult("", errors.New("redis error")))
+
+		err := authService.Logout(accessToken, refreshToken)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "could not invalidate token")
+	})
+}
+
+func TestAuthService_invalidateToken(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockSellerRepo := mocks.NewMockISellerRepository(ctrl)
+	mockBuyerRepo := mocks.NewMockIBuyerRepository(ctrl)
+	mockRedis := mocks.NewMockIRedisClient(ctrl)
+
+	conf := &config.Config{
+		Auth: config.AuthConfig{
+			AccessTokenLifespanMinutes:  15,
+			RefreshTokenLifespanMinutes: 1440,
+			AccessTokenSecret:           "test-secret",
+			RefreshTokenSecret:          "test-secret",
+		},
+	}
+
+	authService := service.NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
+
+	t.Run("successful token invalidation", func(t *testing.T) {
+		token := "test-token"
+		expiration := time.Minute * 15
+
+		mockRedis.EXPECT().SetEx(context.Background(), "blacklist:"+token, "invalid", expiration).Return(redis.NewStatusResult("OK", nil))
+
+		err := authService.InvalidateToken(token, expiration)
+		assert.NoError(t, err)
+	})
+
+	t.Run("failed token invalidation", func(t *testing.T) {
+		token := "test-token"
+		expiration := time.Minute * 15
+
+		mockRedis.EXPECT().SetEx(context.Background(), "blacklist:"+token, "invalid", expiration).Return(redis.NewStatusResult("", errors.New("redis error")))
+
+		err := authService.InvalidateToken(token, expiration)
+		assert.Error(t, err)
+		assert.Contains(t, err.Error(), "could not invalidate token")
+	})
 }

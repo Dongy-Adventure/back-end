@@ -9,10 +9,10 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/enum/tokenmode"
 	"github.com/Dongy-s-Advanture/back-end/internal/repository"
+	"github.com/Dongy-s-Advanture/back-end/pkg/redis"
 	"github.com/Dongy-s-Advanture/back-end/pkg/utils/converter"
 	"github.com/Dongy-s-Advanture/back-end/pkg/utils/token"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -20,18 +20,18 @@ type IAuthService interface {
 	SellerLogin(req *dto.LoginRequest) (*dto.Seller, string, string, error)
 	BuyerLogin(req *dto.LoginRequest) (*dto.Buyer, string, string, error)
 	RefreshToken(c *gin.Context) (string, error)
-	invalidateToken(token string, expirationTime time.Duration) error
+	InvalidateToken(token string, expirationTime time.Duration) error
 	Logout(accessToken string, refreshToken string) error
 }
 
 type AuthService struct {
 	conf             *config.Config
-	redisDB          *redis.Client
+	redisDB          redis.IRedisClient
 	sellerRepository repository.ISellerRepository
 	buyerRepository  repository.IBuyerRepository
 }
 
-func NewAuthService(conf *config.Config, redisDB *redis.Client, sellerRepo repository.ISellerRepository, buyerRepo repository.IBuyerRepository) IAuthService {
+func NewAuthService(conf *config.Config, redisDB redis.IRedisClient, sellerRepo repository.ISellerRepository, buyerRepo repository.IBuyerRepository) IAuthService {
 	return AuthService{
 		conf:             conf,
 		redisDB:          redisDB,
@@ -60,10 +60,7 @@ func (s AuthService) SellerLogin(req *dto.LoginRequest) (*dto.Seller, string, st
 		return nil, "", "", refreshTokenErr
 	}
 
-	sellerDTO, err := converter.SellerModelToDTO(sellerModel)
-	if err != nil {
-		return nil, "", "", err
-	}
+	sellerDTO, _ := converter.SellerModelToDTO(sellerModel)
 
 	return sellerDTO, accessToken, refreshToken, nil
 }
@@ -82,10 +79,7 @@ func (s AuthService) BuyerLogin(req *dto.LoginRequest) (*dto.Buyer, string, stri
 		return nil, "", "", refreshTokenErr
 	}
 
-	buyerDTO, err := converter.BuyerModelToDTO(buyerModel)
-	if err != nil {
-		return nil, "", "", err
-	}
+	buyerDTO, _ := converter.BuyerModelToDTO(buyerModel)
 
 	return buyerDTO, accessToken, refreshToken, nil
 }
@@ -99,14 +93,12 @@ func (s AuthService) RefreshToken(c *gin.Context) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("no userID in token")
 	}
-	accessToken, accessTokenErr := token.GenerateToken(s.conf, userID, tokenmode.ACCESS_TOKEN)
-	if accessTokenErr != nil {
-		return "", accessTokenErr
-	}
+	accessToken, _ := token.GenerateToken(s.conf, userID, tokenmode.ACCESS_TOKEN)
+
 	return accessToken, nil
 }
 
-func (s AuthService) invalidateToken(token string, expirationTime time.Duration) error {
+func (s AuthService) InvalidateToken(token string, expirationTime time.Duration) error {
 	ctx := context.Background()
 	err := s.redisDB.SetEx(ctx, "blacklist:"+token, "invalid", expirationTime).Err()
 	if err != nil {
@@ -119,10 +111,10 @@ func (s AuthService) Logout(accessToken string, refreshToken string) error {
 	accessTokenExpiredIn := s.conf.Auth.AccessTokenLifespanMinutes
 	refreshTokenExpiredIn := s.conf.Auth.RefreshTokenLifespanMinutes
 
-	if err := s.invalidateToken(accessToken, time.Minute*time.Duration(accessTokenExpiredIn)); err != nil {
+	if err := s.InvalidateToken(accessToken, time.Minute*time.Duration(accessTokenExpiredIn)); err != nil {
 		return err
 	}
-	if err := s.invalidateToken(refreshToken, time.Minute*time.Duration(refreshTokenExpiredIn)); err != nil {
+	if err := s.InvalidateToken(refreshToken, time.Minute*time.Duration(refreshTokenExpiredIn)); err != nil {
 		return err
 	}
 	return nil

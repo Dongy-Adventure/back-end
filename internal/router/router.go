@@ -6,9 +6,10 @@ import (
 	docs "github.com/Dongy-s-Advanture/back-end/docs"
 	"github.com/Dongy-s-Advanture/back-end/internal/config"
 	"github.com/Dongy-s-Advanture/back-end/internal/middleware"
+	"github.com/Dongy-s-Advanture/back-end/pkg/redis"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
+	rd "github.com/redis/go-redis/v9"
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -24,7 +25,7 @@ func NewRouter(g *gin.Engine, conf *config.Config) *Router {
 	return &Router{g, conf, nil}
 }
 
-func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s3.Client) {
+func (r *Router) Run(mongoDB *mongo.Database, redisDB *rd.Client, s3Client *s3.Client) {
 
 	r.g.Use(middleware.CORS())
 	if r.conf.App.Env == "production" {
@@ -44,8 +45,10 @@ func (r *Router) Run(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s
 	// versioning
 	v1 := r.g.Group("/api/v1")
 
+	redisAdapter := redis.NewGoRedisAdapter(redisDB)
+
 	// setup
-	r.deps = NewDependencies(mongoDB, redisDB, s3Client, r.conf)
+	r.deps = NewDependencies(mongoDB, redisAdapter, s3Client, r.conf)
 
 	// Add related path
 	r.AddSellerRouter(v1)

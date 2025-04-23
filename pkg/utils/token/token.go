@@ -9,9 +9,9 @@ import (
 
 	"github.com/Dongy-s-Advanture/back-end/internal/config"
 	"github.com/Dongy-s-Advanture/back-end/internal/enum/tokenmode"
+	"github.com/Dongy-s-Advanture/back-end/pkg/redis"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/redis/go-redis/v9"
 )
 
 func extractToken(c *gin.Context) string {
@@ -31,8 +31,14 @@ func GenerateToken(conf *config.Config, userID string, tokenType int) (string, e
 	var tokenLifespan int32
 	switch tokenType {
 	case tokenmode.ACCESS_TOKEN:
+		if conf.Auth.AccessTokenLifespanMinutes == 0 {
+			return "", errors.New("error generating access token")
+		}
 		tokenLifespan = conf.Auth.AccessTokenLifespanMinutes
 	case tokenmode.REFRESH_TOKEN:
+		if conf.Auth.RefreshTokenLifespanMinutes == 0 {
+			return "", errors.New("error generating refresh token")
+		}
 		tokenLifespan = conf.Auth.RefreshTokenLifespanMinutes
 	default:
 		return "", errors.New("token type is invalid")
@@ -53,7 +59,7 @@ func GenerateToken(conf *config.Config, userID string, tokenType int) (string, e
 	}
 }
 
-func ValidateToken(c *gin.Context, conf *config.Config, redisClient *redis.Client, tokenType int) (*jwt.Token, error) {
+func ValidateToken(c *gin.Context, conf *config.Config, redisClient redis.IRedisClient, tokenType int) (*jwt.Token, error) {
 
 	tokenString := extractToken(c)
 
