@@ -7,9 +7,9 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/controller"
 	"github.com/Dongy-s-Advanture/back-end/internal/repository"
 	"github.com/Dongy-s-Advanture/back-end/internal/service"
+	"github.com/Dongy-s-Advanture/back-end/pkg/redis"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/omise/omise-go"
-	"github.com/redis/go-redis/v9"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -50,18 +50,21 @@ type Dependencies struct {
 
 	S3Service service.IS3Service
 
-	redis    *redis.Client
+	redis    redis.IRedisClient
 	mongo    *mongo.Database
 	s3Client *s3.Client
+
+	conf *config.Config
 }
 
-func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s3.Client, conf *config.Config) *Dependencies {
+func NewDependencies(mongoDB *mongo.Database, redisDB redis.IRedisClient, s3Client *s3.Client, conf *config.Config) *Dependencies {
 
 	// Initialize third party
 	omiseClient, e := omise.NewClient(conf.Payment.Public, conf.Payment.Private)
 	if e != nil {
 		log.Fatal(e)
 	}
+
 	// Initialize repositories
 	buyerRepo := repository.NewBuyerRepository(mongoDB, "buyers")
 	sellerRepo := repository.NewSellerRepository(mongoDB, "sellers", "reviews")
@@ -133,5 +136,6 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s
 		redis:     redisDB,
 		s3Client:  s3Client,
 		mongo:     mongoDB,
+		conf:      conf,
 	}
 }

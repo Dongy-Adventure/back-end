@@ -4,17 +4,18 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Dongy-s-Advanture/back-end/internal/config"
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
+	"github.com/Dongy-s-Advanture/back-end/pkg/redis"
 	token "github.com/Dongy-s-Advanture/back-end/pkg/utils/token"
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"github.com/ulule/limiter"
 	memory "github.com/ulule/limiter/drivers/store/memory"
 )
 
-func JWTAuthMiddleWare(tokenType int, redisClient *redis.Client) gin.HandlerFunc {
+func JWTAuthMiddleWare(tokenType int, redisClient redis.IRedisClient, conf *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tkn, err := token.ValidateToken(c, redisClient, tokenType)
+		tkn, err := token.ValidateToken(c, conf, redisClient, tokenType)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, dto.ErrorResponse{Success: false, Status: http.StatusUnauthorized, Error: "Unauthorized", Message: err.Error()})
 			c.Abort()

@@ -11,7 +11,7 @@ func (r Router) AddPaymentRouter(rg *gin.RouterGroup) {
 	paymentRouter := rg.Group("payment")
 
 	paymentRouter.POST("/", cont.HandlePayment)
-	// paymentRouter.POST("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), cont.HandlePayment)
+	// paymentRouter.POST("/", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis, r.deps.conf), cont.HandlePayment)
 	paymentRouter.GET("/sse/:charge_id", cont.SSEHandler)
 	paymentRouter.POST("/webhooks/omise", cont.OmiseWebhookHandler)
 
