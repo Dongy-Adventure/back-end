@@ -7,6 +7,7 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/controller"
 	"github.com/Dongy-s-Advanture/back-end/internal/repository"
 	"github.com/Dongy-s-Advanture/back-end/internal/service"
+	"github.com/Dongy-s-Advanture/back-end/internal/service/auth"
 	"github.com/Dongy-s-Advanture/back-end/pkg/redis"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/omise/omise-go"
@@ -22,7 +23,7 @@ type Dependencies struct {
 	SellerService    service.ISellerService
 	SellerController controller.ISellerController
 
-	AuthService    service.IAuthService
+	AuthService    auth.IAuthService
 	AuthController controller.IAuthController
 
 	ProductRepo       repository.IProductRepository
@@ -77,7 +78,7 @@ func NewDependencies(mongoDB *mongo.Database, redisDB redis.IRedisClient, s3Clie
 	// Initialize services
 	buyerService := service.NewBuyerService(buyerRepo)
 	sellerService := service.NewSellerService(sellerRepo)
-	authService := service.NewAuthService(conf, redisDB, sellerRepo, buyerRepo)
+	authService := auth.NewAuthService(conf, redisDB, sellerRepo, buyerRepo)
 	productService := service.NewProductService(productRepo)
 	reviewService := service.NewReviewService(reviewRepo)
 	appointmentService := service.NewAppointmentService(appointmentRepo)
