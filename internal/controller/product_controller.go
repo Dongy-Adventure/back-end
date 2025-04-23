@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
@@ -46,6 +47,8 @@ func NewProductController(s service.IProductService, s3 service.IS3Service) IPro
 //	@Router			/product/ [post]
 func (s ProductController) CreateProduct(c *gin.Context) {
 	var newProduct dto.ProductCreateRequest
+
+	fmt.Printf("body: %#v\n", newProduct)
 
 	if err := c.ShouldBind(&newProduct); err != nil {
 		c.JSON(http.StatusBadRequest, dto.ErrorResponse{
