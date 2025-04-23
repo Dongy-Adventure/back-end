@@ -91,7 +91,7 @@ func (s AuthService) BuyerLogin(req *dto.LoginRequest) (*dto.Buyer, string, stri
 }
 
 func (s AuthService) RefreshToken(c *gin.Context) (string, error) {
-	tkn, err := token.ValidateToken(c, s.redisDB, tokenmode.REFRESH_TOKEN)
+	tkn, err := token.ValidateToken(c, s.conf, s.redisDB, tokenmode.REFRESH_TOKEN)
 	if err != nil {
 		return "", fmt.Errorf("invalid refresh token: %w", err)
 	}

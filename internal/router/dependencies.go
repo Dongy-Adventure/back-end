@@ -53,6 +53,8 @@ type Dependencies struct {
 	redis    *redis.Client
 	mongo    *mongo.Database
 	s3Client *s3.Client
+
+	conf *config.Config
 }
 
 func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s3.Client, conf *config.Config) *Dependencies {
@@ -62,6 +64,7 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s
 	if e != nil {
 		log.Fatal(e)
 	}
+
 	// Initialize repositories
 	buyerRepo := repository.NewBuyerRepository(mongoDB, "buyers")
 	sellerRepo := repository.NewSellerRepository(mongoDB, "sellers", "reviews")
@@ -133,5 +136,6 @@ func NewDependencies(mongoDB *mongo.Database, redisDB *redis.Client, s3Client *s
 		redis:     redisDB,
 		s3Client:  s3Client,
 		mongo:     mongoDB,
+		conf:      conf,
 	}
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -54,12 +53,8 @@ func GenerateToken(conf *config.Config, userID string, tokenType int) (string, e
 	}
 }
 
-func ValidateToken(c *gin.Context, redisClient *redis.Client, tokenType int) (*jwt.Token, error) {
+func ValidateToken(c *gin.Context, conf *config.Config, redisClient *redis.Client, tokenType int) (*jwt.Token, error) {
 
-	conf, err := config.LoadConfig()
-	if err != nil {
-		log.Fatal("error loading .env")
-	}
 	tokenString := extractToken(c)
 
 	if tokenString == "" {

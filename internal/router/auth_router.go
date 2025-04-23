@@ -14,6 +14,6 @@ func (r Router) AddAuthRouter(rg *gin.RouterGroup) {
 
 	authRouter.POST("/seller", cont.SellerLogin)
 	authRouter.POST("/buyer", cont.BuyerLogin)
-	authRouter.POST("/refresh", middleware.JWTAuthMiddleWare(tokenmode.REFRESH_TOKEN, r.deps.redis), cont.RefreshToken)
-	authRouter.POST("/logout", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis), cont.Logout)
+	authRouter.POST("/refresh", middleware.JWTAuthMiddleWare(tokenmode.REFRESH_TOKEN, r.deps.redis, r.deps.conf), cont.RefreshToken)
+	authRouter.POST("/logout", middleware.JWTAuthMiddleWare(tokenmode.ACCESS_TOKEN, r.deps.redis, r.deps.conf), cont.Logout)
 }
