@@ -1,4 +1,4 @@
-package service_test
+package auth
 
 import (
 	"context"
@@ -11,7 +11,6 @@ import (
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
 	"github.com/Dongy-s-Advanture/back-end/internal/enum/tokenmode"
 	"github.com/Dongy-s-Advanture/back-end/internal/model"
-	"github.com/Dongy-s-Advanture/back-end/internal/service"
 	mocks "github.com/Dongy-s-Advanture/back-end/pkg/mock/repository"
 	"github.com/Dongy-s-Advanture/back-end/pkg/utils/token"
 	"github.com/gin-gonic/gin"
@@ -40,7 +39,7 @@ func TestAuthService_SellerLogin(t *testing.T) {
 		},
 	}
 
-	authService := service.NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
+	authService := NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
 
 	t.Run("successful seller login", func(t *testing.T) {
 		req := &dto.LoginRequest{
@@ -108,7 +107,7 @@ func TestAuthService_SellerLogin(t *testing.T) {
 		}
 
 		// Create service with invalid config
-		authService := service.NewAuthService(invalidConf, mockRedis, mockSellerRepo, mockBuyerRepo)
+		authService := NewAuthService(invalidConf, mockRedis, mockSellerRepo, mockBuyerRepo)
 
 		req := &dto.LoginRequest{
 			Username: "test-seller",
@@ -141,7 +140,7 @@ func TestAuthService_SellerLogin(t *testing.T) {
 				AccessTokenSecret:           "test-secret",
 			},
 		}
-		authService := service.NewAuthService(invalidConf, mockRedis, mockSellerRepo, mockBuyerRepo)
+		authService := NewAuthService(invalidConf, mockRedis, mockSellerRepo, mockBuyerRepo)
 
 		req := &dto.LoginRequest{
 			Username: "test-seller",
@@ -183,7 +182,7 @@ func TestAuthService_BuyerLogin(t *testing.T) {
 		},
 	}
 
-	authService := service.NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
+	authService := NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
 
 	t.Run("successful buyer login", func(t *testing.T) {
 		req := &dto.LoginRequest{
@@ -230,7 +229,7 @@ func TestAuthService_BuyerLogin(t *testing.T) {
 		}
 
 		// Create service with invalid config
-		authService := service.NewAuthService(invalidConf, mockRedis, mockSellerRepo, mockBuyerRepo)
+		authService := NewAuthService(invalidConf, mockRedis, mockSellerRepo, mockBuyerRepo)
 
 		req := &dto.LoginRequest{
 			Username: "test-seller",
@@ -263,7 +262,7 @@ func TestAuthService_BuyerLogin(t *testing.T) {
 				AccessTokenSecret:           "test-secret",
 			},
 		}
-		authService := service.NewAuthService(invalidConf, mockRedis, mockSellerRepo, mockBuyerRepo)
+		authService := NewAuthService(invalidConf, mockRedis, mockSellerRepo, mockBuyerRepo)
 
 		req := &dto.LoginRequest{
 			Username: "test-seller",
@@ -305,7 +304,7 @@ func TestAuthService_RefreshToken(t *testing.T) {
 		},
 	}
 
-	authService := service.NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
+	authService := NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
 
 	t.Run("successful token refresh", func(t *testing.T) {
 		userID := primitive.NewObjectID()
@@ -380,7 +379,7 @@ func TestAuthService_Logout(t *testing.T) {
 		},
 	}
 
-	authService := service.NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
+	authService := NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
 
 	t.Run("successful logout", func(t *testing.T) {
 		accessToken := "test-access-token"
@@ -434,7 +433,7 @@ func TestAuthService_invalidateToken(t *testing.T) {
 		},
 	}
 
-	authService := service.NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
+	authService := NewAuthService(conf, mockRedis, mockSellerRepo, mockBuyerRepo)
 
 	t.Run("successful token invalidation", func(t *testing.T) {
 		token := "test-token"

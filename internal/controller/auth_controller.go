@@ -5,7 +5,7 @@ import (
 
 	"github.com/Dongy-s-Advanture/back-end/internal/config"
 	"github.com/Dongy-s-Advanture/back-end/internal/dto"
-	"github.com/Dongy-s-Advanture/back-end/internal/service"
+	"github.com/Dongy-s-Advanture/back-end/internal/service/auth"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,11 +17,11 @@ type IAuthController interface {
 }
 
 type AuthController struct {
-	authService service.IAuthService
+	authService auth.IAuthService
 	config      *config.Config
 }
 
-func NewAuthController(c *config.Config, s service.IAuthService) IAuthController {
+func NewAuthController(c *config.Config, s auth.IAuthService) IAuthController {
 	return AuthController{
 		authService: s,
 		config:      c,
